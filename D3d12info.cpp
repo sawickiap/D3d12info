@@ -86,51 +86,192 @@ static const uint32_t DXGI_ADAPTER_FLAG_VALUES[] = {
    DXGI_ADAPTER_FLAG_SOFTWARE,
 };
 
+static const wchar_t* D3D_FEATURE_LEVEL_NAMES[] = {
+    L"D3D_FEATURE_LEVEL_9_1",
+    L"D3D_FEATURE_LEVEL_9_2",
+    L"D3D_FEATURE_LEVEL_9_3",
+    L"D3D_FEATURE_LEVEL_10_0",
+    L"D3D_FEATURE_LEVEL_10_1",
+    L"D3D_FEATURE_LEVEL_11_0",
+    L"D3D_FEATURE_LEVEL_11_1",
+    L"D3D_FEATURE_LEVEL_12_0",
+    L"D3D_FEATURE_LEVEL_12_1",
+};
+static const uint32_t D3D_FEATURE_LEVEL_VALUES[] = {
+    D3D_FEATURE_LEVEL_9_1,
+    D3D_FEATURE_LEVEL_9_2,
+    D3D_FEATURE_LEVEL_9_3,
+    D3D_FEATURE_LEVEL_10_0,
+    D3D_FEATURE_LEVEL_10_1,
+    D3D_FEATURE_LEVEL_11_0,
+    D3D_FEATURE_LEVEL_11_1,
+    D3D_FEATURE_LEVEL_12_0,
+    D3D_FEATURE_LEVEL_12_1,
+};
+
+static const wchar_t* D3D_SHADER_MODEL_NAMES[] = {
+    L"D3D_SHADER_MODEL_5_1",
+    L"D3D_SHADER_MODEL_6_0",
+    L"D3D_SHADER_MODEL_6_1",
+    L"D3D_SHADER_MODEL_6_2",
+    L"D3D_SHADER_MODEL_6_3",
+    L"D3D_SHADER_MODEL_6_4",
+};
+static const uint32_t D3D_SHADER_MODEL_VALUES[] = {
+    D3D_SHADER_MODEL_5_1,
+    D3D_SHADER_MODEL_6_0,
+    D3D_SHADER_MODEL_6_1,
+    //D3D_SHADER_MODEL_6_2, // TODO
+    //D3D_SHADER_MODEL_6_3,
+    //D3D_SHADER_MODEL_6_4,
+};
+
+static const wchar_t* D3D_ROOT_SIGNATURE_VERSION_NAMES[] = {
+    L"D3D_ROOT_SIGNATURE_VERSION_1",
+    L"D3D_ROOT_SIGNATURE_VERSION_1_0",
+    L"D3D_ROOT_SIGNATURE_VERSION_1_1",
+};
+static const uint32_t D3D_ROOT_SIGNATURE_VERSION_VALUES[] = {
+    D3D_ROOT_SIGNATURE_VERSION_1,
+    D3D_ROOT_SIGNATURE_VERSION_1_0,
+    D3D_ROOT_SIGNATURE_VERSION_1_1,
+};
+
+static const wchar_t* D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_NAMES[] = {
+    L"D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_NOT_SUPPORTED",
+    L"D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_1",
+    L"D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_2",
+};
+static const uint32_t D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_VALUES[] = {
+    D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_NOT_SUPPORTED,
+    D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_1,
+    D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_2,
+};
+
+static const wchar_t* D3D12_SHADER_CACHE_SUPPORT_FLAGS_NAMES[] = {
+    L"D3D12_SHADER_CACHE_SUPPORT_NONE",
+    L"D3D12_SHADER_CACHE_SUPPORT_SINGLE_PSO",
+    L"D3D12_SHADER_CACHE_SUPPORT_LIBRARY",
+    L"D3D12_SHADER_CACHE_SUPPORT_AUTOMATIC_INPROC_CACHE",
+    L"D3D12_SHADER_CACHE_SUPPORT_AUTOMATIC_DISK_CACHE",
+};
+static const uint32_t D3D12_SHADER_CACHE_SUPPORT_FLAGS_VALUES[] = {
+    D3D12_SHADER_CACHE_SUPPORT_NONE,
+    D3D12_SHADER_CACHE_SUPPORT_SINGLE_PSO,
+    D3D12_SHADER_CACHE_SUPPORT_LIBRARY,
+    D3D12_SHADER_CACHE_SUPPORT_AUTOMATIC_INPROC_CACHE,
+    D3D12_SHADER_CACHE_SUPPORT_AUTOMATIC_DISK_CACHE,
+};
+
+static const wchar_t* D3D12_COMMAND_LIST_SUPPORT_FLAGS_NAMES[] = {
+    L"D3D12_COMMAND_LIST_SUPPORT_FLAG_NONE",
+    L"D3D12_COMMAND_LIST_SUPPORT_FLAG_DIRECT",
+    L"D3D12_COMMAND_LIST_SUPPORT_FLAG_BUNDLE",
+    L"D3D12_COMMAND_LIST_SUPPORT_FLAG_COMPUTE",
+    L"D3D12_COMMAND_LIST_SUPPORT_FLAG_COPY",
+    L"D3D12_COMMAND_LIST_SUPPORT_FLAG_VIDEO_DECODE",
+    L"D3D12_COMMAND_LIST_SUPPORT_FLAG_VIDEO_PROCESS",
+};
+static const uint32_t D3D12_COMMAND_LIST_SUPPORT_FLAGS_VALUES[] = {
+    D3D12_COMMAND_LIST_SUPPORT_FLAG_NONE,
+    D3D12_COMMAND_LIST_SUPPORT_FLAG_DIRECT,
+    D3D12_COMMAND_LIST_SUPPORT_FLAG_BUNDLE,
+    D3D12_COMMAND_LIST_SUPPORT_FLAG_COMPUTE,
+    D3D12_COMMAND_LIST_SUPPORT_FLAG_COPY,
+    D3D12_COMMAND_LIST_SUPPORT_FLAG_VIDEO_DECODE,
+    D3D12_COMMAND_LIST_SUPPORT_FLAG_VIDEO_PROCESS,
+};
+
+static const wchar_t* D3D12_VIEW_INSTANCING_TIER_NAMES[] = {
+    L"D3D12_VIEW_INSTANCING_TIER_NOT_SUPPORTED",
+    L"D3D12_VIEW_INSTANCING_TIER_1",
+    L"D3D12_VIEW_INSTANCING_TIER_2",
+    L"D3D12_VIEW_INSTANCING_TIER_3",
+};
+static const uint32_t D3D12_VIEW_INSTANCING_TIER_VALUES[] = {
+    D3D12_VIEW_INSTANCING_TIER_NOT_SUPPORTED,
+    D3D12_VIEW_INSTANCING_TIER_1,
+    D3D12_VIEW_INSTANCING_TIER_2,
+    D3D12_VIEW_INSTANCING_TIER_3,
+};
 
 static HINSTANCE g_Instance;
 static CComPtr<ID3D12Device> g_Device;
+
 static uint32_t g_Indent;
+static uint32_t g_ArrayIndex = UINT32_MAX;
 
 static void PrintIndent()
 {
-    wprintf(L"%s", L"                                " + (32 - g_Indent * 2));
+    wprintf(L"%s", L"                                                                " + (64 - g_Indent * 4));
+}
+static void BeginArray()
+{
+    g_ArrayIndex = 0;
+}
+static void EndArray()
+{
+    g_ArrayIndex = UINT32_MAX;
+}
+static void StepArray()
+{
+    ++g_ArrayIndex;
+}
+
+static void PrintName(const wchar_t* name)
+{
+    if(g_ArrayIndex != UINT32_MAX)
+    {
+        wprintf(L"%s[%u]", name, g_ArrayIndex);
+    }
+    else
+    {
+        wprintf(L"%s", name);
+    }
 }
 
 static void Print_BOOL(const wchar_t* name, BOOL value)
 {
     PrintIndent();
-    wprintf(L"%s = %s\n", name, value ? L"TRUE" : L"FALSE");
+    PrintName(name);
+    wprintf(L" = %s\n", value ? L"TRUE" : L"FALSE");
 }
 static void Print_uint32(const wchar_t* name, uint32_t value)
 {
     PrintIndent();
-    wprintf(L"%s = %u\n", name, value);
+    PrintName(name);
+    wprintf(L" = %u\n", value);
 }
 static void Print_size(const wchar_t* name, size_t value)
 {
     PrintIndent();
-    wprintf(L"%s = %zu\n", name, value);
+    PrintName(name);
+    wprintf(L" = %zu\n", value);
 }
 static void Print_hex32(const wchar_t* name, uint32_t value)
 {
     PrintIndent();
-    wprintf(L"%s = 0x%X\n", name, value);
+    PrintName(name);
+    wprintf(L" = 0x%X\n", value);
 }
 static void Print_string(const wchar_t* name, const wchar_t* value)
 {
     PrintIndent();
-    wprintf(L"%s = %s\n", name, value);
+    PrintName(name);
+    wprintf(L" = %s\n", value);
 }
 static void Print_LUID(const wchar_t* name, LUID value)
 {
     PrintIndent();
-    wprintf(L"%s = %08X-%08X\n", name, (uint32_t)value.HighPart, (uint32_t)value.LowPart);
+    PrintName(name);
+    wprintf(L" = %08X-%08X\n", (uint32_t)value.HighPart, (uint32_t)value.LowPart);
 }
 
 static void PrintStructBegin(const wchar_t* name)
 {
     PrintIndent();
-    wprintf(L"%s:\n", name);
+    PrintName(name);
+    wprintf(L":\n");
     ++g_Indent;
 }
 
@@ -143,15 +284,16 @@ static void PrintEnum(const wchar_t* name, uint32_t value,
     const wchar_t* const* names, const uint32_t* values, size_t valueCount)
 {
     PrintIndent();
+    PrintName(name);
     for(size_t i = 0; i < valueCount; ++i)
     {
         if(value == values[i])
         {
-            wprintf(L"%s = %s (0x%X)\n", name, names[i], value);
+            wprintf(L" = %s (0x%X)\n", names[i], value);
             return;
         }
     }
-    wprintf(L"%s = 0x%X\n", name, value);
+    wprintf(L" = 0x%X\n", value);
 }
 
 static void PrintFlags(const wchar_t* name, uint32_t value,
@@ -159,7 +301,8 @@ static void PrintFlags(const wchar_t* name, uint32_t value,
     size_t flagCount)
 {
     PrintIndent();
-    wprintf(L"%s = 0x%X\n", name, value);
+    PrintName(name);
+    wprintf(L" = 0x%X\n", value);
 
     ++g_Indent;
     size_t zeroFlagIndex = SIZE_MAX;
@@ -203,6 +346,87 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(const D3D12_FEATURE_DATA_D3D1
     Print_BOOL(  L"CrossAdapterRowMajorTextureSupported", options.CrossAdapterRowMajorTextureSupported);
     Print_BOOL(  L"VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation", options.VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation);
     PrintEnum(   L"ResourceHeapTier                    ", options.ResourceHeapTier, D3D12_RESOURCE_HEAP_TIER_NAMES, D3D12_RESOURCE_HEAP_TIER_VALUES, _countof(D3D12_RESOURCE_HEAP_TIER_VALUES));
+}
+
+static void Print_D3D12_FEATURE_DATA_ARCHITECTURE(const D3D12_FEATURE_DATA_ARCHITECTURE& architecture)
+{
+    Print_uint32(L"NodeIndex        ", architecture.NodeIndex);
+    Print_BOOL  (L"TileBasedRenderer", architecture.TileBasedRenderer);
+    Print_BOOL  (L"UMA              ", architecture.UMA);
+    Print_BOOL  (L"CacheCoherentUMA ", architecture.CacheCoherentUMA);
+}
+
+static void Print_D3D12_FEATURE_DATA_ARCHITECTURE1(const D3D12_FEATURE_DATA_ARCHITECTURE1& architecture1)
+{
+    Print_uint32(L"NodeIndex        ", architecture1.NodeIndex);
+    Print_BOOL  (L"TileBasedRenderer", architecture1.TileBasedRenderer);
+    Print_BOOL  (L"UMA              ", architecture1.UMA);
+    Print_BOOL  (L"CacheCoherentUMA ", architecture1.CacheCoherentUMA);
+    Print_BOOL  (L"IsolatedMMU      ", architecture1.IsolatedMMU);
+}
+
+static void Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(const D3D12_FEATURE_DATA_FEATURE_LEVELS& featureLevels)
+{
+    Print_uint32(L"NumFeatureLevels", featureLevels.NumFeatureLevels);
+    BeginArray();
+    for(uint32_t i = 0; i < featureLevels.NumFeatureLevels; ++i)
+    {
+        PrintEnum(L"pFeatureLevelsRequested", featureLevels.pFeatureLevelsRequested[i], D3D_FEATURE_LEVEL_NAMES, D3D_FEATURE_LEVEL_VALUES, _countof(D3D_FEATURE_LEVEL_VALUES));
+        StepArray();
+    }
+    EndArray();
+    PrintEnum(L"MaxSupportedFeatureLevel", featureLevels.MaxSupportedFeatureLevel, D3D_FEATURE_LEVEL_NAMES, D3D_FEATURE_LEVEL_VALUES, _countof(D3D_FEATURE_LEVEL_VALUES));
+}
+
+static void Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(const D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT& virtualAddressSupport)
+{
+    Print_uint32(L"MaxGPUVirtualAddressBitsPerResource", virtualAddressSupport.MaxGPUVirtualAddressBitsPerResource);
+    Print_uint32(L"MaxGPUVirtualAddressBitsPerProcess ", virtualAddressSupport.MaxGPUVirtualAddressBitsPerProcess);
+}
+
+static void Print_D3D12_FEATURE_DATA_SHADER_MODEL(const D3D12_FEATURE_DATA_SHADER_MODEL& shaderModel)
+{
+    PrintEnum(L"HighestShaderModel", shaderModel.HighestShaderModel, D3D_SHADER_MODEL_NAMES, D3D_SHADER_MODEL_VALUES, _countof(D3D_SHADER_MODEL_VALUES));
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(const D3D12_FEATURE_DATA_D3D12_OPTIONS1& options1)
+{
+    Print_BOOL  (L"WaveOps                      ", options1.WaveOps);
+    Print_uint32(L"WaveLaneCountMin             ", options1.WaveLaneCountMin);
+    Print_uint32(L"WaveLaneCountMax             ", options1.WaveLaneCountMax);
+    Print_uint32(L"TotalLaneCount               ", options1.TotalLaneCount);
+    Print_BOOL  (L"ExpandedComputeResourceStates", options1.ExpandedComputeResourceStates);
+    Print_BOOL  (L"Int64ShaderOps               ", options1.Int64ShaderOps);
+}
+
+static void Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(const D3D12_FEATURE_DATA_ROOT_SIGNATURE& rootSignature)
+{
+    PrintEnum(L"HighestVersion", rootSignature.HighestVersion, D3D_ROOT_SIGNATURE_VERSION_NAMES, D3D_ROOT_SIGNATURE_VERSION_VALUES, _countof(D3D_ROOT_SIGNATURE_VERSION_VALUES));
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(const D3D12_FEATURE_DATA_D3D12_OPTIONS2& options2)
+{
+    Print_BOOL(L"DepthBoundsTestSupported       ", options2.DepthBoundsTestSupported);
+    PrintEnum (L"ProgrammableSamplePositionsTier", options2.ProgrammableSamplePositionsTier, D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_NAMES, D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_VALUES, _countof(D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER_VALUES));
+}
+
+static void Print_D3D12_FEATURE_DATA_SHADER_CACHE(const D3D12_FEATURE_DATA_SHADER_CACHE& shaderCache)
+{
+    PrintFlags(L"SupportFlags", shaderCache.SupportFlags, D3D12_SHADER_CACHE_SUPPORT_FLAGS_NAMES, D3D12_SHADER_CACHE_SUPPORT_FLAGS_VALUES, _countof(D3D12_SHADER_CACHE_SUPPORT_FLAGS_VALUES));
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(const D3D12_FEATURE_DATA_D3D12_OPTIONS3& options3)
+{
+    Print_BOOL(L"CopyQueueTimestampQueriesSupported", options3.CopyQueueTimestampQueriesSupported);
+    Print_BOOL(L"CastingFullyTypedFormatSupported  ", options3.CastingFullyTypedFormatSupported);
+    PrintFlags(L"WriteBufferImmediateSupportFlags  ", options3.WriteBufferImmediateSupportFlags, D3D12_COMMAND_LIST_SUPPORT_FLAGS_NAMES, D3D12_COMMAND_LIST_SUPPORT_FLAGS_VALUES, _countof(D3D12_COMMAND_LIST_SUPPORT_FLAGS_VALUES));
+    PrintEnum (L"ViewInstancingTier                ", options3.ViewInstancingTier, D3D12_VIEW_INSTANCING_TIER_NAMES, D3D12_VIEW_INSTANCING_TIER_VALUES, _countof(D3D12_VIEW_INSTANCING_TIER_VALUES));
+    Print_BOOL(L"BarycentricsSupported             ", options3.BarycentricsSupported);
+}
+
+static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXISTING_HEAPS& existingHeaps)
+{
+    Print_BOOL(L"Supported", existingHeaps.Supported);
 }
 
 int main()
@@ -257,6 +481,83 @@ int main()
     D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
     CHECK_HR( g_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options)) );
     Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(options);
+
+    wprintf(L"\n");
+    wprintf(L"D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT:\n");
+    wprintf(L"===============================================\n");
+    D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT gpuVirtualAddressSupport = {};
+    CHECK_HR( g_Device->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &gpuVirtualAddressSupport, sizeof(gpuVirtualAddressSupport)) );
+    Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(gpuVirtualAddressSupport);
+    
+    wprintf(L"\n");
+    wprintf(L"D3D12_FEATURE_DATA_SHADER_MODEL:\n");
+    wprintf(L"================================\n");
+    D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = {};
+    shaderModel.HighestShaderModel = D3D_SHADER_MODEL_6_1;
+    CHECK_HR( g_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel)) );
+    Print_D3D12_FEATURE_DATA_SHADER_MODEL(shaderModel);
+
+    wprintf(L"\n");
+    wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS1:\n");
+    wprintf(L"==================================\n");
+    D3D12_FEATURE_DATA_D3D12_OPTIONS1 options1 = {};
+    CHECK_HR( g_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1)) );
+    Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(options1);
+
+    wprintf(L"\n");
+    wprintf(L"D3D12_FEATURE_DATA_ROOT_SIGNATURE:\n");
+    wprintf(L"==================================\n");
+    D3D12_FEATURE_DATA_ROOT_SIGNATURE rootSignature = {};
+    rootSignature.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+    CHECK_HR( g_Device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &rootSignature, sizeof(rootSignature)) );
+    Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(rootSignature);
+
+    D3D12_FEATURE_DATA_ARCHITECTURE1 architecture1 = {};
+    HRESULT hr = g_Device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &architecture1, sizeof(architecture1));
+    if(SUCCEEDED(hr))
+    {
+        wprintf(L"\n");
+        wprintf(L"D3D12_FEATURE_DATA_ARCHITECTURE1:\n");
+        wprintf(L"=================================\n");
+        Print_D3D12_FEATURE_DATA_ARCHITECTURE1(architecture1);
+    }
+    else
+    {
+        wprintf(L"\n");
+        wprintf(L"D3D12_FEATURE_DATA_ARCHITECTURE:\n");
+        wprintf(L"================================\n");
+        D3D12_FEATURE_DATA_ARCHITECTURE architecture = {};
+        CHECK_HR( g_Device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &architecture, sizeof(architecture)) );
+        Print_D3D12_FEATURE_DATA_ARCHITECTURE(architecture);
+    }
+
+    wprintf(L"\n");
+    wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS2:\n");
+    wprintf(L"==================================\n");
+    D3D12_FEATURE_DATA_D3D12_OPTIONS2 options2 = {};
+    CHECK_HR( g_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2)) );
+    Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(options2);
+
+    wprintf(L"\n");
+    wprintf(L"D3D12_FEATURE_DATA_SHADER_CACHE:\n");
+    wprintf(L"================================\n");
+    D3D12_FEATURE_DATA_SHADER_CACHE shaderCache = {};
+    CHECK_HR( g_Device->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &shaderCache, sizeof(shaderCache)) );
+    Print_D3D12_FEATURE_DATA_SHADER_CACHE(shaderCache);
+
+    wprintf(L"\n");
+    wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3:\n");
+    wprintf(L"==================================\n");
+    D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3 = {};
+    CHECK_HR( g_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3)) );
+    Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(options3);
+
+    wprintf(L"\n");
+    wprintf(L"D3D12_FEATURE_DATA_EXISTING_HEAPS:\n");
+    wprintf(L"==================================\n");
+    D3D12_FEATURE_DATA_EXISTING_HEAPS existingHeaps = {};
+    CHECK_HR( g_Device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeaps, sizeof(existingHeaps)) );
+    Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(existingHeaps);
 
     g_Device.Release();
 
