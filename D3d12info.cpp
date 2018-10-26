@@ -195,6 +195,30 @@ static const uint32_t D3D12_VIEW_INSTANCING_TIER_VALUES[] = {
     D3D12_VIEW_INSTANCING_TIER_3,
 };
 
+static const wchar_t* D3D12_CPU_PAGE_PROPERTY_NAMES[] = {
+    L"D3D12_CPU_PAGE_PROPERTY_UNKNOWN",
+    L"D3D12_CPU_PAGE_PROPERTY_NOT_AVAILABLE",
+    L"D3D12_CPU_PAGE_PROPERTY_WRITE_COMBINE",
+    L"D3D12_CPU_PAGE_PROPERTY_WRITE_BACK",
+};
+static const uint32_t D3D12_CPU_PAGE_PROPERTY_VALUES[] = {
+    D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
+    D3D12_CPU_PAGE_PROPERTY_NOT_AVAILABLE,
+    D3D12_CPU_PAGE_PROPERTY_WRITE_COMBINE,
+    D3D12_CPU_PAGE_PROPERTY_WRITE_BACK,
+};
+
+static const wchar_t* D3D12_MEMORY_POOL_NAMES[] = {
+    L"D3D12_MEMORY_POOL_UNKNOWN",
+    L"D3D12_MEMORY_POOL_L0",
+    L"D3D12_MEMORY_POOL_L1",
+};
+static const uint32_t D3D12_MEMORY_POOL_VALUES[] = {
+    D3D12_MEMORY_POOL_UNKNOWN,
+    D3D12_MEMORY_POOL_L0,
+    D3D12_MEMORY_POOL_L1,
+};
+
 static HINSTANCE g_Instance;
 static CComPtr<ID3D12Device> g_Device;
 
@@ -241,6 +265,12 @@ static void Print_uint32(const wchar_t* name, uint32_t value)
     PrintIndent();
     PrintName(name);
     wprintf(L" = %u\n", value);
+}
+static void Print_uint64(const wchar_t* name, uint64_t value)
+{
+    PrintIndent();
+    PrintName(name);
+    wprintf(L" = %llu\n", value);
 }
 static void Print_size(const wchar_t* name, size_t value)
 {
@@ -429,6 +459,23 @@ static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXI
     Print_BOOL(L"Supported", existingHeaps.Supported);
 }
 
+static void Print_DXGI_QUERY_VIDEO_MEMORY_INFO(const DXGI_QUERY_VIDEO_MEMORY_INFO& videoMemoryInfo)
+{
+    Print_uint64(L"Budget", videoMemoryInfo.Budget);
+    Print_uint64(L"CurrentUsage", videoMemoryInfo.CurrentUsage);
+    Print_uint64(L"AvailableForReservation", videoMemoryInfo.AvailableForReservation);
+    Print_uint64(L"CurrentReservation", videoMemoryInfo.CurrentReservation);
+}
+
+static void Print_D3D12_HEAP_PROPERTIES(const D3D12_HEAP_PROPERTIES& heapProperties)
+{
+    // heapProperties.Type intentionally ignored.
+    PrintEnum(L"CPUPageProperty", heapProperties.CPUPageProperty, D3D12_CPU_PAGE_PROPERTY_NAMES, D3D12_CPU_PAGE_PROPERTY_VALUES, _countof(D3D12_CPU_PAGE_PROPERTY_VALUES));
+    PrintEnum(L"MemoryPoolPreference", heapProperties.MemoryPoolPreference, D3D12_MEMORY_POOL_NAMES, D3D12_MEMORY_POOL_VALUES, _countof(D3D12_MEMORY_POOL_VALUES));
+    Print_hex32(L"CreationNodeMask", heapProperties.CreationNodeMask);
+    Print_hex32(L"VisibleNodeMask", heapProperties.VisibleNodeMask);
+}
+
 int main()
 {
     g_Instance = (HINSTANCE)GetModuleHandle(NULL);
@@ -445,15 +492,16 @@ int main()
 
     wprintf(L"DXGI Adapters:\n");
     wprintf(L"==============\n");
-    IDXGIAdapter1* adapter = nullptr;
+    IDXGIAdapter1* adapter1 = nullptr;
     UINT adapterIndex = 0;
-    while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND)
+    while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
     {
         wprintf(L"Adapter %u:\n", adapterIndex);
 
-        DXGI_ADAPTER_DESC1 desc;
-        adapter->GetDesc1(&desc);
         ++g_Indent;
+
+        DXGI_ADAPTER_DESC1 desc;
+        adapter1->GetDesc1(&desc);
         Print_string(L"Description          ", desc.Description);
         Print_hex32 (L"VendorId             ", desc.VendorId);
         Print_hex32 (L"DeviceId             ", desc.DeviceId);
@@ -464,15 +512,42 @@ int main()
         Print_size  (L"SharedSystemMemory   ", desc.SharedSystemMemory);
         Print_LUID  (L"AdapterLuid          ", desc.AdapterLuid);
         PrintFlags  (L"Flags                ", desc.Flags, DXGI_ADAPTER_FLAG_NAMES, DXGI_ADAPTER_FLAG_VALUES, _countof(DXGI_ADAPTER_FLAG_VALUES));
+
+        CComPtr<IDXGIAdapter3> adapter3;
+        IDXGIAdapter3* adapter3Ptr = nullptr;
+        if(SUCCEEDED(adapter1->QueryInterface<IDXGIAdapter3>(&adapter3Ptr)))
+        {
+            adapter3.Attach(adapter3Ptr);
+
+            DXGI_QUERY_VIDEO_MEMORY_INFO videoMemoryInfo = {};
+            for(uint32_t memorySegmentGroup = 0; memorySegmentGroup < 2; ++memorySegmentGroup)
+            {
+                CHECK_HR( adapter3->QueryVideoMemoryInfo(0, (DXGI_MEMORY_SEGMENT_GROUP)memorySegmentGroup, &videoMemoryInfo) );
+                switch(memorySegmentGroup)
+                {
+                case 0:
+                    PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_LOCAL]");
+                    break;
+                case 1:
+                    PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]");
+                    break;
+                default:
+                    assert(0);
+                }
+                Print_DXGI_QUERY_VIDEO_MEMORY_INFO(videoMemoryInfo);
+                PrintStructEnd();
+            }
+        }
+
         --g_Indent;
 
-        SAFE_RELEASE(adapter);
+        SAFE_RELEASE(adapter1);
         adapterIndex++;
     }
 
-    CHECK_HR( dxgiFactory->EnumAdapters1(0, &adapter) );
+    CHECK_HR( dxgiFactory->EnumAdapters1(0, &adapter1) );
     ID3D12Device* device = nullptr;
-    CHECK_HR( D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
+    CHECK_HR( D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
     g_Device.Attach(device);
 
     wprintf(L"\n");
@@ -559,8 +634,34 @@ int main()
     CHECK_HR( g_Device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeaps, sizeof(existingHeaps)) );
     Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(existingHeaps);
 
+    wprintf(L"\n");
+    wprintf(L"D3D12_HEAP_PROPERTIES:\n");
+    wprintf(L"======================\n");
+    for(uint32_t heapType = D3D12_HEAP_TYPE_DEFAULT; heapType <= D3D12_HEAP_TYPE_READBACK; ++heapType)
+    {
+        switch(heapType)
+        {
+        case D3D12_HEAP_TYPE_DEFAULT:
+            PrintStructBegin(L"D3D12_HEAP_PROPERTIES[D3D12_HEAP_TYPE_DEFAULT]");
+            break;
+        case D3D12_HEAP_TYPE_UPLOAD:
+            PrintStructBegin(L"D3D12_HEAP_PROPERTIES[D3D12_HEAP_TYPE_UPLOAD]");
+            break;
+        case D3D12_HEAP_TYPE_READBACK:
+            PrintStructBegin(L"D3D12_HEAP_PROPERTIES[D3D12_HEAP_TYPE_READBACK]");
+            break;
+        default:
+            assert(0);
+        }
+
+        D3D12_HEAP_PROPERTIES heapProperties = device->GetCustomHeapProperties(0, (D3D12_HEAP_TYPE)heapType);
+        Print_D3D12_HEAP_PROPERTIES(heapProperties);
+        
+        PrintStructEnd();
+    }
+
     g_Device.Release();
 
-    SAFE_RELEASE(adapter);
+    SAFE_RELEASE(adapter1);
     SAFE_RELEASE(dxgiFactory);
 }
