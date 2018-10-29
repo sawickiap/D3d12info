@@ -10,6 +10,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cwchar>
+#include <cstdlib>
 
 #define CHECK_HR(expr)		do { HRESULT hr__ = (expr); if(FAILED(hr__)) assert(0 && #expr); } while(false)
 #define SAFE_RELEASE(x)		do { if(x) { (x)->Release(); (x) = nullptr; } } while(false)
@@ -487,11 +488,30 @@ static void Print_D3D12_HEAP_PROPERTIES(const D3D12_HEAP_PROPERTIES& heapPropert
 	Print_hex32(L"VisibleNodeMask", heapProperties.VisibleNodeMask);
 }
 
-int main()
+int main(int argc, const char** argv)
 {
+    UINT requestedAdapterIndex = ~0u;
+
 	wprintf(L"============================\n");
 	wprintf(L"D3D12INFO\n");
 	wprintf(L"built: %hs, %hs\n", __DATE__, __TIME__);
+
+	if (argc > 2)
+	{
+		wprintf(L"usage: %hs ... show info for all adapters\n", argv[0]);
+		wprintf(L"usage: %hs <adapterIndex> ... show info for specific adapter\n", argv[0]);
+		wprintf(L"============================\n");
+		wprintf(L"\n");
+
+		return -1;
+	}
+	else if (argc > 1)
+	{
+		requestedAdapterIndex = atoi(argv[1]);
+
+		wprintf(L"requested adapter index: %d\n", requestedAdapterIndex);
+	}
+
 	wprintf(L"============================\n");
 	wprintf(L"\n");
 
@@ -502,7 +522,7 @@ int main()
 
 
 	IDXGIAdapter1* adapter1 = nullptr;
-	UINT adapterIndex = 0;
+	UINT adapterIndex = requestedAdapterIndex != ~0u ? requestedAdapterIndex : 0u;
 	while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
 	{
 		assert(adapter1 != nullptr);
@@ -700,8 +720,15 @@ int main()
 
 		SAFE_RELEASE(device);
 		SAFE_RELEASE(adapter1);
+
+		if (requestedAdapterIndex != ~0u)
+		{
+			break;
+		}
 		++adapterIndex;
 	}
 
 	SAFE_RELEASE(dxgiFactory);
+
+	return 0;
 }
