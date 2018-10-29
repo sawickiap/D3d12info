@@ -496,7 +496,7 @@ int main()
     wprintf(L"\n");
 
     IDXGIFactory4* dxgiFactory = nullptr;
-    CHECK_HR( CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
+    CHECK_HR( ::CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
 
     wprintf(L"DXGI Adapters:\n");
     wprintf(L"==============\n");
@@ -564,7 +564,7 @@ int main()
 	assert(adapter1 != nullptr);
 
     ID3D12Device* device = nullptr;
-    CHECK_HR( D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
+    CHECK_HR( ::D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
 	assert(device != nullptr);
 
     wprintf(L"\n");
