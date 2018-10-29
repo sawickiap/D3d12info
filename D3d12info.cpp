@@ -495,7 +495,7 @@ int main()
     wprintf(L"============================\n");
     wprintf(L"\n");
 
-    IDXGIFactory4* dxgiFactory;
+    IDXGIFactory4* dxgiFactory = nullptr;
     CHECK_HR( CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
 
     wprintf(L"DXGI Adapters:\n");
@@ -508,7 +508,7 @@ int main()
 
         ++g_Indent;
 
-        DXGI_ADAPTER_DESC1 desc;
+        DXGI_ADAPTER_DESC1 desc = {};
         adapter1->GetDesc1(&desc);
         Print_string(L"Description          ", desc.Description);
         Print_hex32 (L"VendorId             ", desc.VendorId);
