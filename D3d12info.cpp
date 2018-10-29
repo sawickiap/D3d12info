@@ -509,7 +509,7 @@ int main()
         ++g_Indent;
 
         DXGI_ADAPTER_DESC1 desc = {};
-        adapter1->GetDesc1(&desc);
+        CHECK_HR( adapter1->GetDesc1(&desc) );
         Print_string(L"Description          ", desc.Description);
         Print_hex32 (L"VendorId             ", desc.VendorId);
         Print_hex32 (L"DeviceId             ", desc.DeviceId);
