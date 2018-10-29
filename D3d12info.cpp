@@ -500,16 +500,15 @@ int main()
     IDXGIFactory4* dxgiFactory = nullptr;
     CHECK_HR( ::CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
 
-    wprintf(L"DXGI Adapters:\n");
-    wprintf(L"==============\n");
-    wprintf(L"\n");
 
     IDXGIAdapter1* adapter1 = nullptr;
     UINT adapterIndex = 0;
     while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
     {
-        wprintf(L"Adapter %u:\n", adapterIndex);
 		assert(adapter1 != nullptr);
+
+	    wprintf(L"DXGI Adapter %2u:\n", adapterIndex);
+		wprintf(L"================\n");
 
         ++g_Indent;
 
@@ -557,130 +556,130 @@ int main()
 
 		wprintf(L"\n");
 
-        --g_Indent;
 
-        SAFE_RELEASE(adapter1);
+		ID3D12Device* device = nullptr;
+		CHECK_HR( ::D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
+		if (device != nullptr)
+		{
+			wprintf(L"\n");
+			wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS:\n");
+			wprintf(L"=================================\n");
+			D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
+			CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options)) );
+			Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(options);
+
+			wprintf(L"\n");
+			wprintf(L"D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT:\n");
+			wprintf(L"===============================================\n");
+			D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT gpuVirtualAddressSupport = {};
+			CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &gpuVirtualAddressSupport, sizeof(gpuVirtualAddressSupport)) );
+			Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(gpuVirtualAddressSupport);
+    
+			wprintf(L"\n");
+			wprintf(L"D3D12_FEATURE_DATA_SHADER_MODEL:\n");
+			wprintf(L"================================\n");
+			D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = {};
+			shaderModel.HighestShaderModel = D3D_SHADER_MODEL_6_1;
+			CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel)) );
+			Print_D3D12_FEATURE_DATA_SHADER_MODEL(shaderModel);
+
+			wprintf(L"\n");
+			wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS1:\n");
+			wprintf(L"==================================\n");
+			D3D12_FEATURE_DATA_D3D12_OPTIONS1 options1 = {};
+			CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1)) );
+			Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(options1);
+
+			wprintf(L"\n");
+			wprintf(L"D3D12_FEATURE_DATA_ROOT_SIGNATURE:\n");
+			wprintf(L"==================================\n");
+			D3D12_FEATURE_DATA_ROOT_SIGNATURE rootSignature = {};
+			rootSignature.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+			CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &rootSignature, sizeof(rootSignature)) );
+			Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(rootSignature);
+
+			D3D12_FEATURE_DATA_ARCHITECTURE1 architecture1 = {};
+			hr = device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &architecture1, sizeof(architecture1));
+			if(SUCCEEDED(hr))
+			{
+				wprintf(L"\n");
+				wprintf(L"D3D12_FEATURE_DATA_ARCHITECTURE1:\n");
+				wprintf(L"=================================\n");
+				Print_D3D12_FEATURE_DATA_ARCHITECTURE1(architecture1);
+			}
+			else
+			{
+				wprintf(L"\n");
+				wprintf(L"D3D12_FEATURE_DATA_ARCHITECTURE:\n");
+				wprintf(L"================================\n");
+				D3D12_FEATURE_DATA_ARCHITECTURE architecture = {};
+				CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &architecture, sizeof(architecture)) );
+				Print_D3D12_FEATURE_DATA_ARCHITECTURE(architecture);
+			}
+
+			wprintf(L"\n");
+			wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS2:\n");
+			wprintf(L"==================================\n");
+			D3D12_FEATURE_DATA_D3D12_OPTIONS2 options2 = {};
+			CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2)) );
+			Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(options2);
+
+			wprintf(L"\n");
+			wprintf(L"D3D12_FEATURE_DATA_SHADER_CACHE:\n");
+			wprintf(L"================================\n");
+			D3D12_FEATURE_DATA_SHADER_CACHE shaderCache = {};
+			CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &shaderCache, sizeof(shaderCache)) );
+			Print_D3D12_FEATURE_DATA_SHADER_CACHE(shaderCache);
+
+			wprintf(L"\n");
+			wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3:\n");
+			wprintf(L"==================================\n");
+			D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3 = {};
+			CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3)) );
+			Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(options3);
+
+			wprintf(L"\n");
+			wprintf(L"D3D12_FEATURE_DATA_EXISTING_HEAPS:\n");
+			wprintf(L"==================================\n");
+			D3D12_FEATURE_DATA_EXISTING_HEAPS existingHeaps = {};
+			CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeaps, sizeof(existingHeaps)) );
+			Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(existingHeaps);
+
+			wprintf(L"\n");
+			wprintf(L"D3D12_HEAP_PROPERTIES:\n");
+			wprintf(L"======================\n");
+			for(uint32_t heapType = D3D12_HEAP_TYPE_DEFAULT; heapType <= D3D12_HEAP_TYPE_READBACK; ++heapType)
+			{
+				switch(heapType)
+				{
+				case D3D12_HEAP_TYPE_DEFAULT:
+					PrintStructBegin(L"D3D12_HEAP_PROPERTIES [D3D12_HEAP_TYPE_DEFAULT]");
+					break;
+				case D3D12_HEAP_TYPE_UPLOAD:
+					PrintStructBegin(L"D3D12_HEAP_PROPERTIES [D3D12_HEAP_TYPE_UPLOAD]");
+					break;
+				case D3D12_HEAP_TYPE_READBACK:
+					PrintStructBegin(L"D3D12_HEAP_PROPERTIES [D3D12_HEAP_TYPE_READBACK]");
+					break;
+				default:
+					assert(0);
+				}
+
+				D3D12_HEAP_PROPERTIES heapProperties = device->GetCustomHeapProperties(0, (D3D12_HEAP_TYPE)heapType);
+				Print_D3D12_HEAP_PROPERTIES(heapProperties);
+        
+				PrintStructEnd();
+			}
+
+			wprintf(L"\n");
+		}
+
+		--g_Indent;
+
+		SAFE_RELEASE(device);
+		SAFE_RELEASE(adapter1);
         ++adapterIndex;
     }
 
-    CHECK_HR( dxgiFactory->EnumAdapters1(0, &adapter1) );
-	assert(adapter1 != nullptr);
-
-    ID3D12Device* device = nullptr;
-    CHECK_HR( ::D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
-	assert(device != nullptr);
-
-    wprintf(L"\n");
-    wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS:\n");
-    wprintf(L"=================================\n");
-    D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
-    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options)) );
-    Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(options);
-
-    wprintf(L"\n");
-    wprintf(L"D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT:\n");
-    wprintf(L"===============================================\n");
-    D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT gpuVirtualAddressSupport = {};
-    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &gpuVirtualAddressSupport, sizeof(gpuVirtualAddressSupport)) );
-    Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(gpuVirtualAddressSupport);
-    
-    wprintf(L"\n");
-    wprintf(L"D3D12_FEATURE_DATA_SHADER_MODEL:\n");
-    wprintf(L"================================\n");
-    D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = {};
-    shaderModel.HighestShaderModel = D3D_SHADER_MODEL_6_1;
-    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel)) );
-    Print_D3D12_FEATURE_DATA_SHADER_MODEL(shaderModel);
-
-    wprintf(L"\n");
-    wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS1:\n");
-    wprintf(L"==================================\n");
-    D3D12_FEATURE_DATA_D3D12_OPTIONS1 options1 = {};
-    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1)) );
-    Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(options1);
-
-    wprintf(L"\n");
-    wprintf(L"D3D12_FEATURE_DATA_ROOT_SIGNATURE:\n");
-    wprintf(L"==================================\n");
-    D3D12_FEATURE_DATA_ROOT_SIGNATURE rootSignature = {};
-    rootSignature.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
-    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &rootSignature, sizeof(rootSignature)) );
-    Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(rootSignature);
-
-    D3D12_FEATURE_DATA_ARCHITECTURE1 architecture1 = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &architecture1, sizeof(architecture1));
-    if(SUCCEEDED(hr))
-    {
-        wprintf(L"\n");
-        wprintf(L"D3D12_FEATURE_DATA_ARCHITECTURE1:\n");
-        wprintf(L"=================================\n");
-        Print_D3D12_FEATURE_DATA_ARCHITECTURE1(architecture1);
-    }
-    else
-    {
-        wprintf(L"\n");
-        wprintf(L"D3D12_FEATURE_DATA_ARCHITECTURE:\n");
-        wprintf(L"================================\n");
-        D3D12_FEATURE_DATA_ARCHITECTURE architecture = {};
-        CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &architecture, sizeof(architecture)) );
-        Print_D3D12_FEATURE_DATA_ARCHITECTURE(architecture);
-    }
-
-    wprintf(L"\n");
-    wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS2:\n");
-    wprintf(L"==================================\n");
-    D3D12_FEATURE_DATA_D3D12_OPTIONS2 options2 = {};
-    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2)) );
-    Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(options2);
-
-    wprintf(L"\n");
-    wprintf(L"D3D12_FEATURE_DATA_SHADER_CACHE:\n");
-    wprintf(L"================================\n");
-    D3D12_FEATURE_DATA_SHADER_CACHE shaderCache = {};
-    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &shaderCache, sizeof(shaderCache)) );
-    Print_D3D12_FEATURE_DATA_SHADER_CACHE(shaderCache);
-
-    wprintf(L"\n");
-    wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3:\n");
-    wprintf(L"==================================\n");
-    D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3 = {};
-    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3)) );
-    Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(options3);
-
-    wprintf(L"\n");
-    wprintf(L"D3D12_FEATURE_DATA_EXISTING_HEAPS:\n");
-    wprintf(L"==================================\n");
-    D3D12_FEATURE_DATA_EXISTING_HEAPS existingHeaps = {};
-    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeaps, sizeof(existingHeaps)) );
-    Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(existingHeaps);
-
-    wprintf(L"\n");
-    wprintf(L"D3D12_HEAP_PROPERTIES:\n");
-    wprintf(L"======================\n");
-    for(uint32_t heapType = D3D12_HEAP_TYPE_DEFAULT; heapType <= D3D12_HEAP_TYPE_READBACK; ++heapType)
-    {
-        switch(heapType)
-        {
-        case D3D12_HEAP_TYPE_DEFAULT:
-            PrintStructBegin(L"D3D12_HEAP_PROPERTIES [D3D12_HEAP_TYPE_DEFAULT]");
-            break;
-        case D3D12_HEAP_TYPE_UPLOAD:
-            PrintStructBegin(L"D3D12_HEAP_PROPERTIES [D3D12_HEAP_TYPE_UPLOAD]");
-            break;
-        case D3D12_HEAP_TYPE_READBACK:
-            PrintStructBegin(L"D3D12_HEAP_PROPERTIES [D3D12_HEAP_TYPE_READBACK]");
-            break;
-        default:
-            assert(0);
-        }
-
-        D3D12_HEAP_PROPERTIES heapProperties = device->GetCustomHeapProperties(0, (D3D12_HEAP_TYPE)heapType);
-        Print_D3D12_HEAP_PROPERTIES(heapProperties);
-        
-        PrintStructEnd();
-    }
-
-    SAFE_RELEASE(device);
-    SAFE_RELEASE(adapter1);
     SAFE_RELEASE(dxgiFactory);
 }
