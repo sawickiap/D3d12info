@@ -495,6 +495,8 @@ int main()
     wprintf(L"============================\n");
     wprintf(L"\n");
 
+	HRESULT hr = S_FALSE;
+
     IDXGIFactory4* dxgiFactory = nullptr;
     CHECK_HR( ::CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
 
@@ -527,7 +529,8 @@ int main()
 	    wprintf(L"\n");
 
         IDXGIAdapter3* adapter3 = nullptr;
-        if(SUCCEEDED(adapter1->QueryInterface<IDXGIAdapter3>(&adapter3)))
+		hr = adapter1->QueryInterface<IDXGIAdapter3>(&adapter3);
+        if(SUCCEEDED(hr))
         {
 			assert(adapter3 != nullptr);
 
@@ -605,7 +608,7 @@ int main()
     Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(rootSignature);
 
     D3D12_FEATURE_DATA_ARCHITECTURE1 architecture1 = {};
-    HRESULT hr = device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &architecture1, sizeof(architecture1));
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &architecture1, sizeof(architecture1));
     if(SUCCEEDED(hr))
     {
         wprintf(L"\n");
