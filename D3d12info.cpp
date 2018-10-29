@@ -500,6 +500,7 @@ int main()
 
     wprintf(L"DXGI Adapters:\n");
     wprintf(L"==============\n");
+    wprintf(L"\n");
     IDXGIAdapter1* adapter1 = nullptr;
     UINT adapterIndex = 0;
     while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
@@ -521,6 +522,7 @@ int main()
         Print_size  (L"SharedSystemMemory   ", desc.SharedSystemMemory);
         Print_LUID  (L"AdapterLuid          ", desc.AdapterLuid);
         PrintFlags  (L"Flags                ", desc.Flags, DXGI_ADAPTER_FLAG_NAMES, DXGI_ADAPTER_FLAG_VALUES, _countof(DXGI_ADAPTER_FLAG_VALUES));
+	    wprintf(L"\n");
 
         IDXGIAdapter3* adapter3 = nullptr;
         if(SUCCEEDED(adapter1->QueryInterface<IDXGIAdapter3>(&adapter3)))
@@ -534,10 +536,10 @@ int main()
                 switch(memorySegmentGroup)
                 {
                 case 0:
-                    PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_LOCAL]");
+                    PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO [DXGI_MEMORY_SEGMENT_GROUP_LOCAL]");
                     break;
                 case 1:
-                    PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]");
+                    PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO [DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]");
                     break;
                 default:
                     assert(0);
@@ -546,6 +548,8 @@ int main()
                 PrintStructEnd();
             }
         }
+
+		wprintf(L"\n");
 
         --g_Indent;
 
@@ -652,13 +656,13 @@ int main()
         switch(heapType)
         {
         case D3D12_HEAP_TYPE_DEFAULT:
-            PrintStructBegin(L"D3D12_HEAP_PROPERTIES[D3D12_HEAP_TYPE_DEFAULT]");
+            PrintStructBegin(L"D3D12_HEAP_PROPERTIES [D3D12_HEAP_TYPE_DEFAULT]");
             break;
         case D3D12_HEAP_TYPE_UPLOAD:
-            PrintStructBegin(L"D3D12_HEAP_PROPERTIES[D3D12_HEAP_TYPE_UPLOAD]");
+            PrintStructBegin(L"D3D12_HEAP_PROPERTIES [D3D12_HEAP_TYPE_UPLOAD]");
             break;
         case D3D12_HEAP_TYPE_READBACK:
-            PrintStructBegin(L"D3D12_HEAP_PROPERTIES[D3D12_HEAP_TYPE_READBACK]");
+            PrintStructBegin(L"D3D12_HEAP_PROPERTIES [D3D12_HEAP_TYPE_READBACK]");
             break;
         default:
             assert(0);
