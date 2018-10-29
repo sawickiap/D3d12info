@@ -617,6 +617,28 @@ int main()
 				Print_D3D12_FEATURE_DATA_ARCHITECTURE(architecture);
 			}
 
+			static const D3D_FEATURE_LEVEL featureLevels[] =
+			{
+				D3D_FEATURE_LEVEL_12_1,
+				D3D_FEATURE_LEVEL_12_0,
+				D3D_FEATURE_LEVEL_11_1,
+				D3D_FEATURE_LEVEL_11_0,
+			};
+
+			D3D12_FEATURE_DATA_FEATURE_LEVELS levels =
+			{
+				_countof(featureLevels), featureLevels, D3D_FEATURE_LEVEL_11_0
+			};
+
+			hr = device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &levels, sizeof(levels));
+			if(SUCCEEDED(hr))
+			{
+				wprintf(L"\n");
+				wprintf(L"D3D12_FEATURE_DATA_FEATURE_LEVELS:\n");
+				wprintf(L"==================================\n");
+				Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(levels);
+			}
+
 			wprintf(L"\n");
 			wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS2:\n");
 			wprintf(L"==================================\n");
