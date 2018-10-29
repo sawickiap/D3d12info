@@ -489,9 +489,10 @@ static void Print_D3D12_HEAP_PROPERTIES(const D3D12_HEAP_PROPERTIES& heapPropert
 
 int main()
 {
-    wprintf(L"=========\n");
+    wprintf(L"============================\n");
     wprintf(L"D3D12INFO\n");
-    wprintf(L"=========\n");
+	wprintf(L"built: %hs, %hs\n", __DATE__, __TIME__);
+    wprintf(L"============================\n");
     wprintf(L"\n");
 
     IDXGIFactory4* dxgiFactory;
