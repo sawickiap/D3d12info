@@ -501,6 +501,7 @@ int main()
     wprintf(L"DXGI Adapters:\n");
     wprintf(L"==============\n");
     wprintf(L"\n");
+
     IDXGIAdapter1* adapter1 = nullptr;
     UINT adapterIndex = 0;
     while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
@@ -512,6 +513,7 @@ int main()
 
         DXGI_ADAPTER_DESC1 desc = {};
         CHECK_HR( adapter1->GetDesc1(&desc) );
+
         Print_string(L"Description          ", desc.Description);
         Print_hex32 (L"VendorId             ", desc.VendorId);
         Print_hex32 (L"DeviceId             ", desc.DeviceId);
@@ -533,6 +535,7 @@ int main()
             for(uint32_t memorySegmentGroup = 0; memorySegmentGroup < 2; ++memorySegmentGroup)
             {
                 CHECK_HR( adapter3->QueryVideoMemoryInfo(0, (DXGI_MEMORY_SEGMENT_GROUP)memorySegmentGroup, &videoMemoryInfo) );
+
                 switch(memorySegmentGroup)
                 {
                 case 0:
