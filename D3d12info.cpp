@@ -515,6 +515,14 @@ int main(int argc, const char** argv)
 	wprintf(L"============================\n");
 	wprintf(L"\n");
 
+#if defined(_DEBUG)
+	ID3D12Debug* debugController = nullptr;
+	if (SUCCEEDED(::D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+	{
+		debugController->EnableDebugLayer();
+	}
+#endif
+
 	HRESULT hr = S_FALSE;
 
 	IDXGIFactory4* dxgiFactory = nullptr;
@@ -729,6 +737,10 @@ int main(int argc, const char** argv)
 	}
 
 	SAFE_RELEASE(dxgiFactory);
+
+#if defined(_DEBUG)
+	SAFE_RELEASE(debugController);
+#endif
 
 	return 0;
 }
