@@ -531,9 +531,9 @@ int main()
         {
 			assert(adapter3 != nullptr);
 
-            DXGI_QUERY_VIDEO_MEMORY_INFO videoMemoryInfo = {};
             for(uint32_t memorySegmentGroup = 0; memorySegmentGroup < 2; ++memorySegmentGroup)
             {
+	            DXGI_QUERY_VIDEO_MEMORY_INFO videoMemoryInfo = {};
                 CHECK_HR( adapter3->QueryVideoMemoryInfo(0, (DXGI_MEMORY_SEGMENT_GROUP)memorySegmentGroup, &videoMemoryInfo) );
 
                 switch(memorySegmentGroup)
