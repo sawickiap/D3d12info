@@ -505,6 +505,7 @@ int main()
     while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
     {
         wprintf(L"Adapter %u:\n", adapterIndex);
+		assert(adapter1 != nullptr);
 
         ++g_Indent;
 
@@ -524,6 +525,8 @@ int main()
         IDXGIAdapter3* adapter3 = nullptr;
         if(SUCCEEDED(adapter1->QueryInterface<IDXGIAdapter3>(&adapter3)))
         {
+			assert(adapter3 != nullptr);
+
             DXGI_QUERY_VIDEO_MEMORY_INFO videoMemoryInfo = {};
             for(uint32_t memorySegmentGroup = 0; memorySegmentGroup < 2; ++memorySegmentGroup)
             {
@@ -551,8 +554,11 @@ int main()
     }
 
     CHECK_HR( dxgiFactory->EnumAdapters1(0, &adapter1) );
+	assert(adapter1 != nullptr);
+
     ID3D12Device* device = nullptr;
     CHECK_HR( D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
+	assert(device != nullptr);
 
     wprintf(L"\n");
     wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS:\n");
