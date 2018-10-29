@@ -560,7 +560,7 @@ int main()
         --g_Indent;
 
         SAFE_RELEASE(adapter1);
-        adapterIndex++;
+        ++adapterIndex;
     }
 
     CHECK_HR( dxgiFactory->EnumAdapters1(0, &adapter1) );
