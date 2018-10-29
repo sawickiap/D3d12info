@@ -237,7 +237,6 @@ static const uint32_t D3D12_MEMORY_POOL_VALUES[] = {
     D3D12_MEMORY_POOL_L1,
 };
 
-static HINSTANCE g_Instance;
 static CComPtr<ID3D12Device> g_Device;
 
 static uint32_t g_Indent;
@@ -496,8 +495,6 @@ static void Print_D3D12_HEAP_PROPERTIES(const D3D12_HEAP_PROPERTIES& heapPropert
 
 int main()
 {
-    g_Instance = (HINSTANCE)GetModuleHandle(NULL);
-
     CoInitialize(NULL);
 
     wprintf(L"=========\n");
