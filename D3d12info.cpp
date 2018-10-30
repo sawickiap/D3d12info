@@ -514,7 +514,7 @@ int main(int argc, const char** argv)
 	{
 		requestedAdapterIndex = atoi(argv[1]);
 
-		wprintf(L"requested adapter index: %d\n", requestedAdapterIndex);
+		wprintf(L"requested adapter index: %u\n", requestedAdapterIndex);
 	}
 
 	wprintf(L"============================\n");
