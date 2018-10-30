@@ -12,6 +12,11 @@
 #include <cwchar>
 #include <cstdlib>
 
+
+#pragma comment(lib, "dxgi.lib") 
+#pragma comment(lib, "d3d12.lib") 
+
+
 #define CHECK_HR(expr)		do { HRESULT hr__ = (expr); if(FAILED(hr__)) assert(0 && #expr); } while(false)
 #define SAFE_RELEASE(x)		do { if(x) { (x)->Release(); (x) = nullptr; } } while(false)
 
