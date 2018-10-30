@@ -30,6 +30,9 @@ typedef HRESULT (WINAPI* PFN_DXGI_CREATE_FACTORY1)(REFIID riid, _COM_Outptr_ voi
 HMODULE dxgiLibrary = nullptr;
 HMODULE dx12Library = nullptr;
 
+const wchar_t* DYN_LIB_DXGI = L"dxgi.dll";
+const wchar_t* DYN_LIB_DX12 = L"d3d12.dll";
+
 #endif
 
 
@@ -508,17 +511,17 @@ static void Print_D3D12_HEAP_PROPERTIES(const D3D12_HEAP_PROPERTIES& heapPropert
 int main(int argc, const char** argv)
 {
 #if !defined(AUTO_LINK_DX12)
-	dxgiLibrary = ::LoadLibraryEx(L"dxgi.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+	dxgiLibrary = ::LoadLibraryEx(DYN_LIB_DXGI, nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
 	if (!dxgiLibrary)
 	{
-		wprintf(L"could not load dxgi.dll\n");
+		wprintf(L"could not load %s\n", DYN_LIB_DXGI);
 		return -1;
 	}
 
-	dx12Library = ::LoadLibraryEx(L"d3d12.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+	dx12Library = ::LoadLibraryEx(DYN_LIB_DX12, nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
 	if (!dx12Library)
 	{
-		wprintf(L"could not load d3d12.dll\n");
+		wprintf(L"could not load %s\n", DYN_LIB_DX12);
 		return -1;
 	}
 
