@@ -782,7 +782,7 @@ int main(int argc, const char** argv)
 					assert(0);
 				}
 
-				D3D12_HEAP_PROPERTIES heapProperties = device->GetCustomHeapProperties(0, (D3D12_HEAP_TYPE)heapType);
+				const D3D12_HEAP_PROPERTIES heapProperties = device->GetCustomHeapProperties(0, (D3D12_HEAP_TYPE)heapType);
 				Print_D3D12_HEAP_PROPERTIES(heapProperties);
 
 				PrintStructEnd();
