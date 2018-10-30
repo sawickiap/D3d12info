@@ -719,9 +719,10 @@ static void PrintInfoAdapter(IDXGIAdapter1* adapter1)
 	--g_Indent;
 }
 
-int main(int argc, const char** argv)
-{
 #if !defined(AUTO_LINK_DX12)
+
+static int LoadLibraries()
+{
 	dxgiLibrary = ::LoadLibraryEx(DYN_LIB_DXGI, nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
 	if (!dxgiLibrary)
 	{
@@ -754,7 +755,41 @@ int main(int argc, const char** argv)
 	{
 		return -1;
 	}
+
+	return 0;
 #endif
+}
+
+static void UnloadLibraries()
+{
+	pCreateDXGIFactory1 = nullptr;
+	pD3D12CreateDevice = nullptr;
+
+#if defined(_DEBUG)
+	pD3D12GetDebugInterface = nullptr;
+#endif
+
+	BOOL rc;
+
+	rc = ::FreeLibrary(dxgiLibrary);
+	assert(rc);
+	dxgiLibrary = nullptr;
+
+	rc = ::FreeLibrary(dx12Library);
+	assert(rc);
+	dx12Library = nullptr;
+}
+
+#endif
+
+int main(int argc, const char** argv)
+{
+#if !defined(AUTO_LINK_DX12)
+	if (LoadLibraries() != 0)
+	{
+		wprintf(L"could not load DXGI & DX12 libraries\n");
+		return -1;
+	}
 #endif
 
 	UINT requestedAdapterIndex = ~0u;
@@ -830,13 +865,7 @@ int main(int argc, const char** argv)
 #endif
 
 #if !defined(AUTO_LINK_DX12)
-	BOOL rc;
-
-	rc = ::FreeLibrary(dxgiLibrary);
-	assert(rc);
-
-	rc = ::FreeLibrary(dx12Library);
-	assert(rc);
+	UnloadLibraries();
 #endif
 
 	return 0;
