@@ -269,7 +269,7 @@ static void PrintIndent()
 	static const wchar_t* maxIndentStr = L"                                                                ";
 	const uint32_t offset = 64u - (g_Indent * 4u);
 	assert(offset < wcslen(maxIndentStr));
-	wprintf(L"%s", const_cast<wchar_t*>(maxIndentStr) + offset);
+	wprintf(L"%s", maxIndentStr + offset);
 }
 static void BeginArray()
 {
