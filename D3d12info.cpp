@@ -782,6 +782,30 @@ static void UnloadLibraries()
 
 #endif
 
+#if defined(_DEBUG)
+
+ID3D12Debug* EnableDebugLayer()
+{
+	HRESULT hr;
+	ID3D12Debug* debugController = nullptr;
+
+#if defined(AUTO_LINK_DX12)
+	hr = ::D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
+#else
+	hr = pD3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
+#endif
+
+	if (SUCCEEDED(hr))
+	{
+		assert(debugController != nullptr);
+		debugController->EnableDebugLayer();
+	}
+
+	return debugController;
+}
+
+#endif
+
 int main(int argc, const char** argv)
 {
 #if !defined(AUTO_LINK_DX12)
@@ -817,20 +841,8 @@ int main(int argc, const char** argv)
 	wprintf(L"============================\n");
 	wprintf(L"\n");
 
-	HRESULT hr;
-
 #if defined(_DEBUG)
-	ID3D12Debug* debugController = nullptr;
-#if defined(AUTO_LINK_DX12)
-	hr = ::D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
-#else
-	hr = pD3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
-#endif
-	if (SUCCEEDED(hr))
-	{
-		assert(debugController != nullptr);
-		debugController->EnableDebugLayer();
-	}
+	ID3D12Debug* debugController = EnableDebugLayer();
 #endif
 
 	IDXGIFactory4* dxgiFactory = nullptr;
