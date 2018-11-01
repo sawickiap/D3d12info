@@ -755,9 +755,9 @@ static int LoadLibraries()
 	{
 		return -1;
 	}
+#endif
 
 	return 0;
-#endif
 }
 
 static void UnloadLibraries()
