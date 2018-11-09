@@ -6,6 +6,7 @@ static const wchar_t* const PROGRAM_VERSION = L"0.0.1-development";
 static const int PROGRAM_EXIT_SUCCESS            = 0;
 static const int PROGRAM_EXIT_ERROR_INIT         = -1;
 static const int PROGRAM_EXIT_ERROR_COMMAND_LINE = -2;
+static const int PROGRAM_EXIT_ERROR_EXCEPTION    = -3;
 
 //#define AUTO_LINK_DX12    // use this on everything before Win10
 #if defined(AUTO_LINK_DX12)
@@ -807,7 +808,7 @@ static void PrintCommandLineSyntax()
     wprintf(L"  -a --Adapter=<Index> Print details of adapter at specified index (instead of default).\n");
 }
 
-int wmain(int argc, wchar_t** argv)
+int wmain2(int argc, wchar_t** argv)
 {
     wprintf(L"============================\n");
     wprintf(L"D3D12INFO %s\n", PROGRAM_VERSION);
@@ -939,4 +940,22 @@ int wmain(int argc, wchar_t** argv)
 #endif
 
     return PROGRAM_EXIT_SUCCESS;
+}
+
+int wmain(int argc, wchar_t** argv)
+{
+    try
+    {
+        return wmain2(argc, argv);
+    }
+    catch(const std::exception& ex)
+    {
+        wprintf(L"ERROR: %hs\n", ex.what());
+        return PROGRAM_EXIT_ERROR_EXCEPTION;
+    }
+    catch(...)
+    {
+        wprintf(L"UNKNOWN ERROR.\n");
+        return PROGRAM_EXIT_ERROR_EXCEPTION;
+    }
 }
