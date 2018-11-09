@@ -555,10 +555,10 @@ static void PrintInfoAdapter(IDXGIAdapter1* adapter1)
 			switch(memorySegmentGroup)
 			{
 			case 0:
-				PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO [DXGI_MEMORY_SEGMENT_GROUP_LOCAL]");
+				PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_LOCAL]");
 				break;
 			case 1:
-				PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO [DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]");
+				PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]");
 				break;
 			default:
 				assert(0);
@@ -693,13 +693,13 @@ static void PrintInfoAdapter(IDXGIAdapter1* adapter1)
 			switch(heapType)
 			{
 			case D3D12_HEAP_TYPE_DEFAULT:
-				PrintStructBegin(L"D3D12_HEAP_PROPERTIES [D3D12_HEAP_TYPE_DEFAULT]");
+				PrintStructBegin(L"D3D12_HEAP_PROPERTIES[D3D12_HEAP_TYPE_DEFAULT]");
 				break;
 			case D3D12_HEAP_TYPE_UPLOAD:
-				PrintStructBegin(L"D3D12_HEAP_PROPERTIES [D3D12_HEAP_TYPE_UPLOAD]");
+				PrintStructBegin(L"D3D12_HEAP_PROPERTIES[D3D12_HEAP_TYPE_UPLOAD]");
 				break;
 			case D3D12_HEAP_TYPE_READBACK:
-				PrintStructBegin(L"D3D12_HEAP_PROPERTIES [D3D12_HEAP_TYPE_READBACK]");
+				PrintStructBegin(L"D3D12_HEAP_PROPERTIES[D3D12_HEAP_TYPE_READBACK]");
 				break;
 			default:
 				assert(0);
@@ -820,7 +820,7 @@ int main(int argc, const char** argv)
 
 	wprintf(L"============================\n");
 	wprintf(L"D3D12INFO\n");
-	wprintf(L"built: %hs, %hs\n", __DATE__, __TIME__);
+	wprintf(L"Built: %hs, %hs\n", __DATE__, __TIME__);
 
 	if (argc > 2)
 	{
@@ -857,8 +857,8 @@ int main(int argc, const char** argv)
 	UINT adapterIndex = requestedAdapterIndex != ~0u ? requestedAdapterIndex : 0u;
 	while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
 	{
-		wprintf(L"DXGI Adapter %2u:\n", adapterIndex);
-		wprintf(L"================\n");
+		wprintf(L"DXGI Adapter %u:\n", adapterIndex);
+		wprintf(L"===============\n");
 
 		PrintInfoAdapter(adapter1);
 		SAFE_RELEASE(adapter1);
