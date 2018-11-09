@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Utils.h"
 
-static const wchar_t* const PROGRAM_VERSION = L"0.0.1-development";
+static const wchar_t* const PROGRAM_VERSION = L"0.0.1";
 
 static const int PROGRAM_EXIT_SUCCESS            = 0;
 static const int PROGRAM_EXIT_ERROR_INIT         = -1;
