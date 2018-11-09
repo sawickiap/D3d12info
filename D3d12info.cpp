@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Utils.h"
 
+static const wchar_t* const PROGRAM_VERSION = L"0.0.1-development";
+
 static const int PROGRAM_EXIT_SUCCESS            = 0;
 static const int PROGRAM_EXIT_ERROR_INIT         = -1;
 static const int PROGRAM_EXIT_ERROR_COMMAND_LINE = -2;
@@ -800,13 +802,15 @@ ID3D12Debug* EnableDebugLayer()
 static void PrintCommandLineSyntax()
 {
     wprintf(L"Options:\n");
-    wprintf(L"  --Adapter=<Index>   Print details of adapter at specified index.\n");
+    wprintf(L"  -v --Version         Only print program version information.\n");
+    wprintf(L"  -h --Help            Only print this help (command line syntax).\n");
+    wprintf(L"  -a --Adapter=<Index> Print details of adapter at specified index (instead of default).\n");
 }
 
 int wmain(int argc, wchar_t** argv)
 {
     wprintf(L"============================\n");
-    wprintf(L"D3D12INFO\n");
+    wprintf(L"D3D12INFO %s\n", PROGRAM_VERSION);
     wprintf(L"Built: %hs, %hs\n", __DATE__, __TIME__);
     wprintf(L"============================\n");
     wprintf(L"\n");
@@ -825,10 +829,17 @@ int wmain(int argc, wchar_t** argv)
 
     enum CMD_LINE_PARAM
     {
+        CMD_LINE_OPT_VERSION,
+        CMD_LINE_OPT_HELP,
         CMD_LINE_OPT_ADAPTER,
     };
 
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_VERSION, L"Version", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_VERSION, L'v', false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_HELP,    L"Help", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_HELP,    L'h', false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ADAPTER, L"Adapter", true);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ADAPTER, L'a', true);
 
     CmdLineParser::RESULT cmdLineResult;
     while((cmdLineResult = cmdLineParser.ReadNext()) != CmdLineParser::RESULT_END)
@@ -842,6 +853,11 @@ int wmain(int argc, wchar_t** argv)
         case CmdLineParser::RESULT_OPT:
             switch(cmdLineParser.GetOptId())
             {
+            case CMD_LINE_OPT_VERSION:
+                return PROGRAM_EXIT_SUCCESS;
+            case CMD_LINE_OPT_HELP:
+                PrintCommandLineSyntax();
+                return PROGRAM_EXIT_SUCCESS;
             case CMD_LINE_OPT_ADAPTER:
                 requestedAdapterIndex = _wtoi(cmdLineParser.GetParameter().c_str());
                 break;
