@@ -791,7 +791,7 @@ ID3D12Debug* EnableDebugLayer()
     return debugController;
 }
 
-#endif
+#endif // #if defined(_DEBUG)
 
 int main(int argc, const char** argv)
 {
