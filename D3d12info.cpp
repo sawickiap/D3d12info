@@ -1,8 +1,5 @@
 #include "pch.h"
 
-#define CHECK_HR(expr)        do { HRESULT hr__ = (expr); if(FAILED(hr__)) assert(0 && #expr); } while(false)
-#define SAFE_RELEASE(x)        do { if(x) { (x)->Release(); (x) = nullptr; } } while(false)
-
 
 //#define AUTO_LINK_DX12    // use this on everything before Win10
 #if defined(AUTO_LINK_DX12)
