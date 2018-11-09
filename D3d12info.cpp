@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "Utils.h"
 
 static const int PROGRAM_EXIT_SUCCESS            = 0;
 static const int PROGRAM_EXIT_ERROR_INIT         = -1;
@@ -556,8 +557,11 @@ static void PrintInfoAdapter(IDXGIAdapter1* adapter1)
     }
 
     wprintf(L"\n");
+}
 
-
+static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
+{
+    HRESULT hr;
     ID3D12Device* device = nullptr;
 #if defined(AUTO_LINK_DX12)
     CHECK_HR( ::D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
@@ -793,8 +797,20 @@ ID3D12Debug* EnableDebugLayer()
 
 #endif // #if defined(_DEBUG)
 
-int main(int argc, const char** argv)
+static void PrintCommandLineSyntax()
 {
+    wprintf(L"Options:\n");
+    wprintf(L"  --Adapter=<Index>   Print details of adapter at specified index.\n");
+}
+
+int wmain(int argc, wchar_t** argv)
+{
+    wprintf(L"============================\n");
+    wprintf(L"D3D12INFO\n");
+    wprintf(L"Built: %hs, %hs\n", __DATE__, __TIME__);
+    wprintf(L"============================\n");
+    wprintf(L"\n");
+
 #if !defined(AUTO_LINK_DX12)
     if (LoadLibraries() != 0)
     {
@@ -803,30 +819,41 @@ int main(int argc, const char** argv)
     }
 #endif
 
-    UINT requestedAdapterIndex = ~0u;
+    UINT requestedAdapterIndex = UINT32_MAX;
 
-    wprintf(L"============================\n");
-    wprintf(L"D3D12INFO\n");
-    wprintf(L"Built: %hs, %hs\n", __DATE__, __TIME__);
+    CmdLineParser cmdLineParser(argc, argv);
 
-    if (argc > 2)
+    enum CMD_LINE_PARAM
     {
-        wprintf(L"usage: %hs ... show info for all adapters\n", argv[0]);
-        wprintf(L"usage: %hs <adapterIndex> ... show info for specific adapter\n", argv[0]);
-        wprintf(L"============================\n");
-        wprintf(L"\n");
+        CMD_LINE_OPT_ADAPTER,
+    };
 
-        return PROGRAM_EXIT_ERROR_COMMAND_LINE;
-    }
-    else if (argc > 1)
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ADAPTER, L"Adapter", true);
+
+    CmdLineParser::RESULT cmdLineResult;
+    while((cmdLineResult = cmdLineParser.ReadNext()) != CmdLineParser::RESULT_END)
     {
-        requestedAdapterIndex = atoi(argv[1]);
-
-        wprintf(L"requested adapter index: %u\n", requestedAdapterIndex);
+        switch(cmdLineResult)
+        {
+        case CmdLineParser::RESULT_ERROR:
+        case CmdLineParser::RESULT_PARAMETER:
+            PrintCommandLineSyntax();
+            return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+        case CmdLineParser::RESULT_OPT:
+            switch(cmdLineParser.GetOptId())
+            {
+            case CMD_LINE_OPT_ADAPTER:
+                requestedAdapterIndex = _wtoi(cmdLineParser.GetParameter().c_str());
+                break;
+            default:
+                PrintCommandLineSyntax();
+                return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+            }
+            break;
+        default:
+            assert(0);
+        }
     }
-
-    wprintf(L"============================\n");
-    wprintf(L"\n");
 
 #if defined(_DEBUG)
     ID3D12Debug* debugController = EnableDebugLayer();
@@ -840,21 +867,49 @@ int main(int argc, const char** argv)
 #endif
     assert(dxgiFactory != nullptr);
 
-    IDXGIAdapter1* adapter1 = nullptr;
-    UINT adapterIndex = requestedAdapterIndex != ~0u ? requestedAdapterIndex : 0u;
-    while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
+    IDXGIAdapter1* requestedAdapter = nullptr;
+    IDXGIAdapter1* currAdapter1 = nullptr;
+    UINT currAdapterIndex = 0;
+    while(dxgiFactory->EnumAdapters1(currAdapterIndex, &currAdapter1) != DXGI_ERROR_NOT_FOUND)
     {
-        wprintf(L"DXGI Adapter %u:\n", adapterIndex);
+        wprintf(L"DXGI Adapter %u:\n", currAdapterIndex);
         wprintf(L"===============\n");
 
-        PrintInfoAdapter(adapter1);
-        SAFE_RELEASE(adapter1);
+        PrintInfoAdapter(currAdapter1);
 
-        if (requestedAdapterIndex != ~0u)
+        // No explicit adapter requested: Choose first non-software and non-remote.
+        if(requestedAdapterIndex == UINT32_MAX)
         {
-            break;
+            DXGI_ADAPTER_DESC1 desc = {};
+            currAdapter1->GetDesc1(&desc);
+            if(desc.Flags == 0)
+            {
+                requestedAdapterIndex = 0;
+            }
         }
-        ++adapterIndex;
+
+        if(requestedAdapterIndex == currAdapterIndex)
+        {
+            requestedAdapter = currAdapter1;
+            currAdapter1 = nullptr;
+        }
+        else
+        {
+            SAFE_RELEASE(currAdapter1);
+        }
+
+        ++currAdapterIndex;
+    }
+
+    if(requestedAdapter)
+    {
+        wprintf(L"Adapter %u chosen to show D3D12 device details.\n", requestedAdapterIndex);
+        PrintDeviceDetails(requestedAdapter);
+        SAFE_RELEASE(requestedAdapter);
+    }
+    else
+    {
+        wprintf(L"No valid adapter chosen to show D3D12 device details.\n");
     }
 
     SAFE_RELEASE(dxgiFactory);
