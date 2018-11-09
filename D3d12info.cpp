@@ -1,17 +1,4 @@
-#define STRICT
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#define VC_EXTRALEAN
-#include <windows.h>
-
-#include <d3d12.h>
-#include <dxgi1_6.h>
-
-#include <cassert>
-#include <cstdint>
-#include <cwchar>
-#include <cstdlib>
-
+#include "pch.h"
 
 #define CHECK_HR(expr)		do { HRESULT hr__ = (expr); if(FAILED(hr__)) assert(0 && #expr); } while(false)
 #define SAFE_RELEASE(x)		do { if(x) { (x)->Release(); (x) = nullptr; } } while(false)
