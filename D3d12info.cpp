@@ -1,5 +1,8 @@
 #include "pch.h"
 
+static const int PROGRAM_EXIT_SUCCESS            = 0;
+static const int PROGRAM_EXIT_ERROR_INIT         = -1;
+static const int PROGRAM_EXIT_ERROR_COMMAND_LINE = -2;
 
 //#define AUTO_LINK_DX12    // use this on everything before Win10
 #if defined(AUTO_LINK_DX12)
@@ -796,7 +799,7 @@ int main(int argc, const char** argv)
     if (LoadLibraries() != 0)
     {
         wprintf(L"could not load DXGI & DX12 libraries\n");
-        return -1;
+        return PROGRAM_EXIT_ERROR_INIT;
     }
 #endif
 
@@ -813,7 +816,7 @@ int main(int argc, const char** argv)
         wprintf(L"============================\n");
         wprintf(L"\n");
 
-        return -1;
+        return PROGRAM_EXIT_ERROR_COMMAND_LINE;
     }
     else if (argc > 1)
     {
@@ -864,5 +867,5 @@ int main(int argc, const char** argv)
     UnloadLibraries();
 #endif
 
-    return 0;
+    return PROGRAM_EXIT_SUCCESS;
 }
