@@ -10,24 +10,24 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d12.lib")
 
-#else
+#else // #if defined(AUTO_LINK_DX12)
 
 typedef HRESULT (WINAPI* PFN_DXGI_CREATE_FACTORY1)(REFIID riid, _COM_Outptr_ void **);
 
-HMODULE dxgiLibrary = nullptr;
-HMODULE dx12Library = nullptr;
+HMODULE g_DxgiLibrary = nullptr;
+HMODULE g_Dx12Library = nullptr;
 
 const wchar_t* DYN_LIB_DXGI = L"dxgi.dll";
 const wchar_t* DYN_LIB_DX12 = L"d3d12.dll";
 
-PFN_DXGI_CREATE_FACTORY1 pCreateDXGIFactory1;
-PFN_D3D12_CREATE_DEVICE pD3D12CreateDevice;
+PFN_DXGI_CREATE_FACTORY1 g_CreateDXGIFactory1;
+PFN_D3D12_CREATE_DEVICE g_D3D12CreateDevice;
 
 #if defined(_DEBUG)
-PFN_D3D12_GET_DEBUG_INTERFACE pD3D12GetDebugInterface;
+PFN_D3D12_GET_DEBUG_INTERFACE g_D3D12GetDebugInterface;
 #endif
 
-#endif
+#endif // #if defined(AUTO_LINK_DX12)
 
 
 static const wchar_t* D3D12_SHADER_MIN_PRECISION_SUPPORT_NAMES[] = {
@@ -562,7 +562,7 @@ static void PrintInfoAdapter(IDXGIAdapter1* adapter1)
 #if defined(AUTO_LINK_DX12)
     CHECK_HR( ::D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
 #else
-    CHECK_HR( pD3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
+    CHECK_HR( g_D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
 #endif
     if (device != nullptr)
     {
@@ -710,35 +710,35 @@ static void PrintInfoAdapter(IDXGIAdapter1* adapter1)
 
 static int LoadLibraries()
 {
-    dxgiLibrary = ::LoadLibraryEx(DYN_LIB_DXGI, nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
-    if (!dxgiLibrary)
+    g_DxgiLibrary = ::LoadLibraryEx(DYN_LIB_DXGI, nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+    if (!g_DxgiLibrary)
     {
         wprintf(L"could not load %s\n", DYN_LIB_DXGI);
         return -1;
     }
 
-    dx12Library = ::LoadLibraryEx(DYN_LIB_DX12, nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
-    if (!dx12Library)
+    g_Dx12Library = ::LoadLibraryEx(DYN_LIB_DX12, nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+    if (!g_Dx12Library)
     {
         wprintf(L"could not load %s\n", DYN_LIB_DX12);
         return -1;
     }
 
-    pCreateDXGIFactory1 = reinterpret_cast<PFN_DXGI_CREATE_FACTORY1>(::GetProcAddress(dxgiLibrary, "CreateDXGIFactory1"));
-    if (!pCreateDXGIFactory1)
+    g_CreateDXGIFactory1 = reinterpret_cast<PFN_DXGI_CREATE_FACTORY1>(::GetProcAddress(g_DxgiLibrary, "CreateDXGIFactory1"));
+    if (!g_CreateDXGIFactory1)
     {
         return -1;
     }
 
-    pD3D12CreateDevice = reinterpret_cast<PFN_D3D12_CREATE_DEVICE>(::GetProcAddress(dx12Library, "D3D12CreateDevice"));
-    if (!pD3D12CreateDevice)
+    g_D3D12CreateDevice = reinterpret_cast<PFN_D3D12_CREATE_DEVICE>(::GetProcAddress(g_Dx12Library, "D3D12CreateDevice"));
+    if (!g_D3D12CreateDevice)
     {
         return -1;
     }
 
 #if defined(_DEBUG)
-    pD3D12GetDebugInterface = reinterpret_cast<PFN_D3D12_GET_DEBUG_INTERFACE>(::GetProcAddress(dx12Library, "D3D12GetDebugInterface"));
-    if (!pD3D12GetDebugInterface)
+    g_D3D12GetDebugInterface = reinterpret_cast<PFN_D3D12_GET_DEBUG_INTERFACE>(::GetProcAddress(g_Dx12Library, "D3D12GetDebugInterface"));
+    if (!g_D3D12GetDebugInterface)
     {
         return -1;
     }
@@ -749,22 +749,22 @@ static int LoadLibraries()
 
 static void UnloadLibraries()
 {
-    pCreateDXGIFactory1 = nullptr;
-    pD3D12CreateDevice = nullptr;
+    g_CreateDXGIFactory1 = nullptr;
+    g_D3D12CreateDevice = nullptr;
 
 #if defined(_DEBUG)
-    pD3D12GetDebugInterface = nullptr;
+    g_D3D12GetDebugInterface = nullptr;
 #endif
 
     BOOL rc;
 
-    rc = ::FreeLibrary(dxgiLibrary);
+    rc = ::FreeLibrary(g_DxgiLibrary);
     assert(rc);
-    dxgiLibrary = nullptr;
+    g_DxgiLibrary = nullptr;
 
-    rc = ::FreeLibrary(dx12Library);
+    rc = ::FreeLibrary(g_Dx12Library);
     assert(rc);
-    dx12Library = nullptr;
+    g_Dx12Library = nullptr;
 }
 
 #endif
@@ -779,7 +779,7 @@ ID3D12Debug* EnableDebugLayer()
 #if defined(AUTO_LINK_DX12)
     hr = ::D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
 #else
-    hr = pD3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
+    hr = g_D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
 #endif
 
     if (SUCCEEDED(hr))
@@ -836,7 +836,7 @@ int main(int argc, const char** argv)
 #if defined(AUTO_LINK_DX12)
     CHECK_HR( ::CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
 #else
-    CHECK_HR( pCreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
+    CHECK_HR( g_CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
 #endif
     assert(dxgiFactory != nullptr);
 
