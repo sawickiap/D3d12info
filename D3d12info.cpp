@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "Utils.h"
+#include "pch.hpp"
+#include "Utils.hpp"
 
 static const wchar_t* const PROGRAM_VERSION = L"0.0.2-development";
 
