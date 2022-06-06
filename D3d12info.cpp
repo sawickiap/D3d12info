@@ -808,43 +808,43 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
 
 #if !defined(AUTO_LINK_DX12)
 
-static int LoadLibraries()
+static bool LoadLibraries()
 {
     g_DxgiLibrary = ::LoadLibraryEx(DYN_LIB_DXGI, nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
     if (!g_DxgiLibrary)
     {
         wprintf(L"could not load %s\n", DYN_LIB_DXGI);
-        return -1;
+        return false;
     }
 
     g_Dx12Library = ::LoadLibraryEx(DYN_LIB_DX12, nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
     if (!g_Dx12Library)
     {
         wprintf(L"could not load %s\n", DYN_LIB_DX12);
-        return -1;
+        return false;
     }
 
     g_CreateDXGIFactory1 = reinterpret_cast<PFN_DXGI_CREATE_FACTORY1>(::GetProcAddress(g_DxgiLibrary, "CreateDXGIFactory1"));
     if (!g_CreateDXGIFactory1)
     {
-        return -1;
+        return false;
     }
 
     g_D3D12CreateDevice = reinterpret_cast<PFN_D3D12_CREATE_DEVICE>(::GetProcAddress(g_Dx12Library, "D3D12CreateDevice"));
     if (!g_D3D12CreateDevice)
     {
-        return -1;
+        return false;
     }
 
 #if defined(_DEBUG)
     g_D3D12GetDebugInterface = reinterpret_cast<PFN_D3D12_GET_DEBUG_INTERFACE>(::GetProcAddress(g_Dx12Library, "D3D12GetDebugInterface"));
     if (!g_D3D12GetDebugInterface)
     {
-        return -1;
+        return false;
     }
 #endif
 
-    return 0;
+    return true;
 }
 
 static void UnloadLibraries()
@@ -910,7 +910,7 @@ int wmain2(int argc, wchar_t** argv)
     wprintf(L"\n");
 
 #if !defined(AUTO_LINK_DX12)
-    if (LoadLibraries() != 0)
+    if (!LoadLibraries())
     {
         wprintf(L"could not load DXGI & DX12 libraries\n");
         return PROGRAM_EXIT_ERROR_INIT;
