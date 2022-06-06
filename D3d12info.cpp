@@ -543,15 +543,6 @@ static void Print_DXGI_QUERY_VIDEO_MEMORY_INFO(const DXGI_QUERY_VIDEO_MEMORY_INF
     Print_uint64(L"CurrentReservation", videoMemoryInfo.CurrentReservation);
 }
 
-static void Print_D3D12_HEAP_PROPERTIES(const D3D12_HEAP_PROPERTIES& heapProperties)
-{
-    // heapProperties.Type intentionally ignored.
-    PrintEnum(L"CPUPageProperty", heapProperties.CPUPageProperty, D3D12_CPU_PAGE_PROPERTY_NAMES, D3D12_CPU_PAGE_PROPERTY_VALUES, _countof(D3D12_CPU_PAGE_PROPERTY_VALUES));
-    PrintEnum(L"MemoryPoolPreference", heapProperties.MemoryPoolPreference, D3D12_MEMORY_POOL_NAMES, D3D12_MEMORY_POOL_VALUES, _countof(D3D12_MEMORY_POOL_VALUES));
-    Print_hex32(L"CreationNodeMask", heapProperties.CreationNodeMask);
-    Print_hex32(L"VisibleNodeMask", heapProperties.VisibleNodeMask);
-}
-
 static void PrintInfoAdapter(IDXGIAdapter1* adapter1)
 {
     assert(adapter1 != nullptr);
@@ -750,32 +741,6 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
             wprintf(L"D3D12_FEATURE_DATA_EXISTING_HEAPS:\n");
             wprintf(L"==================================\n");
             Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(existingHeaps);
-        }
-
-        wprintf(L"\n");
-        wprintf(L"D3D12_HEAP_PROPERTIES:\n");
-        wprintf(L"======================\n");
-        for(uint32_t heapType = D3D12_HEAP_TYPE_DEFAULT; heapType <= D3D12_HEAP_TYPE_READBACK; ++heapType)
-        {
-            switch(heapType)
-            {
-            case D3D12_HEAP_TYPE_DEFAULT:
-                PrintStructBegin(L"D3D12_HEAP_PROPERTIES[D3D12_HEAP_TYPE_DEFAULT]");
-                break;
-            case D3D12_HEAP_TYPE_UPLOAD:
-                PrintStructBegin(L"D3D12_HEAP_PROPERTIES[D3D12_HEAP_TYPE_UPLOAD]");
-                break;
-            case D3D12_HEAP_TYPE_READBACK:
-                PrintStructBegin(L"D3D12_HEAP_PROPERTIES[D3D12_HEAP_TYPE_READBACK]");
-                break;
-            default:
-                assert(0);
-            }
-
-            const D3D12_HEAP_PROPERTIES heapProperties = device->GetCustomHeapProperties(0, (D3D12_HEAP_TYPE)heapType);
-            Print_D3D12_HEAP_PROPERTIES(heapProperties);
-
-            PrintStructEnd();
         }
 
         D3D12_FEATURE_DATA_D3D12_OPTIONS4 options4 = {};
