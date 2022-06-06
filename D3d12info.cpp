@@ -386,11 +386,19 @@ static void Print_uint64(const wchar_t* name, uint64_t value)
     PrintName(name);
     wprintf(L" = %llu\n", value);
 }
-static void Print_size(const wchar_t* name, size_t value)
+static void Print_size(const wchar_t* name, uint64_t value)
 {
     PrintIndent();
     PrintName(name);
-    wprintf(L" = %zu\n", value);
+    if(value == 0)
+        wprintf(L" = 0\n");
+    else if(value < 1024)
+        wprintf(L" = %zu (0x%llx)\n", value, value);
+    else
+    {
+        wstring sizeStr = SizeToStr(value);
+        wprintf(L" = %zu (0x%llx) (%s)\n", value, value, sizeStr.c_str());
+    }
 }
 static void Print_hex32(const wchar_t* name, uint32_t value)
 {
@@ -619,10 +627,10 @@ static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXI
 
 static void Print_DXGI_QUERY_VIDEO_MEMORY_INFO(const DXGI_QUERY_VIDEO_MEMORY_INFO& videoMemoryInfo)
 {
-    Print_uint64(L"Budget", videoMemoryInfo.Budget);
-    Print_uint64(L"CurrentUsage", videoMemoryInfo.CurrentUsage);
-    Print_uint64(L"AvailableForReservation", videoMemoryInfo.AvailableForReservation);
-    Print_uint64(L"CurrentReservation", videoMemoryInfo.CurrentReservation);
+    Print_size(L"Budget", videoMemoryInfo.Budget);
+    Print_size(L"CurrentUsage", videoMemoryInfo.CurrentUsage);
+    Print_size(L"AvailableForReservation", videoMemoryInfo.AvailableForReservation);
+    Print_size(L"CurrentReservation", videoMemoryInfo.CurrentReservation);
 }
 
 static void PrintInfoAdapter(IDXGIAdapter1* adapter1)

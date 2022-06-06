@@ -20,6 +20,8 @@
 #include <cstdlib>
 #include <cmath>
 
+using std::wstring;
+
 #define CHECK_HR(expr)		do { HRESULT hr__ = (expr); if(FAILED(hr__)) assert(0 && #expr); } while(false)
 
 #define SAFE_RELEASE(x)		do { if(x) { (x)->Release(); (x) = nullptr; } } while(false)

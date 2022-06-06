@@ -1,6 +1,24 @@
 #include "pch.hpp"
 #include "Utils.hpp"
 
+wstring SizeToStr(uint64_t size)
+{
+	if(size == 0)
+		return L"0";
+	wchar_t s[16];
+	if (size < 1024llu)
+		swprintf_s(s, L"%llu B", size);
+	else if(size < 1024llu * 1024)
+		swprintf_s(s, L"%.2f KB", size / 1024.);
+	else if(size < 1024llu * 1024 * 1024)
+		swprintf_s(s, L"%.2f MB", size / (1024. * 1024.));
+	else if(size < 1024llu * 1024 * 1024 * 1024)
+		swprintf_s(s, L"%.2f GB", size / (1024. * 1024. * 1024.));
+	else if(size < 1024llu * 1024 * 1024 * 1024 * 1024)
+		swprintf_s(s, L"%.2f TB", size / (1024. * 1024. * 1024. * 1024.));
+	return s;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // class CmdLineParser
 

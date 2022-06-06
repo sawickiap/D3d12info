@@ -1,5 +1,7 @@
 #pragma once
 
+wstring SizeToStr(uint64_t size);
+
 class CmdLineParser
 {
 public:
