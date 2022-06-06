@@ -50,14 +50,14 @@ static const wchar_t* D3D12_TILED_RESOURCES_TIER_NAMES[] = {
     L"D3D12_TILED_RESOURCES_TIER_1",
     L"D3D12_TILED_RESOURCES_TIER_2",
     L"D3D12_TILED_RESOURCES_TIER_3",
-    //L"D3D12_TILED_RESOURCES_TIER_4", // TODO
+    L"D3D12_TILED_RESOURCES_TIER_4",
 };
 static const uint32_t D3D12_TILED_RESOURCES_TIER_VALUES[] = {
     D3D12_TILED_RESOURCES_TIER_NOT_SUPPORTED,
     D3D12_TILED_RESOURCES_TIER_1,
     D3D12_TILED_RESOURCES_TIER_2,
     D3D12_TILED_RESOURCES_TIER_3,
-    //D3D12_TILED_RESOURCES_TIER_4, // TODO
+    D3D12_TILED_RESOURCES_TIER_4,
 };
 
 static const wchar_t* D3D12_RESOURCE_BINDING_TIER_NAMES[] = {
@@ -89,14 +89,14 @@ static const wchar_t* D3D12_CROSS_NODE_SHARING_TIER_NAMES[] = {
     L"D3D12_CROSS_NODE_SHARING_TIER_1_EMULATED",
     L"D3D12_CROSS_NODE_SHARING_TIER_1",
     L"D3D12_CROSS_NODE_SHARING_TIER_2",
-    //L"D3D12_CROSS_NODE_SHARING_TIER_3",
+    L"D3D12_CROSS_NODE_SHARING_TIER_3",
 };
 static const uint32_t D3D12_CROSS_NODE_SHARING_TIER_VALUES[] = {
     D3D12_CROSS_NODE_SHARING_TIER_NOT_SUPPORTED,
     D3D12_CROSS_NODE_SHARING_TIER_1_EMULATED,
     D3D12_CROSS_NODE_SHARING_TIER_1,
     D3D12_CROSS_NODE_SHARING_TIER_2,
-    //D3D12_CROSS_NODE_SHARING_TIER_3, // TODO
+    D3D12_CROSS_NODE_SHARING_TIER_3,
 };
 
 static const wchar_t* D3D12_RESOURCE_HEAP_TIER_NAMES[] = {
@@ -149,14 +149,20 @@ static const wchar_t* D3D_SHADER_MODEL_NAMES[] = {
     L"D3D_SHADER_MODEL_6_2",
     L"D3D_SHADER_MODEL_6_3",
     L"D3D_SHADER_MODEL_6_4",
+    L"D3D_SHADER_MODEL_6_5",
+    L"D3D_SHADER_MODEL_6_6",
+    L"D3D_SHADER_MODEL_6_7",
 };
 static const uint32_t D3D_SHADER_MODEL_VALUES[] = {
     D3D_SHADER_MODEL_5_1,
     D3D_SHADER_MODEL_6_0,
     D3D_SHADER_MODEL_6_1,
-    //D3D_SHADER_MODEL_6_2, // TODO
-    //D3D_SHADER_MODEL_6_3,
-    //D3D_SHADER_MODEL_6_4,
+    D3D_SHADER_MODEL_6_2,
+    D3D_SHADER_MODEL_6_3,
+    D3D_SHADER_MODEL_6_4,
+    D3D_SHADER_MODEL_6_5,
+    D3D_SHADER_MODEL_6_6,
+    D3D_SHADER_MODEL_6_7,
 };
 
 static const wchar_t* D3D_ROOT_SIGNATURE_VERSION_NAMES[] = {
@@ -231,10 +237,12 @@ static const uint32_t D3D12_VIEW_INSTANCING_TIER_VALUES[] = {
 static const wchar_t* D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_NAMES[] = {
     L"D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_0",
     L"D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_1",
+    L"D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2",
 };
 static const uint32_t D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_VALUES[] = {
     D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_0,
     D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_1,
+    D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2,
 };
 
 static const wchar_t* D3D12_RENDER_PASS_TIER_NAMES[] = {
@@ -251,11 +259,55 @@ static const uint32_t D3D12_RENDER_PASS_TIER_VALUES[] = {
 static const wchar_t* D3D12_RAYTRACING_TIER_NAMES[] = {
     L"D3D12_RAYTRACING_TIER_NOT_SUPPORTED",
     L"D3D12_RAYTRACING_TIER_1_0",
+    L"D3D12_RAYTRACING_TIER_1_1",
 };
 static const uint32_t D3D12_RAYTRACING_TIER_VALUES[] = {
     D3D12_RAYTRACING_TIER_NOT_SUPPORTED,
     D3D12_RAYTRACING_TIER_1_0,
+    D3D12_RAYTRACING_TIER_1_1,
 };
+
+static const wchar_t* D3D12_VARIABLE_SHADING_RATE_TIER_NAMES[] = {
+    L"D3D12_VARIABLE_SHADING_RATE_TIER_NOT_SUPPORTED",
+    L"D3D12_VARIABLE_SHADING_RATE_TIER_1",
+    L"D3D12_VARIABLE_SHADING_RATE_TIER_2",
+};
+static const uint32_t D3D12_VARIABLE_SHADING_RATE_TIER_VALUES[] = {
+    D3D12_VARIABLE_SHADING_RATE_TIER_NOT_SUPPORTED,
+    D3D12_VARIABLE_SHADING_RATE_TIER_1,
+    D3D12_VARIABLE_SHADING_RATE_TIER_2,
+};
+
+static const wchar_t* D3D12_MESH_SHADER_TIER_NAMES[] = {
+    L"D3D12_MESH_SHADER_TIER_NOT_SUPPORTED",
+    L"D3D12_MESH_SHADER_TIER_1",
+};
+static const uint32_t D3D12_MESH_SHADER_TIER_VALUES[] = {
+    D3D12_MESH_SHADER_TIER_NOT_SUPPORTED,
+    D3D12_MESH_SHADER_TIER_1,
+};
+
+static const wchar_t* D3D12_SAMPLER_FEEDBACK_TIER_NAMES[] = {
+    L"D3D12_SAMPLER_FEEDBACK_TIER_NOT_SUPPORTED",
+    L"D3D12_SAMPLER_FEEDBACK_TIER_0_9",
+    L"D3D12_SAMPLER_FEEDBACK_TIER_1_0",
+};
+static const uint32_t D3D12_SAMPLER_FEEDBACK_TIER_VALUES[] = {
+    D3D12_SAMPLER_FEEDBACK_TIER_NOT_SUPPORTED,
+    D3D12_SAMPLER_FEEDBACK_TIER_0_9,
+    D3D12_SAMPLER_FEEDBACK_TIER_1_0,
+};
+
+static const wchar_t* D3D12_WAVE_MMA_TIER_NAMES[] = {
+    L"D3D12_WAVE_MMA_TIER_NOT_SUPPORTED",
+    L"D3D12_WAVE_MMA_TIER_1_0",
+};
+static const uint32_t D3D12_WAVE_MMA_TIER_VALUES[] = {
+    D3D12_WAVE_MMA_TIER_NOT_SUPPORTED,
+    D3D12_WAVE_MMA_TIER_1_0,
+};
+
+//--
 
 static const wchar_t* D3D12_CPU_PAGE_PROPERTY_NAMES[] = {
     L"D3D12_CPU_PAGE_PROPERTY_UNKNOWN",
@@ -530,6 +582,36 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS5(const D3D12_FEATURE_DATA_D3D
     PrintEnum(L"RaytracingTier", options5.RaytracingTier, D3D12_RAYTRACING_TIER_NAMES, D3D12_RAYTRACING_TIER_VALUES, _countof(D3D12_RAYTRACING_TIER_VALUES));
 }
 
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS6(const D3D12_FEATURE_DATA_D3D12_OPTIONS6& o)
+{
+    Print_BOOL(L"AdditionalShadingRatesSupported", o.AdditionalShadingRatesSupported);
+    Print_BOOL(L"PerPrimitiveShadingRateSupportedWithViewportIndexing", o.PerPrimitiveShadingRateSupportedWithViewportIndexing);
+    PrintEnum(L"VariableShadingRateTier", o.VariableShadingRateTier, D3D12_VARIABLE_SHADING_RATE_TIER_NAMES, D3D12_VARIABLE_SHADING_RATE_TIER_VALUES, _countof(D3D12_VARIABLE_SHADING_RATE_TIER_VALUES));
+    Print_uint32(L"ShadingRateImageTileSize", o.ShadingRateImageTileSize);
+    Print_BOOL(L"BackgroundProcessingSupported", o.BackgroundProcessingSupported);
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS7(const D3D12_FEATURE_DATA_D3D12_OPTIONS7& o)
+{
+    PrintEnum(L"MeshShaderTier", o.MeshShaderTier, D3D12_MESH_SHADER_TIER_NAMES, D3D12_MESH_SHADER_TIER_VALUES, _countof(D3D12_MESH_SHADER_TIER_VALUES));
+    PrintEnum(L"SamplerFeedbackTier", o.SamplerFeedbackTier, D3D12_SAMPLER_FEEDBACK_TIER_NAMES, D3D12_SAMPLER_FEEDBACK_TIER_VALUES, _countof(D3D12_SAMPLER_FEEDBACK_TIER_VALUES));
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS8(const D3D12_FEATURE_DATA_D3D12_OPTIONS8& o)
+{
+    Print_BOOL(L"UnalignedBlockTexturesSupported", o.UnalignedBlockTexturesSupported);
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(const D3D12_FEATURE_DATA_D3D12_OPTIONS9& o)
+{
+    Print_BOOL(L"MeshShaderPipelineStatsSupported", o.MeshShaderPipelineStatsSupported);
+    Print_BOOL(L"MeshShaderSupportsFullRangeRenderTargetArrayIndex", o.MeshShaderSupportsFullRangeRenderTargetArrayIndex);
+    Print_BOOL(L"AtomicInt64OnTypedResourceSupported", o.AtomicInt64OnTypedResourceSupported);
+    Print_BOOL(L"AtomicInt64OnGroupSharedSupported", o.AtomicInt64OnGroupSharedSupported);
+    Print_BOOL(L"DerivativesInMeshAndAmplificationShadersSupported", o.DerivativesInMeshAndAmplificationShadersSupported);
+    PrintEnum(L"WaveMMATier", o.WaveMMATier, D3D12_WAVE_MMA_TIER_NAMES, D3D12_WAVE_MMA_TIER_VALUES, _countof(D3D12_WAVE_MMA_TIER_VALUES));
+}
+
 static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXISTING_HEAPS& existingHeaps)
 {
     Print_BOOL(L"Supported", existingHeaps.Supported);
@@ -713,6 +795,7 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
 
         /*
         D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY commandQueuePriority = {};
+        // There are IN parameters - need to fill in commandQueuePriority.CommandListType, Priority...
         hr = device->CheckFeatureSupport(D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &commandQueuePriority, sizeof(commandQueuePriority));
         if(SUCCEEDED(hr))
         {
@@ -761,6 +844,46 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
             wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS5:\n");
             wprintf(L"==================================\n");
             Print_D3D12_FEATURE_DATA_D3D12_OPTIONS5(options5);
+        }
+
+        D3D12_FEATURE_DATA_D3D12_OPTIONS6 options6 = {};
+        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &options6, sizeof(options6));
+        if(SUCCEEDED(hr))
+        {
+            wprintf(L"\n");
+            wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS6:\n");
+            wprintf(L"==================================\n");
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS6(options6);
+        }
+
+        D3D12_FEATURE_DATA_D3D12_OPTIONS7 options7 = {};
+        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7));
+        if(SUCCEEDED(hr))
+        {
+            wprintf(L"\n");
+            wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS7:\n");
+            wprintf(L"==================================\n");
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS7(options7);
+        }
+
+        D3D12_FEATURE_DATA_D3D12_OPTIONS8 options8 = {};
+        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &options8, sizeof(options8));
+        if(SUCCEEDED(hr))
+        {
+            wprintf(L"\n");
+            wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS8:\n");
+            wprintf(L"==================================\n");
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS8(options8);
+        }
+
+        D3D12_FEATURE_DATA_D3D12_OPTIONS9 options9 = {};
+        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &options9, sizeof(options9));
+        if(SUCCEEDED(hr))
+        {
+            wprintf(L"\n");
+            wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS9:\n");
+            wprintf(L"==================================\n");
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(options9);
         }
 
         wprintf(L"\n");
