@@ -20,6 +20,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <cwchar>
 
 using std::wstring;
 
