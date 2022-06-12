@@ -58,6 +58,20 @@ static void StepArray()
     ++g_ArrayIndex;
 }
 
+static void PrintEmptyLine()
+{
+    wprintf(L"\n");
+}
+
+static void PrintHeader(const wchar_t* s)
+{
+    const size_t len = wcslen(s);
+    assert(len > 0 && len < 80);
+    wprintf(L"%s:\n", s);
+    static const wchar_t* underline = L"================================================================================";
+    wprintf(L"%s\n", underline + 80 - len - 1);
+}
+
 static void PrintName(const wchar_t* name)
 {
     if(g_ArrayIndex != UINT32_MAX)
@@ -351,7 +365,7 @@ static void PrintInfoAdapter(IDXGIAdapter1* adapter1)
     Print_size  (L"SharedSystemMemory   ", desc.SharedSystemMemory);
     Print_LUID  (L"AdapterLuid          ", desc.AdapterLuid);
     PrintFlags  (L"Flags                ", desc.Flags, Enum_DXGI_ADAPTER_FLAG);
-    wprintf(L"\n");
+    PrintEmptyLine();
 
     HRESULT hr;
 
@@ -382,7 +396,7 @@ static void PrintInfoAdapter(IDXGIAdapter1* adapter1)
         }
     }
 
-    wprintf(L"\n");
+    PrintEmptyLine();
 }
 
 static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
@@ -396,9 +410,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
 #endif
     if (device != nullptr)
     {
-        wprintf(L"\n");
-        wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS:\n");
-        wprintf(L"=================================\n");
+        PrintEmptyLine();
+        PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS");
         D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
         CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options)) );
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(options);
@@ -407,23 +420,20 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &gpuVirtualAddressSupport, sizeof(gpuVirtualAddressSupport));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT:\n");
-            wprintf(L"===============================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT");
             Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(gpuVirtualAddressSupport);
         }
 
-        wprintf(L"\n");
-        wprintf(L"D3D12_FEATURE_DATA_SHADER_MODEL:\n");
-        wprintf(L"================================\n");
+        PrintEmptyLine();
+        PrintHeader(L"D3D12_FEATURE_DATA_SHADER_MODEL");
         D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = {};
         shaderModel.HighestShaderModel = D3D_SHADER_MODEL_6_1;
         CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel)) );
         Print_D3D12_FEATURE_DATA_SHADER_MODEL(shaderModel);
 
-        wprintf(L"\n");
-        wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS1:\n");
-        wprintf(L"==================================\n");
+        PrintEmptyLine();
+        PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS1");
         D3D12_FEATURE_DATA_D3D12_OPTIONS1 options1 = {};
         CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1)) );
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(options1);
@@ -433,9 +443,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &rootSignature, sizeof(rootSignature));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_ROOT_SIGNATURE:\n");
-            wprintf(L"==================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_ROOT_SIGNATURE");
             Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(rootSignature);
         }
 
@@ -443,16 +452,14 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &architecture1, sizeof(architecture1));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_ARCHITECTURE1:\n");
-            wprintf(L"=================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_ARCHITECTURE1");
             Print_D3D12_FEATURE_DATA_ARCHITECTURE1(architecture1);
         }
         else
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_ARCHITECTURE:\n");
-            wprintf(L"================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_ARCHITECTURE");
             D3D12_FEATURE_DATA_ARCHITECTURE architecture = {};
             CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &architecture, sizeof(architecture)) );
             Print_D3D12_FEATURE_DATA_ARCHITECTURE(architecture);
@@ -474,9 +481,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &levels, sizeof(levels));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_FEATURE_LEVELS:\n");
-            wprintf(L"==================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_FEATURE_LEVELS");
             Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(levels);
         }
 
@@ -484,9 +490,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS2:\n");
-            wprintf(L"==================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS2");
             Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(options2);
         }
 
@@ -494,9 +499,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &shaderCache, sizeof(shaderCache));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_SHADER_CACHE:\n");
-            wprintf(L"================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_SHADER_CACHE");
             Print_D3D12_FEATURE_DATA_SHADER_CACHE(shaderCache);
         }
 
@@ -506,9 +510,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &commandQueuePriority, sizeof(commandQueuePriority));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY:\n");
-            wprintf(L"==========================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY");
             Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(commandQueuePriority);
         }
         */
@@ -517,9 +520,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3:\n");
-            wprintf(L"==================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3");
             Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(options3);
         }
 
@@ -527,9 +529,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeaps, sizeof(existingHeaps));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_EXISTING_HEAPS:\n");
-            wprintf(L"==================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_EXISTING_HEAPS");
             Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(existingHeaps);
         }
 
@@ -537,9 +538,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &options4, sizeof(options4));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS4:\n");
-            wprintf(L"==================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS4");
             Print_D3D12_FEATURE_DATA_D3D12_OPTIONS4(options4);
         }
 
@@ -547,9 +547,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS5:\n");
-            wprintf(L"==================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS5");
             Print_D3D12_FEATURE_DATA_D3D12_OPTIONS5(options5);
         }
 
@@ -557,9 +556,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &options6, sizeof(options6));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS6:\n");
-            wprintf(L"==================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS6");
             Print_D3D12_FEATURE_DATA_D3D12_OPTIONS6(options6);
         }
 
@@ -567,9 +565,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS7:\n");
-            wprintf(L"==================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS7");
             Print_D3D12_FEATURE_DATA_D3D12_OPTIONS7(options7);
         }
 
@@ -577,9 +574,8 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &options8, sizeof(options8));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS8:\n");
-            wprintf(L"==================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS8");
             Print_D3D12_FEATURE_DATA_D3D12_OPTIONS8(options8);
         }
 
@@ -587,13 +583,12 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
         hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &options9, sizeof(options9));
         if(SUCCEEDED(hr))
         {
-            wprintf(L"\n");
-            wprintf(L"D3D12_FEATURE_DATA_D3D12_OPTIONS9:\n");
-            wprintf(L"==================================\n");
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS9");
             Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(options9);
         }
 
-        wprintf(L"\n");
+        PrintEmptyLine();
 
         SAFE_RELEASE(device);
     }
@@ -702,7 +697,7 @@ int wmain2(int argc, wchar_t** argv)
     wprintf(L"D3D12INFO %s\n", PROGRAM_VERSION);
     wprintf(L"Built: %hs, %hs\n", __DATE__, __TIME__);
     wprintf(L"============================\n");
-    wprintf(L"\n");
+    PrintEmptyLine();
 
 #if !defined(AUTO_LINK_DX12)
     if (!LoadLibraries())
@@ -777,8 +772,7 @@ int wmain2(int argc, wchar_t** argv)
     UINT currAdapterIndex = 0;
     while(dxgiFactory->EnumAdapters1(currAdapterIndex, &currAdapter1) != DXGI_ERROR_NOT_FOUND)
     {
-        wprintf(L"DXGI Adapter %u:\n", currAdapterIndex);
-        wprintf(L"===============\n");
+        PrintHeader(std::format(L"DXGI Adapter {}", currAdapterIndex).c_str());
 
         PrintInfoAdapter(currAdapter1);
 

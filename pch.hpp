@@ -13,6 +13,7 @@
 #include <vector>
 #include <string>
 #include <exception>
+#include <format>
 
 #include <cstdint>
 #include <cassert>
