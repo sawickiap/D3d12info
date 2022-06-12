@@ -2,7 +2,7 @@
 
 Simple console tool to get all the information from DXGI and Direct3D 12 (D3D12) on current system.
 
-Built and tested on Windows 10 64-bit using Visual Studio 2017.
+Built and tested on Windows 10 64-bit using Visual Studio 2022.
 
 Still in early development phase, not feature-complete, but can already be useful.
 
