@@ -3,6 +3,7 @@
   <ItemGroup>
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Utils.hpp" />
+    <ClInclude Include="Enums.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3d12info.cpp" />

@@ -94,6 +94,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Enums.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Utils.hpp" />
   </ItemGroup>
