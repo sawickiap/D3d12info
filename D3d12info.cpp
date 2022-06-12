@@ -143,19 +143,6 @@ static void Print_LUID(const wchar_t* name, LUID value)
     wprintf(L" = %08X-%08X\n", (uint32_t)value.HighPart, (uint32_t)value.LowPart);
 }
 
-static void PrintStructBegin(const wchar_t* name)
-{
-    PrintIndent();
-    PrintName(name);
-    wprintf(L":\n");
-    ++g_Indent;
-}
-
-static void PrintStructEnd()
-{
-    --g_Indent;
-}
-
 static void PrintEnum(const wchar_t* name, uint32_t value,
     const EnumItem* enumItems)
 {
@@ -390,6 +377,7 @@ static void Print_DXGI_QUERY_VIDEO_MEMORY_INFO(const DXGI_QUERY_VIDEO_MEMORY_INF
     Print_size(L"AvailableForReservation", videoMemoryInfo.AvailableForReservation);
     Print_size(L"CurrentReservation", videoMemoryInfo.CurrentReservation);
     --g_Indent;
+    PrintEmptyLine();
 }
 
 static void PrintGeneral()
@@ -409,68 +397,174 @@ static void PrintGeneral()
     PrintEmptyLine();
 }
 
+static void PrintAdapterDesc1(const DXGI_ADAPTER_DESC1& desc1)
+{
+    PrintHeader(L"DXGI_ADAPTER_DESC1", 1);
+    ++g_Indent;
+    Print_string(L"Description          ", desc1.Description);
+    Print_hex32 (L"VendorId             ", desc1.VendorId);
+    Print_hex32 (L"DeviceId             ", desc1.DeviceId);
+    Print_hex32 (L"SubSysId             ", desc1.SubSysId);
+    Print_hex32 (L"Revision             ", desc1.Revision);
+    Print_size  (L"DedicatedVideoMemory ", desc1.DedicatedVideoMemory);
+    Print_size  (L"DedicatedSystemMemory", desc1.DedicatedSystemMemory);
+    Print_size  (L"SharedSystemMemory   ", desc1.SharedSystemMemory);
+    Print_LUID  (L"AdapterLuid          ", desc1.AdapterLuid);
+    PrintFlags  (L"Flags                ", desc1.Flags, Enum_DXGI_ADAPTER_FLAG);
+    --g_Indent;
+    PrintEmptyLine();
+}
+
+static void PrintAdapterDesc2(const DXGI_ADAPTER_DESC2& desc2)
+{
+    PrintHeader(L"DXGI_ADAPTER2_DESC2", 1);
+    ++g_Indent;
+    PrintEnum(L"GraphicsPreemptionGranularity", desc2.GraphicsPreemptionGranularity, Enum_DXGI_GRAPHICS_PREEMPTION_GRANULARITY);
+    PrintEnum(L"ComputePreemptionGranularity", desc2.ComputePreemptionGranularity, Enum_DXGI_COMPUTE_PREEMPTION_GRANULARITY);
+    --g_Indent;
+    PrintEmptyLine();
+}
+
+#if 0
+static void PrintAdapterDesc3(const DXGI_ADAPTER_DESC3& desc3)
+{
+    PrintHeader(L"DXGI_ADAPTER2_DESC3", 1);
+    ++g_Indent;
+    // There are no members, makes no sense to print it.
+    --g_Indent;
+    PrintEmptyLine();
+}
+#endif
+
 static void PrintInfoAdapter(IDXGIAdapter1* adapter1)
 {
     assert(adapter1 != nullptr);
 
-    ++g_Indent;
+    DXGI_ADAPTER_DESC1 desc1 = {};
+    if(SUCCEEDED(adapter1->GetDesc1(&desc1)))
+        PrintAdapterDesc1(desc1);
 
-    DXGI_ADAPTER_DESC1 desc = {};
-    CHECK_HR( adapter1->GetDesc1(&desc) );
-
-    Print_string(L"Description          ", desc.Description);
-    Print_hex32 (L"VendorId             ", desc.VendorId);
-    Print_hex32 (L"DeviceId             ", desc.DeviceId);
-    Print_hex32 (L"SubSysId             ", desc.SubSysId);
-    Print_hex32 (L"Revision             ", desc.Revision);
-    Print_size  (L"DedicatedVideoMemory ", desc.DedicatedVideoMemory);
-    Print_size  (L"DedicatedSystemMemory", desc.DedicatedSystemMemory);
-    Print_size  (L"SharedSystemMemory   ", desc.SharedSystemMemory);
-    Print_LUID  (L"AdapterLuid          ", desc.AdapterLuid);
-    PrintFlags  (L"Flags                ", desc.Flags, Enum_DXGI_ADAPTER_FLAG);
-    PrintEmptyLine();
-
-    HRESULT hr;
-
-    IDXGIAdapter3* adapter3 = nullptr;
-    hr = adapter1->QueryInterface<IDXGIAdapter3>(&adapter3);
-    if(SUCCEEDED(hr))
     {
-        assert(adapter3 != nullptr);
-
-        for(uint32_t memorySegmentGroup = 0; memorySegmentGroup < 2; ++memorySegmentGroup)
+        ComPtr<IDXGIAdapter2> adapter2;
+        if(SUCCEEDED(adapter1->QueryInterface(IID_PPV_ARGS(&adapter2))))
         {
-            DXGI_QUERY_VIDEO_MEMORY_INFO videoMemoryInfo = {};
-            CHECK_HR( adapter3->QueryVideoMemoryInfo(0, (DXGI_MEMORY_SEGMENT_GROUP)memorySegmentGroup, &videoMemoryInfo) );
-
-            switch(memorySegmentGroup)
-            {
-            case 0:
-                PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_LOCAL]");
-                break;
-            case 1:
-                PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]");
-                break;
-            default:
-                assert(0);
-            }
-            Print_DXGI_QUERY_VIDEO_MEMORY_INFO(videoMemoryInfo);
-            PrintStructEnd();
+            DXGI_ADAPTER_DESC2 desc2;
+            if(SUCCEEDED(adapter2->GetDesc2(&desc2)))
+                PrintAdapterDesc2(desc2);
         }
     }
 
-    --g_Indent;
+    {
+        ComPtr<IDXGIAdapter3> adapter3;
+        if(SUCCEEDED(adapter1->QueryInterface<IDXGIAdapter3>(&adapter3)))
+        {
+            for(uint32_t memorySegmentGroup = 0; memorySegmentGroup < 2; ++memorySegmentGroup)
+            {
+                DXGI_QUERY_VIDEO_MEMORY_INFO videoMemoryInfo = {};
+                if(SUCCEEDED(adapter3->QueryVideoMemoryInfo(0, (DXGI_MEMORY_SEGMENT_GROUP)memorySegmentGroup, &videoMemoryInfo)))
+                {
+                    switch(memorySegmentGroup)
+                    {
+                    case 0:
+                        PrintHeader(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_LOCAL]", 1);
+                        break;
+                    case 1:
+                        PrintHeader(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]", 1);
+                        break;
+                    default:
+                        assert(0);
+                    }
+                    Print_DXGI_QUERY_VIDEO_MEMORY_INFO(videoMemoryInfo);
+                }
+            }
+        }
+    }
+
+#if 0
+    {
+        ComPtr<IDXGIAdapter4> adapter4;
+        if(SUCCEEDED(adapter4->QueryInterface(IID_PPV_ARGS(&adapter4))))
+        {
+            DXGI_ADAPTER_DESC3 desc3;
+            if(SUCCEEDED(adapter4->GetDesc2(&desc3)))
+                PrintAdapterDesc3(desc3);
+        }
+    }
+#endif
+}
+
+static void PrintFormatInformation(ID3D12Device* device)
+{
     PrintEmptyLine();
+    PrintHeader(L"Formats", 1);
+    ++g_Indent;
+    HRESULT hr;
+    D3D12_FEATURE_DATA_FORMAT_SUPPORT formatSupport = {};
+    D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS msQualityLevels = {};
+    D3D12_FEATURE_DATA_FORMAT_INFO formatInfo = {};
+    for(size_t formatIndex = 0; Enum_DXGI_FORMAT[formatIndex].m_Name != nullptr; ++formatIndex)
+    {
+        const DXGI_FORMAT format = (DXGI_FORMAT)Enum_DXGI_FORMAT[formatIndex].m_Value;
+
+        PrintIndent();
+        wprintf(L"%s\n", Enum_DXGI_FORMAT[formatIndex].m_Name);
+        ++g_Indent;
+
+        formatSupport.Format = format;
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, UINT(sizeof formatSupport))))
+        {
+            for(size_t supportIndex = 0; Enum_D3D12_FORMAT_SUPPORT1[supportIndex].m_Name != nullptr; ++supportIndex)
+            {
+                if((formatSupport.Support1 & Enum_D3D12_FORMAT_SUPPORT1[supportIndex].m_Value) != 0)
+                {
+                    PrintIndent();
+                    wprintf(L"%s\n", Enum_D3D12_FORMAT_SUPPORT1[supportIndex].m_Name);
+                }
+            }
+            for(size_t supportIndex = 0; Enum_D3D12_FORMAT_SUPPORT2[supportIndex].m_Name != nullptr; ++supportIndex)
+            {
+                if((formatSupport.Support1 & Enum_D3D12_FORMAT_SUPPORT2[supportIndex].m_Value) != 0)
+                {
+                    PrintIndent();
+                    wprintf(L"%s\n", Enum_D3D12_FORMAT_SUPPORT2[supportIndex].m_Name);
+                }
+            }
+        }
+
+        msQualityLevels.Format = format;
+        for(msQualityLevels.SampleCount = 1; ; msQualityLevels.SampleCount *= 2)
+        {
+            if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &msQualityLevels, UINT(sizeof msQualityLevels))) &&
+                msQualityLevels.NumQualityLevels > 0)
+            {
+                PrintIndent();
+                wprintf(L"SampleCount = %u: NumQualityLevels = %u", msQualityLevels.SampleCount, msQualityLevels.NumQualityLevels);
+                if((msQualityLevels.Flags & D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE) != 0)
+                    wprintf(L" D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE\n");
+                else
+                    wprintf(L"\n");
+            }
+            else
+                break;
+        }
+
+        formatInfo.Format = format;
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &formatInfo, UINT(sizeof formatInfo))))
+            Print_uint32(L"PlaneCount", formatInfo.PlaneCount);
+
+        --g_Indent;
+    }
+    --g_Indent;
 }
 
 static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
 {
     HRESULT hr;
-    ID3D12Device* device = nullptr;
+    ComPtr<ID3D12Device> device = nullptr;
 #if defined(AUTO_LINK_DX12)
-    CHECK_HR( ::D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
+    CHECK_HR( ::D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device)) );
 #else
-    CHECK_HR( g_D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)) );
+    CHECK_HR( g_D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device)) );
 #endif
     if (device != nullptr)
     {
@@ -652,9 +746,20 @@ static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
             Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(options9);
         }
 
-        PrintEmptyLine();
+#if 0
+        D3D12_FEATURE_DATA_D3D12_OPTIONS10 options10 = {};
+        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS10, &options10, sizeof(options10));
+        if(SUCCEEDED(hr))
+        {
+            PrintEmptyLine();
+            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS10", 1);
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS10(options10);
+        }
+#endif
 
-        SAFE_RELEASE(device);
+        PrintFormatInformation(device.Get());
+
+        PrintEmptyLine();
     }
 
     --g_Indent;
@@ -725,10 +830,10 @@ static void UnloadLibraries()
 
 #if defined(_DEBUG)
 
-ID3D12Debug* EnableDebugLayer()
+ComPtr<ID3D12Debug> EnableDebugLayer()
 {
     HRESULT hr;
-    ID3D12Debug* debugController = nullptr;
+    ComPtr<ID3D12Debug> debugController = nullptr;
 
 #if defined(AUTO_LINK_DX12)
     hr = ::D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
@@ -821,67 +926,59 @@ int wmain2(int argc, wchar_t** argv)
 
     PrintGeneral();
 
-#if defined(_DEBUG)
-    ID3D12Debug* debugController = EnableDebugLayer();
-#endif
-
-    IDXGIFactory4* dxgiFactory = nullptr;
-#if defined(AUTO_LINK_DX12)
-    CHECK_HR( ::CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
-#else
-    CHECK_HR( g_CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
-#endif
-    assert(dxgiFactory != nullptr);
-
-    IDXGIAdapter1* requestedAdapter = nullptr;
-    IDXGIAdapter1* currAdapter1 = nullptr;
-    UINT currAdapterIndex = 0;
-    while(dxgiFactory->EnumAdapters1(currAdapterIndex, &currAdapter1) != DXGI_ERROR_NOT_FOUND)
+    // Scope for COM objects.
     {
-        PrintHeader(std::format(L"DXGI Adapter {}", currAdapterIndex).c_str(), 0);
+#if defined(_DEBUG)
+        ComPtr<ID3D12Debug> debugController = EnableDebugLayer();
+#endif
 
-        PrintInfoAdapter(currAdapter1);
+        ComPtr<IDXGIFactory4> dxgiFactory = nullptr;
+#if defined(AUTO_LINK_DX12)
+        CHECK_HR( ::CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
+#else
+        CHECK_HR( g_CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
+#endif
+        assert(dxgiFactory != nullptr);
 
-        // No explicit adapter requested: Choose first non-software and non-remote.
-        if(requestedAdapterIndex == UINT32_MAX)
+        ComPtr<IDXGIAdapter1> requestedAdapter = nullptr;
+        ComPtr<IDXGIAdapter1> currAdapter1 = nullptr;
+        UINT currAdapterIndex = 0;
+        while(dxgiFactory->EnumAdapters1(currAdapterIndex, &currAdapter1) != DXGI_ERROR_NOT_FOUND)
         {
-            DXGI_ADAPTER_DESC1 desc = {};
-            currAdapter1->GetDesc1(&desc);
-            if(desc.Flags == 0)
+            PrintHeader(std::format(L"DXGI Adapter {}", currAdapterIndex).c_str(), 0);
+            PrintEmptyLine();
+
+            PrintInfoAdapter(currAdapter1.Get());
+
+            // No explicit adapter requested: Choose first non-software and non-remote.
+            if(requestedAdapterIndex == UINT32_MAX)
             {
-                requestedAdapterIndex = 0;
+                DXGI_ADAPTER_DESC1 desc = {};
+                currAdapter1->GetDesc1(&desc);
+                if(desc.Flags == 0)
+                {
+                    requestedAdapterIndex = 0;
+                }
             }
+
+            if(requestedAdapterIndex == currAdapterIndex)
+                requestedAdapter = std::move(currAdapter1);
+            else
+                currAdapter1.Reset();
+
+            ++currAdapterIndex;
         }
 
-        if(requestedAdapterIndex == currAdapterIndex)
+        if(requestedAdapter)
         {
-            requestedAdapter = currAdapter1;
-            currAdapter1 = nullptr;
+            wprintf(L"Adapter %u chosen to show D3D12 device details.\n", requestedAdapterIndex);
+            PrintDeviceDetails(requestedAdapter.Get());
         }
         else
         {
-            SAFE_RELEASE(currAdapter1);
+            wprintf(L"No valid adapter chosen to show D3D12 device details.\n");
         }
-
-        ++currAdapterIndex;
     }
-
-    if(requestedAdapter)
-    {
-        wprintf(L"Adapter %u chosen to show D3D12 device details.\n", requestedAdapterIndex);
-        PrintDeviceDetails(requestedAdapter);
-        SAFE_RELEASE(requestedAdapter);
-    }
-    else
-    {
-        wprintf(L"No valid adapter chosen to show D3D12 device details.\n");
-    }
-
-    SAFE_RELEASE(dxgiFactory);
-
-#if defined(_DEBUG)
-    SAFE_RELEASE(debugController);
-#endif
 
 #if !defined(AUTO_LINK_DX12)
     UnloadLibraries();

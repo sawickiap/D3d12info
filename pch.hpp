@@ -5,7 +5,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 #include <windows.h>
-#include <atlbase.h> // for CComPtr
+#include <wrl/client.h> // for ComPtr
 
 #include <d3d12.h>
 #include <dxgi1_6.h>
@@ -23,7 +23,6 @@
 #include <cwchar>
 
 using std::wstring;
+using Microsoft::WRL::ComPtr;
 
 #define CHECK_HR(expr)		do { HRESULT hr__ = (expr); if(FAILED(hr__)) assert(0 && #expr); } while(false)
-
-#define SAFE_RELEASE(x)		do { if(x) { (x)->Release(); (x) = nullptr; } } while(false)
