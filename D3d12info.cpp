@@ -498,7 +498,6 @@ static void PrintFormatInformation(ID3D12Device* device)
     PrintEmptyLine();
     PrintHeader(L"Formats", 1);
     ++g_Indent;
-    HRESULT hr;
     D3D12_FEATURE_DATA_FORMAT_SUPPORT formatSupport = {};
     D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS msQualityLevels = {};
     D3D12_FEATURE_DATA_FORMAT_INFO formatInfo = {};
