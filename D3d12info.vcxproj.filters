@@ -4,10 +4,25 @@
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Utils.hpp" />
     <ClInclude Include="Enums.hpp" />
+    <ClInclude Include="Json.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D3d12info.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="Json.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="ThirdParty">
+      <UniqueIdentifier>{9c4511d3-f0d7-46f8-ab74-05b09b7adc65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\rapidjson">
+      <UniqueIdentifier>{216333fe-4e18-4d98-b94e-259e24954395}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="ThirdParty\rapidjson\contrib\natvis\rapidjson.natvis">
+      <Filter>ThirdParty\rapidjson</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>

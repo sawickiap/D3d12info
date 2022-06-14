@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "Utils.hpp"
 #include "Enums.hpp"
+#include "Json.hpp"
 
 static const wchar_t* const PROGRAM_VERSION = L"0.0.2-development";
 
@@ -8,6 +9,8 @@ static const int PROGRAM_EXIT_SUCCESS            = 0;
 static const int PROGRAM_EXIT_ERROR_INIT         = -1;
 static const int PROGRAM_EXIT_ERROR_COMMAND_LINE = -2;
 static const int PROGRAM_EXIT_ERROR_EXCEPTION    = -3;
+static const int PROGRAM_EXIT_ERROR_NO_ADAPTER   = -4;
+static const int PROGRAM_EXIT_ERROR_D3D12        = -5;
 
 //#define AUTO_LINK_DX12    // use this on everything before Win10
 #if defined(AUTO_LINK_DX12)
@@ -22,6 +25,17 @@ typedef HRESULT (WINAPI* PFN_DXGI_CREATE_FACTORY1)(REFIID riid, _COM_Outptr_ voi
 HMODULE g_DxgiLibrary = nullptr;
 HMODULE g_Dx12Library = nullptr;
 
+static const D3D_ROOT_SIGNATURE_VERSION HIGHEST_ROOT_SIGNATURE_VERSION = D3D_ROOT_SIGNATURE_VERSION_1_1;
+static const D3D_FEATURE_LEVEL FEATURE_LEVELS_ARRAY[] =
+{
+    D3D_FEATURE_LEVEL_12_2,
+    D3D_FEATURE_LEVEL_12_1,
+    D3D_FEATURE_LEVEL_12_0,
+    D3D_FEATURE_LEVEL_11_1,
+    D3D_FEATURE_LEVEL_11_0,
+};
+static const D3D_FEATURE_LEVEL HIGHEST_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_2;
+
 const wchar_t* DYN_LIB_DXGI = L"dxgi.dll";
 const wchar_t* DYN_LIB_DX12 = L"d3d12.dll";
 
@@ -34,12 +48,16 @@ PFN_D3D12_GET_DEBUG_INTERFACE g_D3D12GetDebugInterface;
 
 #endif // #if defined(AUTO_LINK_DX12)
 
+static bool g_ListAdapters = false;
+static bool g_UseJson = false;
+static bool g_PrintEnums = false;
 
 static uint32_t g_Indent;
 static uint32_t g_ArrayIndex = UINT32_MAX;
 
 static void PrintIndent()
 {
+    assert(!g_UseJson);
     if(g_Indent == 0)
         return;
     static const wchar_t* maxIndentStr = L"                                                                ";
@@ -47,6 +65,7 @@ static void PrintIndent()
     assert(offset < wcslen(maxIndentStr));
     wprintf(L"%s", maxIndentStr + offset);
 }
+#if 0 // TODO
 static void BeginArray()
 {
     g_ArrayIndex = 0;
@@ -59,14 +78,17 @@ static void StepArray()
 {
     ++g_ArrayIndex;
 }
+#endif
 
 static void PrintEmptyLine()
 {
+    assert(!g_UseJson);
     wprintf(L"\n");
 }
 
 static void PrintHeader(const wchar_t* s, uint8_t headerLevel)
 {
+    assert(!g_UseJson);
     assert(headerLevel < 2);
 
     const size_t len = wcslen(s);
@@ -82,6 +104,7 @@ static void PrintHeader(const wchar_t* s, uint8_t headerLevel)
 
 static void PrintName(const wchar_t* name)
 {
+    assert(!g_UseJson);
     if(g_ArrayIndex != UINT32_MAX)
     {
         wprintf(L"%s[%u]", name, g_ArrayIndex);
@@ -94,104 +117,193 @@ static void PrintName(const wchar_t* name)
 
 static void Print_BOOL(const wchar_t* name, BOOL value)
 {
-    PrintIndent();
-    PrintName(name);
-    wprintf(L" = %s\n", value ? L"TRUE" : L"FALSE");
+    if(g_UseJson)
+    {
+        Json::WriteString(name);
+        Json::WriteBool(value != FALSE);
+    }
+    else
+    {
+        PrintIndent();
+        PrintName(name);
+        wprintf(L" = %s\n", value ? L"TRUE" : L"FALSE");
+    }
 }
 static void Print_uint32(const wchar_t* name, uint32_t value)
 {
-    PrintIndent();
-    PrintName(name);
-    wprintf(L" = %u\n", value);
+    if(g_UseJson)
+    {
+        Json::WriteString(name);
+        Json::WriteNumber(value);
+    }
+    else
+    {
+        PrintIndent();
+        PrintName(name);
+        wprintf(L" = %u\n", value);
+    }
 }
 static void Print_uint64(const wchar_t* name, uint64_t value)
 {
-    PrintIndent();
-    PrintName(name);
-    wprintf(L" = %llu\n", value);
+    if(g_UseJson)
+    {
+        Json::WriteString(name);
+        Json::WriteNumber(value);
+    }
+    else
+    {
+        PrintIndent();
+        PrintName(name);
+        wprintf(L" = %llu\n", value);
+    }
 }
 static void Print_size(const wchar_t* name, uint64_t value)
 {
-    PrintIndent();
-    PrintName(name);
-    if(value == 0)
-        wprintf(L" = 0\n");
-    else if(value < 1024)
-        wprintf(L" = %zu (0x%llx)\n", value, value);
+    if(g_UseJson)
+    {
+        Json::WriteString(name);
+        Json::WriteNumber(value);
+    }
     else
     {
-        wstring sizeStr = SizeToStr(value);
-        wprintf(L" = %zu (0x%llx) (%s)\n", value, value, sizeStr.c_str());
+        PrintIndent();
+        PrintName(name);
+        if(value == 0)
+            wprintf(L" = 0\n");
+        else if(value < 1024)
+            wprintf(L" = %zu (0x%llx)\n", value, value);
+        else
+        {
+            wstring sizeStr = SizeToStr(value);
+            wprintf(L" = %zu (0x%llx) (%s)\n", value, value, sizeStr.c_str());
+        }
     }
 }
 static void Print_hex32(const wchar_t* name, uint32_t value)
 {
-    PrintIndent();
-    PrintName(name);
-    wprintf(L" = 0x%X\n", value);
+    if(g_UseJson)
+    {
+        Json::WriteString(name);
+        Json::WriteNumber(value);
+    }
+    else
+    {
+        PrintIndent();
+        PrintName(name);
+        wprintf(L" = 0x%X\n", value);
+    }
 }
 static void Print_string(const wchar_t* name, const wchar_t* value)
 {
-    PrintIndent();
-    PrintName(name);
-    wprintf(L" = %s\n", value);
+    if(g_UseJson)
+    {
+        Json::WriteString(name);
+        Json::WriteString(value);
+    }
+    else
+    {
+        PrintIndent();
+        PrintName(name);
+        wprintf(L" = %s\n", value);
+    }
 }
-static void Print_LUID(const wchar_t* name, LUID value)
+
+static wstring LuidToStr(LUID value)
 {
-    PrintIndent();
-    PrintName(name);
-    wprintf(L" = %08X-%08X\n", (uint32_t)value.HighPart, (uint32_t)value.LowPart);
+    wchar_t s[64];
+    swprintf_s(s, L"%08X-%08X", (uint32_t)value.HighPart, (uint32_t)value.LowPart);
+    return wstring{s};
 }
 
 static void PrintEnum(const wchar_t* name, uint32_t value,
     const EnumItem* enumItems)
 {
-    PrintIndent();
-    PrintName(name);
-    const wchar_t* enumItemName = FindEnumItemName(value, enumItems);
-    if(enumItemName != nullptr)
+    if(g_UseJson)
     {
-        wprintf(L" = %s (0x%X)\n", enumItemName, value);
-        return;
+        Json::WriteString(name);
+        Json::WriteNumber(value);
     }
-    wprintf(L" = 0x%X\n", value);
+    else
+    {
+        PrintIndent();
+        PrintName(name);
+        const wchar_t* enumItemName = FindEnumItemName(value, enumItems);
+        if(enumItemName != nullptr)
+            wprintf(L" = %s (0x%X)\n", enumItemName, value);
+        else
+            wprintf(L" = 0x%X\n", value);
+    }
 }
 
 static void PrintFlags(const wchar_t* name, uint32_t value,
     const EnumItem* enumItems)
 {
-    PrintIndent();
-    PrintName(name);
-    wprintf(L" = 0x%X\n", value);
-
-    ++g_Indent;
-    size_t zeroFlagIndex = SIZE_MAX;
-    for(size_t i = 0; enumItems[i].m_Name != nullptr; ++i)
+    if(g_UseJson)
     {
-        if(enumItems[i].m_Value == 0)
-        {
-            zeroFlagIndex = i;
-        }
-        else
-        {
-            if((value & enumItems[i].m_Value) != 0)
-            {
-                PrintIndent();
-                wprintf(L"%s\n", enumItems[i].m_Name);
-            }
-        }
+        Json::WriteString(name);
+        Json::WriteNumber(value);
     }
-    if(value == 0 && zeroFlagIndex != SIZE_MAX)
+    else
     {
         PrintIndent();
-        wprintf(L"%s\n", enumItems[zeroFlagIndex].m_Name);
+        PrintName(name);
+        wprintf(L" = 0x%X\n", value);
+
+        ++g_Indent;
+        size_t zeroFlagIndex = SIZE_MAX;
+        for(size_t i = 0; enumItems[i].m_Name != nullptr; ++i)
+        {
+            if(enumItems[i].m_Value == 0)
+            {
+                zeroFlagIndex = i;
+            }
+            else
+            {
+                if((value & enumItems[i].m_Value) != 0)
+                {
+                    PrintIndent();
+                    wprintf(L"%s\n", enumItems[i].m_Name);
+                }
+            }
+        }
+        if(value == 0 && zeroFlagIndex != SIZE_MAX)
+        {
+            PrintIndent();
+            wprintf(L"%s\n", enumItems[zeroFlagIndex].m_Name);
+        }
+        --g_Indent;
     }
-    --g_Indent;
+}
+
+static void PrintStructBegin(const wchar_t* structName)
+{
+    if(g_UseJson)
+    {
+        Json::WriteString(structName);
+        Json::BeginObject();
+    }
+    else
+    {
+        PrintHeader(structName, 1);
+        ++g_Indent;
+    }
+}
+
+static void PrintStructEnd()
+{
+    if(g_UseJson)
+    {
+        Json::EndObject();
+    }
+    else
+    {
+        --g_Indent;
+        PrintEmptyLine();
+    }
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(const D3D12_FEATURE_DATA_D3D12_OPTIONS& options)
 {
-    ++g_Indent;
     Print_BOOL(  L"DoublePrecisionFloatShaderOps       ", options.DoublePrecisionFloatShaderOps);
     Print_BOOL(  L"OutputMergerLogicOp                 ", options.OutputMergerLogicOp);
     PrintEnum(   L"MinPrecisionSupport                 ", options.MinPrecisionSupport, Enum_D3D12_SHADER_MIN_PRECISION_SUPPORT);
@@ -207,34 +319,29 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(const D3D12_FEATURE_DATA_D3D1
     Print_BOOL(  L"CrossAdapterRowMajorTextureSupported", options.CrossAdapterRowMajorTextureSupported);
     Print_BOOL(  L"VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation", options.VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation);
     PrintEnum(   L"ResourceHeapTier                    ", options.ResourceHeapTier, Enum_D3D12_RESOURCE_HEAP_TIER);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_ARCHITECTURE(const D3D12_FEATURE_DATA_ARCHITECTURE& architecture)
 {
-    ++g_Indent;
     Print_uint32(L"NodeIndex        ", architecture.NodeIndex);
     Print_BOOL  (L"TileBasedRenderer", architecture.TileBasedRenderer);
     Print_BOOL  (L"UMA              ", architecture.UMA);
     Print_BOOL  (L"CacheCoherentUMA ", architecture.CacheCoherentUMA);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_ARCHITECTURE1(const D3D12_FEATURE_DATA_ARCHITECTURE1& architecture1)
 {
-    ++g_Indent;
     Print_uint32(L"NodeIndex        ", architecture1.NodeIndex);
     Print_BOOL  (L"TileBasedRenderer", architecture1.TileBasedRenderer);
     Print_BOOL  (L"UMA              ", architecture1.UMA);
     Print_BOOL  (L"CacheCoherentUMA ", architecture1.CacheCoherentUMA);
     Print_BOOL  (L"IsolatedMMU      ", architecture1.IsolatedMMU);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(const D3D12_FEATURE_DATA_FEATURE_LEVELS& featureLevels)
 {
-    ++g_Indent;
     Print_uint32(L"NumFeatureLevels", featureLevels.NumFeatureLevels);
+#if 0//TODO
     BeginArray();
     for(uint32_t i = 0; i < featureLevels.NumFeatureLevels; ++i)
     {
@@ -242,165 +349,243 @@ static void Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(const D3D12_FEATURE_DATA_FEA
         StepArray();
     }
     EndArray();
+#endif
     PrintEnum(L"MaxSupportedFeatureLevel", featureLevels.MaxSupportedFeatureLevel, Enum_D3D_FEATURE_LEVEL);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(const D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT& virtualAddressSupport)
 {
-    ++g_Indent;
     Print_uint32(L"MaxGPUVirtualAddressBitsPerResource", virtualAddressSupport.MaxGPUVirtualAddressBitsPerResource);
     Print_uint32(L"MaxGPUVirtualAddressBitsPerProcess ", virtualAddressSupport.MaxGPUVirtualAddressBitsPerProcess);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_SHADER_MODEL(const D3D12_FEATURE_DATA_SHADER_MODEL& shaderModel)
 {
-    ++g_Indent;
     PrintEnum(L"HighestShaderModel", shaderModel.HighestShaderModel, Enum_D3D_SHADER_MODEL);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(const D3D12_FEATURE_DATA_D3D12_OPTIONS1& options1)
 {
-    ++g_Indent;
     Print_BOOL  (L"WaveOps                      ", options1.WaveOps);
     Print_uint32(L"WaveLaneCountMin             ", options1.WaveLaneCountMin);
     Print_uint32(L"WaveLaneCountMax             ", options1.WaveLaneCountMax);
     Print_uint32(L"TotalLaneCount               ", options1.TotalLaneCount);
     Print_BOOL  (L"ExpandedComputeResourceStates", options1.ExpandedComputeResourceStates);
     Print_BOOL  (L"Int64ShaderOps               ", options1.Int64ShaderOps);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(const D3D12_FEATURE_DATA_ROOT_SIGNATURE& rootSignature)
 {
-    ++g_Indent;
     PrintEnum(L"HighestVersion", rootSignature.HighestVersion, Enum_D3D_ROOT_SIGNATURE_VERSION);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(const D3D12_FEATURE_DATA_D3D12_OPTIONS2& options2)
 {
-    ++g_Indent;
     Print_BOOL(L"DepthBoundsTestSupported       ", options2.DepthBoundsTestSupported);
     PrintEnum (L"ProgrammableSamplePositionsTier", options2.ProgrammableSamplePositionsTier, Enum_D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_SHADER_CACHE(const D3D12_FEATURE_DATA_SHADER_CACHE& shaderCache)
 {
-    ++g_Indent;
     PrintFlags(L"SupportFlags", shaderCache.SupportFlags, Enum_D3D12_SHADER_CACHE_SUPPORT_FLAGS);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(const D3D12_FEATURE_DATA_D3D12_OPTIONS3& options3)
 {
-    ++g_Indent;
     Print_BOOL(L"CopyQueueTimestampQueriesSupported", options3.CopyQueueTimestampQueriesSupported);
     Print_BOOL(L"CastingFullyTypedFormatSupported  ", options3.CastingFullyTypedFormatSupported);
     PrintFlags(L"WriteBufferImmediateSupportFlags  ", options3.WriteBufferImmediateSupportFlags, Enum_D3D12_COMMAND_LIST_SUPPORT_FLAGS);
     PrintEnum (L"ViewInstancingTier                ", options3.ViewInstancingTier, Enum_D3D12_VIEW_INSTANCING_TIER);
     Print_BOOL(L"BarycentricsSupported             ", options3.BarycentricsSupported);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS4(const D3D12_FEATURE_DATA_D3D12_OPTIONS4& options4)
 {
-    ++g_Indent;
     Print_BOOL(L"MSAA64KBAlignedTextureSupported", options4.MSAA64KBAlignedTextureSupported);
     PrintEnum(L"SharedResourceCompatibilityTier", options4.SharedResourceCompatibilityTier, Enum_D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER);
     Print_BOOL(L"Native16BitShaderOpsSupported", options4.Native16BitShaderOpsSupported);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS5(const D3D12_FEATURE_DATA_D3D12_OPTIONS5& options5)
 {
-    ++g_Indent;
     Print_BOOL(L"SRVOnlyTiledResourceTier3", options5.SRVOnlyTiledResourceTier3);
     PrintEnum(L"RenderPassesTier", options5.RenderPassesTier, Enum_D3D12_RENDER_PASS_TIER);
     PrintEnum(L"RaytracingTier", options5.RaytracingTier, Enum_D3D12_RAYTRACING_TIER);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS6(const D3D12_FEATURE_DATA_D3D12_OPTIONS6& o)
 {
-    ++g_Indent;
     Print_BOOL(L"AdditionalShadingRatesSupported", o.AdditionalShadingRatesSupported);
     Print_BOOL(L"PerPrimitiveShadingRateSupportedWithViewportIndexing", o.PerPrimitiveShadingRateSupportedWithViewportIndexing);
     PrintEnum(L"VariableShadingRateTier", o.VariableShadingRateTier, Enum_D3D12_VARIABLE_SHADING_RATE_TIER);
     Print_uint32(L"ShadingRateImageTileSize", o.ShadingRateImageTileSize);
     Print_BOOL(L"BackgroundProcessingSupported", o.BackgroundProcessingSupported);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS7(const D3D12_FEATURE_DATA_D3D12_OPTIONS7& o)
 {
-    ++g_Indent;
     PrintEnum(L"MeshShaderTier", o.MeshShaderTier, Enum_D3D12_MESH_SHADER_TIER);
     PrintEnum(L"SamplerFeedbackTier", o.SamplerFeedbackTier, Enum_D3D12_SAMPLER_FEEDBACK_TIER);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS8(const D3D12_FEATURE_DATA_D3D12_OPTIONS8& o)
 {
-    ++g_Indent;
     Print_BOOL(L"UnalignedBlockTexturesSupported", o.UnalignedBlockTexturesSupported);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(const D3D12_FEATURE_DATA_D3D12_OPTIONS9& o)
 {
-    ++g_Indent;
     Print_BOOL(L"MeshShaderPipelineStatsSupported", o.MeshShaderPipelineStatsSupported);
     Print_BOOL(L"MeshShaderSupportsFullRangeRenderTargetArrayIndex", o.MeshShaderSupportsFullRangeRenderTargetArrayIndex);
     Print_BOOL(L"AtomicInt64OnTypedResourceSupported", o.AtomicInt64OnTypedResourceSupported);
     Print_BOOL(L"AtomicInt64OnGroupSharedSupported", o.AtomicInt64OnGroupSharedSupported);
     Print_BOOL(L"DerivativesInMeshAndAmplificationShadersSupported", o.DerivativesInMeshAndAmplificationShadersSupported);
     PrintEnum(L"WaveMMATier", o.WaveMMATier, Enum_D3D12_WAVE_MMA_TIER);
-    --g_Indent;
 }
 
 static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXISTING_HEAPS& existingHeaps)
 {
-    ++g_Indent;
     Print_BOOL(L"Supported", existingHeaps.Supported);
-    --g_Indent;
 }
 
 static void Print_DXGI_QUERY_VIDEO_MEMORY_INFO(const DXGI_QUERY_VIDEO_MEMORY_INFO& videoMemoryInfo)
 {
-    ++g_Indent;
     Print_size(L"Budget", videoMemoryInfo.Budget);
     Print_size(L"CurrentUsage", videoMemoryInfo.CurrentUsage);
     Print_size(L"AvailableForReservation", videoMemoryInfo.AvailableForReservation);
     Print_size(L"CurrentReservation", videoMemoryInfo.CurrentReservation);
-    --g_Indent;
+}
+
+static wstring MakeBuildDateTime()
+{
+    wchar_t s[128];
+    swprintf_s(s, L"%hs, %hs", __DATE__, __TIME__);
+    return wstring{s};
+}
+
+static void PrintHeader_Text()
+{
+    wprintf(L"============================\n");
+    wprintf(L"D3D12INFO %s\n", PROGRAM_VERSION);
+    wprintf(L"Built: %s\n", MakeBuildDateTime().c_str());
+    wprintf(L"============================\n");
     PrintEmptyLine();
 }
 
-static void PrintGeneral()
+static void PrintHeader_Json()
 {
-    PrintHeader(L"General", 0);
-    ++g_Indent;
+    Json::WriteString(L"Header");
+    Json::BeginObject();
 
+    Json::WriteString(L"Program");
+    Json::WriteString(L"D3D12INFO");
+    Json::WriteString(L"Version");
+    Json::WriteString(PROGRAM_VERSION);
+    Json::WriteString(L"Built");
+    Json::WriteString(MakeBuildDateTime());
+
+    Json::EndObject();
+}
+
+static void PrintHeaderData()
+{
+    if(g_UseJson)
+        PrintHeader_Json();
+    else
+        PrintHeader_Text();
+}
+
+static wstring MakeCurrentDate()
+{
     std::time_t time = std::time(nullptr);
     std::tm time2;
     localtime_s(&time2, &time);
     wchar_t dateStr[32];
     std::wcsftime(dateStr, _countof(dateStr), L"%Y-%m-%d", &time2);
+    return wstring{dateStr};
+}
 
-    Print_string(L"Current date", dateStr);
+static void PrintGeneral_Json()
+{
+    Json::WriteString(L"General");
+    Json::BeginObject();
+
+    Json::WriteString(L"Current date");
+    Json::WriteString(MakeCurrentDate());
+
+    Json::EndObject();
+}
+
+static void PrintGeneral_Text()
+{
+    PrintHeader(L"General", 0);
+    ++g_Indent;
+
+    Print_string(L"Current date", MakeCurrentDate().c_str());
 
     --g_Indent;
     PrintEmptyLine();
 }
 
+static void PrintGeneralData()
+{
+    if(g_UseJson)
+        PrintGeneral_Json();
+    else
+        PrintGeneral_Text();
+}
+
+static void PrintEnums_Json()
+{
+    Json::WriteString(L"Enums");
+    Json::BeginObject();
+
+    EnumCollection& enumCollection = EnumCollection::GetInstance();
+    for(const auto it : enumCollection.m_Enums)
+    {
+        Json::WriteString(it.first.data(), it.first.length());
+        Json::BeginObject();
+
+        for(const EnumItem* item = it.second; item->m_Name != nullptr; ++item)
+        {
+            Json::WriteString(item->m_Name);
+            Json::WriteNumber(item->m_Value);
+        }
+
+        Json::EndObject();
+    }
+
+    Json::EndObject();
+}
+
+static void PrintEnums_Text()
+{
+    PrintHeader(L"Enums", 0);
+    PrintEmptyLine();
+
+    EnumCollection& enumCollection = EnumCollection::GetInstance();
+    for(const auto it : enumCollection.m_Enums)
+    {
+        PrintHeader(it.first.c_str(), 1);
+
+        for(const EnumItem* item = it.second; item->m_Name != nullptr; ++item)
+            Print_uint32(item->m_Name, item->m_Value);
+
+        PrintEmptyLine();
+    }
+}
+
+static void PrintEnumsData()
+{
+    if(g_UseJson)
+        PrintEnums_Json();
+    else
+        PrintEnums_Text();
+}
+
 static void PrintAdapterDesc1(const DXGI_ADAPTER_DESC1& desc1)
 {
-    PrintHeader(L"DXGI_ADAPTER_DESC1", 1);
-    ++g_Indent;
+    PrintStructBegin(L"DXGI_ADAPTER_DESC1");
     Print_string(L"Description          ", desc1.Description);
     Print_hex32 (L"VendorId             ", desc1.VendorId);
     Print_hex32 (L"DeviceId             ", desc1.DeviceId);
@@ -409,20 +594,17 @@ static void PrintAdapterDesc1(const DXGI_ADAPTER_DESC1& desc1)
     Print_size  (L"DedicatedVideoMemory ", desc1.DedicatedVideoMemory);
     Print_size  (L"DedicatedSystemMemory", desc1.DedicatedSystemMemory);
     Print_size  (L"SharedSystemMemory   ", desc1.SharedSystemMemory);
-    Print_LUID  (L"AdapterLuid          ", desc1.AdapterLuid);
+    Print_string(L"AdapterLuid          ", LuidToStr(desc1.AdapterLuid).c_str());
     PrintFlags  (L"Flags                ", desc1.Flags, Enum_DXGI_ADAPTER_FLAG);
-    --g_Indent;
-    PrintEmptyLine();
+    PrintStructEnd();
 }
 
 static void PrintAdapterDesc2(const DXGI_ADAPTER_DESC2& desc2)
 {
-    PrintHeader(L"DXGI_ADAPTER2_DESC2", 1);
-    ++g_Indent;
+    PrintStructBegin(L"DXGI_ADAPTER2_DESC2");
     PrintEnum(L"GraphicsPreemptionGranularity", desc2.GraphicsPreemptionGranularity, Enum_DXGI_GRAPHICS_PREEMPTION_GRANULARITY);
     PrintEnum(L"ComputePreemptionGranularity", desc2.ComputePreemptionGranularity, Enum_DXGI_COMPUTE_PREEMPTION_GRANULARITY);
-    --g_Indent;
-    PrintEmptyLine();
+    PrintStructEnd();
 }
 
 #if 0
@@ -436,7 +618,7 @@ static void PrintAdapterDesc3(const DXGI_ADAPTER_DESC3& desc3)
 }
 #endif
 
-static void PrintInfoAdapter(IDXGIAdapter1* adapter1)
+static void PrintAdapterData(IDXGIAdapter1* adapter1)
 {
     assert(adapter1 != nullptr);
 
@@ -466,15 +648,16 @@ static void PrintInfoAdapter(IDXGIAdapter1* adapter1)
                     switch(memorySegmentGroup)
                     {
                     case 0:
-                        PrintHeader(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_LOCAL]", 1);
+                        PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_LOCAL]");
                         break;
                     case 1:
-                        PrintHeader(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]", 1);
+                        PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]");
                         break;
                     default:
                         assert(0);
                     }
                     Print_DXGI_QUERY_VIDEO_MEMORY_INFO(videoMemoryInfo);
+                    PrintStructEnd();
                 }
             }
         }
@@ -556,212 +739,221 @@ static void PrintFormatInformation(ID3D12Device* device)
     --g_Indent;
 }
 
-static void PrintDeviceDetails(IDXGIAdapter1* adapter1)
+static int PrintDeviceDetails(IDXGIAdapter1* adapter1)
 {
     HRESULT hr;
-    ComPtr<ID3D12Device> device = nullptr;
+    ComPtr<ID3D12Device> device;
 #if defined(AUTO_LINK_DX12)
     CHECK_HR( ::D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device)) );
 #else
     CHECK_HR( g_D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device)) );
 #endif
-    if (device != nullptr)
-    {
-        PrintEmptyLine();
-        PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS", 1);
-        D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
-        CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options)) );
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(options);
-
-        D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT gpuVirtualAddressSupport = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &gpuVirtualAddressSupport, sizeof(gpuVirtualAddressSupport));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT", 1);
-            Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(gpuVirtualAddressSupport);
-        }
-
-        PrintEmptyLine();
-        PrintHeader(L"D3D12_FEATURE_DATA_SHADER_MODEL", 1);
-        D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = {};
-        shaderModel.HighestShaderModel = D3D_SHADER_MODEL_6_1;
-        CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel)) );
-        Print_D3D12_FEATURE_DATA_SHADER_MODEL(shaderModel);
-
-        PrintEmptyLine();
-        PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS1", 1);
-        D3D12_FEATURE_DATA_D3D12_OPTIONS1 options1 = {};
-        CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1)) );
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(options1);
-
-        D3D12_FEATURE_DATA_ROOT_SIGNATURE rootSignature = {};
-        rootSignature.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &rootSignature, sizeof(rootSignature));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_ROOT_SIGNATURE", 1);
-            Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(rootSignature);
-        }
-
-        D3D12_FEATURE_DATA_ARCHITECTURE1 architecture1 = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &architecture1, sizeof(architecture1));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_ARCHITECTURE1", 1);
-            Print_D3D12_FEATURE_DATA_ARCHITECTURE1(architecture1);
-        }
-        else
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_ARCHITECTURE", 1);
-            D3D12_FEATURE_DATA_ARCHITECTURE architecture = {};
-            CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &architecture, sizeof(architecture)) );
-            Print_D3D12_FEATURE_DATA_ARCHITECTURE(architecture);
-        }
-
-        static const D3D_FEATURE_LEVEL featureLevels[] =
-        {
-            D3D_FEATURE_LEVEL_12_1,
-            D3D_FEATURE_LEVEL_12_0,
-            D3D_FEATURE_LEVEL_11_1,
-            D3D_FEATURE_LEVEL_11_0,
-        };
-
-        D3D12_FEATURE_DATA_FEATURE_LEVELS levels =
-        {
-            _countof(featureLevels), featureLevels, D3D_FEATURE_LEVEL_11_0
-        };
-
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &levels, sizeof(levels));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_FEATURE_LEVELS", 1);
-            Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(levels);
-        }
-
-        D3D12_FEATURE_DATA_D3D12_OPTIONS2 options2 = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS2", 1);
-            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(options2);
-        }
-
-        D3D12_FEATURE_DATA_SHADER_CACHE shaderCache = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &shaderCache, sizeof(shaderCache));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_SHADER_CACHE", 1);
-            Print_D3D12_FEATURE_DATA_SHADER_CACHE(shaderCache);
-        }
-
-        /*
-        D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY commandQueuePriority = {};
-        // There are IN parameters - need to fill in commandQueuePriority.CommandListType, Priority...
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &commandQueuePriority, sizeof(commandQueuePriority));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY", 1);
-            Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(commandQueuePriority);
-        }
-        */
+    if (!device)
+        return PROGRAM_EXIT_ERROR_D3D12;
         
-        D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3 = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3", 1);
-            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(options3);
-        }
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS");
+    D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
+    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options)) );
+    Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(options);
+    PrintStructEnd();
 
-        D3D12_FEATURE_DATA_EXISTING_HEAPS existingHeaps = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeaps, sizeof(existingHeaps));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_EXISTING_HEAPS", 1);
-            Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(existingHeaps);
-        }
-
-        D3D12_FEATURE_DATA_D3D12_OPTIONS4 options4 = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &options4, sizeof(options4));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS4", 1);
-            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS4(options4);
-        }
-
-        D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS5", 1);
-            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS5(options5);
-        }
-
-        D3D12_FEATURE_DATA_D3D12_OPTIONS6 options6 = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &options6, sizeof(options6));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS6", 1);
-            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS6(options6);
-        }
-
-        D3D12_FEATURE_DATA_D3D12_OPTIONS7 options7 = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS7", 1);
-            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS7(options7);
-        }
-
-        D3D12_FEATURE_DATA_D3D12_OPTIONS8 options8 = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &options8, sizeof(options8));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS8", 1);
-            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS8(options8);
-        }
-
-        D3D12_FEATURE_DATA_D3D12_OPTIONS9 options9 = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &options9, sizeof(options9));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS9", 1);
-            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(options9);
-        }
-
-#if 0
-        D3D12_FEATURE_DATA_D3D12_OPTIONS10 options10 = {};
-        hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS10, &options10, sizeof(options10));
-        if(SUCCEEDED(hr))
-        {
-            PrintEmptyLine();
-            PrintHeader(L"D3D12_FEATURE_DATA_D3D12_OPTIONS10", 1);
-            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS10(options10);
-        }
-#endif
-
-        PrintFormatInformation(device.Get());
-
-        PrintEmptyLine();
+    D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT gpuVirtualAddressSupport = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &gpuVirtualAddressSupport, sizeof(gpuVirtualAddressSupport));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT");
+        Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(gpuVirtualAddressSupport);
+        PrintStructEnd();
     }
 
+    /*
+    Microsoft documentation says:
+
+        ID3D12Device::CheckFeatureSupport returns E_INVALIDARG if HighestShaderModel
+        isn't known by the current runtime. For that reason, we recommend that you call
+        this in a loop with decreasing shader models to determine the highest supported
+        shader model.
+    */
+    {
+        D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = {};
+        for(size_t enumItemIndex = _countof(Enum_D3D_SHADER_MODEL) - 1; enumItemIndex--; )
+        {
+            shaderModel.HighestShaderModel = D3D_SHADER_MODEL(Enum_D3D_SHADER_MODEL[enumItemIndex].m_Value);
+            hr = device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel));
+            if(SUCCEEDED(hr))
+            {
+                PrintStructBegin(L"D3D12_FEATURE_DATA_SHADER_MODEL");
+                Print_D3D12_FEATURE_DATA_SHADER_MODEL(shaderModel);
+                PrintStructEnd();
+                break;
+            }
+        }
+    }
+
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS1");
+    D3D12_FEATURE_DATA_D3D12_OPTIONS1 options1 = {};
+    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1)) );
+    Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(options1);
+    PrintStructEnd();
+
+    D3D12_FEATURE_DATA_ROOT_SIGNATURE rootSignature = {};
+    rootSignature.HighestVersion = HIGHEST_ROOT_SIGNATURE_VERSION;
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &rootSignature, sizeof(rootSignature));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_ROOT_SIGNATURE");
+        Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(rootSignature);
+        PrintStructEnd();
+    }
+
+    D3D12_FEATURE_DATA_ARCHITECTURE1 architecture1 = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &architecture1, sizeof(architecture1));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_ARCHITECTURE1");
+        Print_D3D12_FEATURE_DATA_ARCHITECTURE1(architecture1);
+        PrintStructEnd();
+    }
+    else
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_ARCHITECTURE");
+        D3D12_FEATURE_DATA_ARCHITECTURE architecture = {};
+        CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &architecture, sizeof(architecture)) );
+        Print_D3D12_FEATURE_DATA_ARCHITECTURE(architecture);
+        PrintStructEnd();
+    }
+
+    D3D12_FEATURE_DATA_FEATURE_LEVELS featureLevels =
+    {
+        _countof(FEATURE_LEVELS_ARRAY), FEATURE_LEVELS_ARRAY, HIGHEST_FEATURE_LEVEL
+    };
+
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &featureLevels, sizeof(featureLevels));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_FEATURE_LEVELS");
+        Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(featureLevels);
+        PrintStructEnd();
+    }
+
+    D3D12_FEATURE_DATA_D3D12_OPTIONS2 options2 = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS2");
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(options2);
+        PrintStructEnd();
+    }
+
+    D3D12_FEATURE_DATA_SHADER_CACHE shaderCache = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &shaderCache, sizeof(shaderCache));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_SHADER_CACHE");
+        Print_D3D12_FEATURE_DATA_SHADER_CACHE(shaderCache);
+        PrintStructEnd();
+    }
+
+    /*
+    D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY commandQueuePriority = {};
+    // There are IN parameters - need to fill in commandQueuePriority.CommandListType, Priority...
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &commandQueuePriority, sizeof(commandQueuePriority));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY");
+        Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(commandQueuePriority);
+        PrintStructEnd();
+    }
+    */
+        
+    D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3 = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3");
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(options3);
+        PrintStructEnd();
+    }
+
+    D3D12_FEATURE_DATA_EXISTING_HEAPS existingHeaps = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeaps, sizeof(existingHeaps));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_EXISTING_HEAPS");
+        Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(existingHeaps);
+        PrintStructEnd();
+    }
+
+    D3D12_FEATURE_DATA_D3D12_OPTIONS4 options4 = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &options4, sizeof(options4));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS4");
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS4(options4);
+        PrintStructEnd();
+    }
+
+    D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS5");
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS5(options5);
+        PrintStructEnd();
+    }
+
+    D3D12_FEATURE_DATA_D3D12_OPTIONS6 options6 = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &options6, sizeof(options6));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS6");
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS6(options6);
+        PrintStructEnd();
+    }
+
+    D3D12_FEATURE_DATA_D3D12_OPTIONS7 options7 = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS7");
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS7(options7);
+        PrintStructEnd();
+    }
+
+    D3D12_FEATURE_DATA_D3D12_OPTIONS8 options8 = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &options8, sizeof(options8));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS8");
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS8(options8);
+        PrintStructEnd();
+    }
+
+    D3D12_FEATURE_DATA_D3D12_OPTIONS9 options9 = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &options9, sizeof(options9));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS9");
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(options9);
+        PrintStructEnd();
+    }
+
+#if 0
+    D3D12_FEATURE_DATA_D3D12_OPTIONS10 options10 = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS10, &options10, sizeof(options10));
+    if(SUCCEEDED(hr))
+    {
+        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS10");
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS10(options10);
+        PrintStructEnd();
+    }
+#endif
+
+    //PrintFormatInformation(device.Get());
+
     --g_Indent;
+
+    return PROGRAM_EXIT_SUCCESS;
 }
 
 #if !defined(AUTO_LINK_DX12)
@@ -856,26 +1048,15 @@ static void PrintCommandLineSyntax()
     wprintf(L"Options:\n");
     wprintf(L"  -v --Version         Only print program version information.\n");
     wprintf(L"  -h --Help            Only print this help (command line syntax).\n");
-    wprintf(L"  -a --Adapter=<Index> Print details of adapter at specified index (instead of default).\n");
+    wprintf(L"  -l --List            Only print the list of all adapters.\n");
+    wprintf(L"  -a --Adapter=<Index> Print details of adapter at specified index (default is the first hardware adapter).\n");
+    wprintf(L"  -j --JSON            Print output in JSON format instead of human-friendly text.\n");
+    wprintf(L"  -e --Enums           Include information about all known enums and their values.\n");
 }
 
 int wmain2(int argc, wchar_t** argv)
 {
-    wprintf(L"============================\n");
-    wprintf(L"D3D12INFO %s\n", PROGRAM_VERSION);
-    wprintf(L"Built: %hs, %hs\n", __DATE__, __TIME__);
-    wprintf(L"============================\n");
-    PrintEmptyLine();
-
-#if !defined(AUTO_LINK_DX12)
-    if (!LoadLibraries())
-    {
-        wprintf(L"could not load DXGI & DX12 libraries\n");
-        return PROGRAM_EXIT_ERROR_INIT;
-    }
-#endif
-
-    UINT requestedAdapterIndex = UINT32_MAX;
+    UINT adapterIndex = UINT32_MAX;
 
     CmdLineParser cmdLineParser(argc, argv);
 
@@ -883,15 +1064,24 @@ int wmain2(int argc, wchar_t** argv)
     {
         CMD_LINE_OPT_VERSION,
         CMD_LINE_OPT_HELP,
+        CMD_LINE_OPT_LIST,
         CMD_LINE_OPT_ADAPTER,
+        CMD_LINE_OPT_JSON,
+        CMD_LINE_OPT_ENUMS,
     };
 
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_VERSION, L"Version", false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_VERSION, L'v', false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_HELP,    L"Help", false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_HELP,    L'h', false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_LIST,    L"List", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_LIST,    L'l', false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ADAPTER, L"Adapter", true);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ADAPTER, L'a', true);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,    L"JSON", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,    L'j', false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,   L"Enums", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,   L'e', false);
 
     CmdLineParser::RESULT cmdLineResult;
     while((cmdLineResult = cmdLineParser.ReadNext()) != CmdLineParser::RESULT_END)
@@ -910,8 +1100,17 @@ int wmain2(int argc, wchar_t** argv)
             case CMD_LINE_OPT_HELP:
                 PrintCommandLineSyntax();
                 return PROGRAM_EXIT_SUCCESS;
+            case CMD_LINE_OPT_LIST:
+                g_ListAdapters = true;
+                break;
             case CMD_LINE_OPT_ADAPTER:
-                requestedAdapterIndex = _wtoi(cmdLineParser.GetParameter().c_str());
+                adapterIndex = _wtoi(cmdLineParser.GetParameter().c_str());
+                break;
+            case CMD_LINE_OPT_JSON:
+                g_UseJson = true;
+                break;
+            case CMD_LINE_OPT_ENUMS:
+                g_PrintEnums = true;
                 break;
             default:
                 PrintCommandLineSyntax();
@@ -923,7 +1122,25 @@ int wmain2(int argc, wchar_t** argv)
         }
     }
 
-    PrintGeneral();
+    if(g_UseJson)
+        Json::Begin();
+
+    PrintHeaderData();
+
+#if !defined(AUTO_LINK_DX12)
+    if (!LoadLibraries())
+    {
+        wprintf(L"ERROR: Could not load DXGI & D3D12 libraries.\n");
+        return PROGRAM_EXIT_ERROR_INIT;
+    }
+#endif
+
+    PrintGeneralData();
+
+    if(g_PrintEnums)
+        PrintEnumsData();
+
+    int programResult = PROGRAM_EXIT_SUCCESS;
 
     // Scope for COM objects.
     {
@@ -939,43 +1156,83 @@ int wmain2(int argc, wchar_t** argv)
 #endif
         assert(dxgiFactory != nullptr);
 
-        ComPtr<IDXGIAdapter1> requestedAdapter = nullptr;
-        ComPtr<IDXGIAdapter1> currAdapter1 = nullptr;
-        UINT currAdapterIndex = 0;
-        while(dxgiFactory->EnumAdapters1(currAdapterIndex, &currAdapter1) != DXGI_ERROR_NOT_FOUND)
+        if(g_ListAdapters)
         {
-            PrintHeader(std::format(L"DXGI Adapter {}", currAdapterIndex).c_str(), 0);
-            PrintEmptyLine();
-
-            PrintInfoAdapter(currAdapter1.Get());
-
-            // No explicit adapter requested: Choose first non-software and non-remote.
-            if(requestedAdapterIndex == UINT32_MAX)
+            if(g_UseJson)
             {
-                DXGI_ADAPTER_DESC1 desc = {};
-                currAdapter1->GetDesc1(&desc);
-                if(desc.Flags == 0)
-                {
-                    requestedAdapterIndex = 0;
-                }
+                Json::WriteString(L"Adapters");
+                Json::BeginArray();
             }
 
-            if(requestedAdapterIndex == currAdapterIndex)
-                requestedAdapter = std::move(currAdapter1);
-            else
-                currAdapter1.Reset();
+            ComPtr<IDXGIAdapter1> currAdapter;
+            UINT currAdapterIndex = 0;
+            while(dxgiFactory->EnumAdapters1(currAdapterIndex, &currAdapter) != DXGI_ERROR_NOT_FOUND)
+            {
+                if(g_UseJson)
+                    Json::BeginObject();
+                else
+                {
+                    PrintHeader(std::format(L"DXGI Adapter {}", currAdapterIndex).c_str(), 0);
+                    PrintEmptyLine();
+                }
 
-            ++currAdapterIndex;
-        }
+                PrintAdapterData(currAdapter.Get());
 
-        if(requestedAdapter)
-        {
-            wprintf(L"Adapter %u chosen to show D3D12 device details.\n", requestedAdapterIndex);
-            PrintDeviceDetails(requestedAdapter.Get());
+                if(g_UseJson)
+                    Json::EndObject();
+
+                currAdapter.Reset();
+                ++currAdapterIndex;
+            }
+
+            if(g_UseJson)
+                Json::EndArray();
         }
         else
         {
-            wprintf(L"No valid adapter chosen to show D3D12 device details.\n");
+            ComPtr<IDXGIAdapter1> adapter;
+            if(adapterIndex != UINT32_MAX)
+                dxgiFactory->EnumAdapters1(adapterIndex, &adapter);
+            else
+            {
+                // No explicit adapter requested: Choose first non-software and non-remote.
+                adapterIndex = 0;
+                DXGI_ADAPTER_DESC1 desc = {};
+                while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND)
+                {
+                    adapter->GetDesc1(&desc);
+                    if(desc.Flags == 0)
+                        break;
+                    adapter.Reset();
+                    ++adapterIndex;
+                }
+            }
+
+            wstring adapterStr = std::format(L"DXGI Adapter {}", adapterIndex);
+            if(adapter)
+            {
+                if(g_UseJson)
+                {
+                    Json::WriteString(std::move(adapterStr));
+                    Json::BeginObject();
+                }
+                else
+                {
+                    PrintHeader(adapterStr.c_str(), 0);
+                    PrintEmptyLine();
+                }
+
+                PrintAdapterData(adapter.Get());
+                programResult = PrintDeviceDetails(adapter.Get());
+
+                if(g_UseJson)
+                    Json::EndObject();
+            }
+            else
+            {
+                programResult = PROGRAM_EXIT_ERROR_NO_ADAPTER;
+                wprintf(L"ERROR: No valid adapter chosen to show D3D12 device details.\n");
+            }
         }
     }
 
@@ -983,7 +1240,13 @@ int wmain2(int argc, wchar_t** argv)
     UnloadLibraries();
 #endif
 
-    return PROGRAM_EXIT_SUCCESS;
+    if(g_UseJson && programResult == PROGRAM_EXIT_SUCCESS)
+    {
+        wstring json = Json::End();
+        wprintf(L"%.*s", (int)json.length(), json.data());
+    }
+
+    return programResult;
 }
 
 int wmain(int argc, wchar_t** argv)
