@@ -50,6 +50,7 @@ PFN_D3D12_GET_DEBUG_INTERFACE g_D3D12GetDebugInterface;
 
 static bool g_ListAdapters = false;
 static bool g_UseJson = false;
+static bool g_PrintFormats = false;
 static bool g_PrintEnums = false;
 
 static uint32_t g_Indent;
@@ -678,9 +679,14 @@ static void PrintAdapterData(IDXGIAdapter1* adapter1)
 
 static void PrintFormatInformation(ID3D12Device* device)
 {
-    PrintEmptyLine();
-    PrintHeader(L"Formats", 1);
-    ++g_Indent;
+    if(g_UseJson)
+    {
+        Json::WriteString(L"Formats");
+        Json::BeginObject();
+    }
+    else
+        PrintHeader(L"Formats", 1);
+
     D3D12_FEATURE_DATA_FORMAT_SUPPORT formatSupport = {};
     D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS msQualityLevels = {};
     D3D12_FEATURE_DATA_FORMAT_INFO formatInfo = {};
@@ -688,55 +694,82 @@ static void PrintFormatInformation(ID3D12Device* device)
     {
         const DXGI_FORMAT format = (DXGI_FORMAT)Enum_DXGI_FORMAT[formatIndex].m_Value;
 
-        PrintIndent();
-        wprintf(L"%s\n", Enum_DXGI_FORMAT[formatIndex].m_Name);
-        ++g_Indent;
+        if(g_UseJson)
+        {
+            Json::WriteString(std::format(L"{}", formatIndex));
+            Json::BeginObject();
+        }
+        else
+        {
+            PrintIndent();
+            wprintf(L"%s:\n", Enum_DXGI_FORMAT[formatIndex].m_Name);
+            ++g_Indent;
+        }
 
         formatSupport.Format = format;
         if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, UINT(sizeof formatSupport))))
         {
-            for(size_t supportIndex = 0; Enum_D3D12_FORMAT_SUPPORT1[supportIndex].m_Name != nullptr; ++supportIndex)
-            {
-                if((formatSupport.Support1 & Enum_D3D12_FORMAT_SUPPORT1[supportIndex].m_Value) != 0)
-                {
-                    PrintIndent();
-                    wprintf(L"%s\n", Enum_D3D12_FORMAT_SUPPORT1[supportIndex].m_Name);
-                }
-            }
-            for(size_t supportIndex = 0; Enum_D3D12_FORMAT_SUPPORT2[supportIndex].m_Name != nullptr; ++supportIndex)
-            {
-                if((formatSupport.Support1 & Enum_D3D12_FORMAT_SUPPORT2[supportIndex].m_Value) != 0)
-                {
-                    PrintIndent();
-                    wprintf(L"%s\n", Enum_D3D12_FORMAT_SUPPORT2[supportIndex].m_Name);
-                }
-            }
+            PrintFlags(L"Support1", formatSupport.Support1, Enum_D3D12_FORMAT_SUPPORT1);
+            PrintFlags(L"Support2", formatSupport.Support1, Enum_D3D12_FORMAT_SUPPORT2);
         }
 
-        msQualityLevels.Format = format;
-        for(msQualityLevels.SampleCount = 1; ; msQualityLevels.SampleCount *= 2)
         {
-            if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &msQualityLevels, UINT(sizeof msQualityLevels))) &&
-                msQualityLevels.NumQualityLevels > 0)
+            if(g_UseJson)
             {
-                PrintIndent();
-                wprintf(L"SampleCount = %u: NumQualityLevels = %u", msQualityLevels.SampleCount, msQualityLevels.NumQualityLevels);
-                if((msQualityLevels.Flags & D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE) != 0)
-                    wprintf(L" D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE\n");
-                else
-                    wprintf(L"\n");
+                Json::WriteString(L"MultisampleQualityLevels");
+                Json::BeginObject();
             }
-            else
-                break;
+            msQualityLevels.Format = format;
+            for(msQualityLevels.SampleCount = 1; ; msQualityLevels.SampleCount *= 2)
+            {
+                if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &msQualityLevels, UINT(sizeof msQualityLevels))) &&
+                    msQualityLevels.NumQualityLevels > 0)
+                {
+                    if(g_UseJson)
+                    {
+                        Json::WriteString(std::format(L"{}", msQualityLevels.SampleCount));
+                        Json::BeginObject();
+
+                        Json::WriteString(L"NumQualityLevels");
+                        Json::WriteNumber(msQualityLevels.NumQualityLevels);
+                        Json::WriteString(L"Flags");
+                        Json::WriteNumber(uint32_t(msQualityLevels.Flags));
+
+                        Json::EndObject();
+                    }
+                    else
+                    {
+                        PrintIndent();
+                        wprintf(L"SampleCount = %u: NumQualityLevels = %u", msQualityLevels.SampleCount, msQualityLevels.NumQualityLevels);
+                        if((msQualityLevels.Flags & D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE) != 0)
+                            wprintf(L" D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE\n");
+                        else
+                            wprintf(L"\n");
+                    }
+                }
+                else
+                    break;
+            }
+            if(g_UseJson)
+                Json::EndObject();
         }
 
         formatInfo.Format = format;
         if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &formatInfo, UINT(sizeof formatInfo))))
+        {
             Print_uint32(L"PlaneCount", formatInfo.PlaneCount);
+        }
 
-        --g_Indent;
+        if(g_UseJson)
+            Json::EndObject();
+        else
+            --g_Indent;
     }
-    --g_Indent;
+    
+    if(g_UseJson)
+        Json::EndObject();
+    else
+        PrintEmptyLine();
 }
 
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1)
@@ -949,7 +982,8 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1)
     }
 #endif
 
-    //PrintFormatInformation(device.Get());
+    if(g_PrintFormats)
+        PrintFormatInformation(device.Get());
 
     --g_Indent;
 
@@ -1051,6 +1085,7 @@ static void PrintCommandLineSyntax()
     wprintf(L"  -l --List            Only print the list of all adapters.\n");
     wprintf(L"  -a --Adapter=<Index> Print details of adapter at specified index (default is the first hardware adapter).\n");
     wprintf(L"  -j --JSON            Print output in JSON format instead of human-friendly text.\n");
+    wprintf(L"  -f --Formats         Include information about DXGI format capabilities.\n");
     wprintf(L"  -e --Enums           Include information about all known enums and their values.\n");
 }
 
@@ -1067,6 +1102,7 @@ int wmain2(int argc, wchar_t** argv)
         CMD_LINE_OPT_LIST,
         CMD_LINE_OPT_ADAPTER,
         CMD_LINE_OPT_JSON,
+        CMD_LINE_OPT_FORMATS,
         CMD_LINE_OPT_ENUMS,
     };
 
@@ -1080,6 +1116,8 @@ int wmain2(int argc, wchar_t** argv)
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ADAPTER, L'a', true);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,    L"JSON", false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,    L'j', false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS, L"Formats", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS, L'f', false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,   L"Enums", false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,   L'e', false);
 
@@ -1108,6 +1146,9 @@ int wmain2(int argc, wchar_t** argv)
                 break;
             case CMD_LINE_OPT_JSON:
                 g_UseJson = true;
+                break;
+            case CMD_LINE_OPT_FORMATS:
+                g_PrintFormats = true;
                 break;
             case CMD_LINE_OPT_ENUMS:
                 g_PrintEnums = true;
@@ -1223,6 +1264,7 @@ int wmain2(int argc, wchar_t** argv)
                 }
 
                 PrintAdapterData(adapter.Get());
+                
                 programResult = PrintDeviceDetails(adapter.Get());
 
                 if(g_UseJson)
