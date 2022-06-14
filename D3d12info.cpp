@@ -3,6 +3,12 @@
 #include "Enums.hpp"
 #include "Json.hpp"
 
+// For Direct3D 12 Agility SDK
+extern "C" {
+    __declspec(dllexport) extern const UINT D3D12SDKVersion = 700;
+    __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\";
+}
+
 static const wchar_t* const PROGRAM_VERSION = L"0.0.2-development";
 
 static const int PROGRAM_EXIT_SUCCESS            = 0;

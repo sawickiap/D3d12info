@@ -4,11 +4,13 @@
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
+
+// Agility SDK needs to be included before Windows 10 SDK - according to Microsoft.
+#include "ThirdParty/microsoft.direct3d.d3d12.1.700.10-preview/build/native/include/d3d12.h"
+#include <dxgi1_6.h>
+
 #include <windows.h>
 #include <wrl/client.h> // for ComPtr
-
-#include <d3d12.h>
-#include <dxgi1_6.h>
 
 #include <vector>
 #include <string>
