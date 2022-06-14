@@ -450,6 +450,21 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(const D3D12_FEATURE_DATA_D3D
     PrintEnum(L"WaveMMATier", o.WaveMMATier, Enum_D3D12_WAVE_MMA_TIER);
 }
 
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS10(const D3D12_FEATURE_DATA_D3D12_OPTIONS10& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS10");
+    Print_BOOL(L"VariableRateShadingSumCombinerSupported", o.VariableRateShadingSumCombinerSupported);
+    Print_BOOL(L"MeshShaderPerPrimitiveShadingRateSupported", o.MeshShaderPerPrimitiveShadingRateSupported);
+    PrintStructEnd();
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS11(const D3D12_FEATURE_DATA_D3D12_OPTIONS11& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS11");
+    Print_BOOL(L"AtomicInt64OnDescriptorHeapResourceSupported", o.AtomicInt64OnDescriptorHeapResourceSupported);
+    PrintStructEnd();
+}
+
 static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXISTING_HEAPS& existingHeaps)
 {
     Print_BOOL(L"Supported", existingHeaps.Supported);
@@ -512,34 +527,29 @@ static wstring MakeCurrentDate()
     return wstring{dateStr};
 }
 
-static void PrintGeneral_Json()
+static void PrintGeneralParams()
 {
-    Json::WriteString(L"General");
-    Json::BeginObject();
-
-    Json::WriteString(L"Current date");
-    Json::WriteString(MakeCurrentDate());
-
-    Json::EndObject();
-}
-
-static void PrintGeneral_Text()
-{
-    PrintHeader(L"General", 0);
-    ++g_Indent;
-
     Print_string(L"Current date", MakeCurrentDate().c_str());
-
-    --g_Indent;
-    PrintEmptyLine();
+    Print_uint32(L"D3D12SDKVersion", uint32_t(D3D12SDKVersion));
 }
 
 static void PrintGeneralData()
 {
     if(g_UseJson)
-        PrintGeneral_Json();
+    {
+        Json::WriteString(L"General");
+        Json::BeginObject();
+        PrintGeneralParams();
+        Json::EndObject();
+    }
     else
-        PrintGeneral_Text();
+    {
+        PrintHeader(L"General", 0);
+        ++g_Indent;
+        PrintGeneralParams();
+        --g_Indent;
+        PrintEmptyLine();
+    }
 }
 
 static void PrintEnums_Json()
@@ -977,16 +987,15 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1)
         PrintStructEnd();
     }
 
-#if 0
     D3D12_FEATURE_DATA_D3D12_OPTIONS10 options10 = {};
     hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS10, &options10, sizeof(options10));
     if(SUCCEEDED(hr))
-    {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS10");
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS10(options10);
-        PrintStructEnd();
-    }
-#endif
+
+    D3D12_FEATURE_DATA_D3D12_OPTIONS11 options11 = {};
+    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS11, &options11, sizeof(options11));
+    if(SUCCEEDED(hr))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS11(options11);
 
     if(g_PrintFormats)
         PrintFormatInformation(device.Get());
