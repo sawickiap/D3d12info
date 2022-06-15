@@ -592,6 +592,32 @@ static void PrintEnums_Text()
     }
 }
 
+static void PrintOsVersionInfo()
+{
+    HMODULE m = GetModuleHandle(L"ntdll.dll");
+    if(!m)
+        return;
+    typedef int32_t(WINAPI* RtlGetVersionFunc)(OSVERSIONINFOEX*);
+    RtlGetVersionFunc RtlGetVersion = (RtlGetVersionFunc)GetProcAddress(m, "RtlGetVersion");
+    if(!RtlGetVersion)
+        return;
+    OSVERSIONINFOEX osVersionInfo = {sizeof(osVersionInfo)};
+    // Documentation says it always returns success.
+    RtlGetVersion(&osVersionInfo);
+
+    PrintStructBegin(L"OSVERSIONINFOEX");
+    Print_uint32(L"dwMajorVersion", osVersionInfo.dwMajorVersion);
+    Print_uint32(L"dwMinorVersion", osVersionInfo.dwMinorVersion);
+    Print_uint32(L"dwBuildNumber", osVersionInfo.dwBuildNumber);
+    Print_uint32(L"dwPlatformId", osVersionInfo.dwPlatformId);
+    Print_string(L"szCSDVersion", osVersionInfo.szCSDVersion);
+    Print_uint32(L"wServicePackMajor", uint32_t(osVersionInfo.wServicePackMajor));
+    Print_uint32(L"wServicePackMinor", uint32_t(osVersionInfo.wServicePackMinor));
+    Print_uint32(L"wSuiteMask", uint32_t(osVersionInfo.wSuiteMask));
+    Print_uint32(L"wProductType", uint32_t(osVersionInfo.wProductType));
+    PrintStructEnd();
+}
+
 static void PrintEnumsData()
 {
     if(g_UseJson)
@@ -1192,6 +1218,8 @@ int wmain2(int argc, wchar_t** argv)
 #endif
 
     PrintGeneralData();
+
+    PrintOsVersionInfo();
 
     if(g_PrintEnums)
         PrintEnumsData();
