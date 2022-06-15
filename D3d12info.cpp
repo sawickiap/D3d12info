@@ -613,8 +613,8 @@ static void PrintOsVersionInfo()
     Print_string(L"szCSDVersion", osVersionInfo.szCSDVersion);
     Print_uint32(L"wServicePackMajor", uint32_t(osVersionInfo.wServicePackMajor));
     Print_uint32(L"wServicePackMinor", uint32_t(osVersionInfo.wServicePackMinor));
-    Print_uint32(L"wSuiteMask", uint32_t(osVersionInfo.wSuiteMask));
-    Print_uint32(L"wProductType", uint32_t(osVersionInfo.wProductType));
+    PrintFlags(L"wSuiteMask", uint32_t(osVersionInfo.wSuiteMask), Enum_VER_SUITE);
+    PrintEnum(L"wProductType", uint32_t(osVersionInfo.wProductType), Enum_VER_SUITE);
     PrintStructEnd();
 }
 
