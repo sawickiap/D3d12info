@@ -2,8 +2,13 @@
 #include "Utils.hpp"
 #include "Enums.hpp"
 #include "Json.hpp"
-#include "ThirdParty/NVAPI/nvapi.h"
-#pragma comment(lib, "ThirdParty/NVAPI/amd64/nvapi64.lib")
+
+#define USE_NVAPI 1
+
+#if USE_NVAPI
+#include <nvapi.h>
+#pragma comment(lib, "nvapi64.lib")
+#endif
 
 // For Direct3D 12 Agility SDK
 extern "C" {
@@ -64,6 +69,8 @@ static bool g_PrintEnums = false;
 static uint32_t g_Indent;
 static uint32_t g_ArrayIndex = UINT32_MAX;
 
+#if USE_NVAPI
+
 class NvAPI_Inititalize_RAII
 {
 public:
@@ -88,6 +95,8 @@ wstring NvShortStringToStr(NvAPI_ShortString str)
     swprintf_s(w, L"%hs", str);
     return wstring{w};
 }
+
+#endif // #if USE_NVAPI
 
 static void PrintIndent()
 {
@@ -602,10 +611,12 @@ static void PrintGeneralParams()
     Print_string(L"Current date", MakeCurrentDate().c_str());
     Print_uint32(L"D3D12SDKVersion", uint32_t(D3D12SDKVersion));
 
+#if USE_NVAPI
     NvAPI_ShortString nvShortString;
     NvAPI_Status nvStatus = NvAPI_GetInterfaceVersionString(nvShortString);
     if(nvStatus == NVAPI_OK)
         Print_string(L"NvAPI_GetInterfaceVersionString", NvShortStringToStr(nvShortString).c_str());
+#endif
 }
 
 static void PrintGeneralData()
@@ -889,6 +900,8 @@ static void PrintFormatInformation(ID3D12Device* device)
         PrintEmptyLine();
 }
 
+#if USE_NVAPI
+
 static void PrintNvApiData()
 {
     {
@@ -903,6 +916,8 @@ static void PrintNvApiData()
         }
     }
 }
+
+#endif // #if USE_NVAPI
 
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1)
 {
@@ -1268,10 +1283,11 @@ int wmain2(int argc, wchar_t** argv)
 
     PrintOsVersionInfo();
 
+#if USE_NVAPI
     NvAPI_Inititalize_RAII NvApiInitializeObj;
-
     if(NvApiInitializeObj.IsInitialized())
         PrintNvApiData();
+#endif
 
     if(g_PrintEnums)
         PrintEnumsData();
