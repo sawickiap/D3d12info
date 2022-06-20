@@ -2,6 +2,8 @@
 #include "Utils.hpp"
 #include "Enums.hpp"
 #include "Json.hpp"
+#include "ThirdParty/NVAPI/nvapi.h"
+#pragma comment(lib, "ThirdParty/NVAPI/amd64/nvapi64.lib")
 
 // For Direct3D 12 Agility SDK
 extern "C" {
@@ -61,6 +63,31 @@ static bool g_PrintEnums = false;
 
 static uint32_t g_Indent;
 static uint32_t g_ArrayIndex = UINT32_MAX;
+
+class NvAPI_Inititalize_RAII
+{
+public:
+    NvAPI_Inititalize_RAII()
+    {
+        m_Initialized = NvAPI_Initialize() == NVAPI_OK;
+    }
+    ~NvAPI_Inititalize_RAII()
+    {
+        if(m_Initialized)
+            NvAPI_Unload();
+    }
+    bool IsInitialized() const { return m_Initialized; }
+
+private:
+    bool m_Initialized;
+};
+
+wstring NvShortStringToStr(NvAPI_ShortString str)
+{
+    wchar_t w[NVAPI_SHORT_STRING_MAX];
+    swprintf_s(w, L"%hs", str);
+    return wstring{w};
+}
 
 static void PrintIndent()
 {
@@ -311,42 +338,49 @@ static void PrintStructEnd()
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(const D3D12_FEATURE_DATA_D3D12_OPTIONS& options)
 {
-    Print_BOOL(  L"DoublePrecisionFloatShaderOps       ", options.DoublePrecisionFloatShaderOps);
-    Print_BOOL(  L"OutputMergerLogicOp                 ", options.OutputMergerLogicOp);
-    PrintEnum(   L"MinPrecisionSupport                 ", options.MinPrecisionSupport, Enum_D3D12_SHADER_MIN_PRECISION_SUPPORT);
-    PrintEnum(   L"TiledResourcesTier                  ", options.TiledResourcesTier, Enum_D3D12_TILED_RESOURCES_TIER);
-    PrintEnum(   L"ResourceBindingTier                 ", options.ResourceBindingTier, Enum_D3D12_RESOURCE_BINDING_TIER);
-    Print_BOOL(  L"PSSpecifiedStencilRefSupported      ", options.PSSpecifiedStencilRefSupported);
-    Print_BOOL(  L"TypedUAVLoadAdditionalFormats       ", options.TypedUAVLoadAdditionalFormats);
-    Print_BOOL(  L"ROVsSupported                       ", options.ROVsSupported);
-    PrintEnum(   L"ConservativeRasterizationTier       ", options.ConservativeRasterizationTier, Enum_D3D12_CONSERVATIVE_RASTERIZATION_TIER);
-    Print_uint32(L"MaxGPUVirtualAddressBitsPerResource ", options.MaxGPUVirtualAddressBitsPerResource);
-    Print_BOOL(  L"StandardSwizzle64KBSupported        ", options.StandardSwizzle64KBSupported);
-    PrintEnum(   L"CrossNodeSharingTier                ", options.CrossNodeSharingTier, Enum_D3D12_CROSS_NODE_SHARING_TIER);
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS");
+    Print_BOOL(  L"DoublePrecisionFloatShaderOps", options.DoublePrecisionFloatShaderOps);
+    Print_BOOL(  L"OutputMergerLogicOp", options.OutputMergerLogicOp);
+    PrintEnum(   L"MinPrecisionSupport", options.MinPrecisionSupport, Enum_D3D12_SHADER_MIN_PRECISION_SUPPORT);
+    PrintEnum(   L"TiledResourcesTier", options.TiledResourcesTier, Enum_D3D12_TILED_RESOURCES_TIER);
+    PrintEnum(   L"ResourceBindingTier", options.ResourceBindingTier, Enum_D3D12_RESOURCE_BINDING_TIER);
+    Print_BOOL(  L"PSSpecifiedStencilRefSupported", options.PSSpecifiedStencilRefSupported);
+    Print_BOOL(  L"TypedUAVLoadAdditionalFormats", options.TypedUAVLoadAdditionalFormats);
+    Print_BOOL(  L"ROVsSupported", options.ROVsSupported);
+    PrintEnum(   L"ConservativeRasterizationTier", options.ConservativeRasterizationTier, Enum_D3D12_CONSERVATIVE_RASTERIZATION_TIER);
+    Print_uint32(L"MaxGPUVirtualAddressBitsPerResource", options.MaxGPUVirtualAddressBitsPerResource);
+    Print_BOOL(  L"StandardSwizzle64KBSupported", options.StandardSwizzle64KBSupported);
+    PrintEnum(   L"CrossNodeSharingTier", options.CrossNodeSharingTier, Enum_D3D12_CROSS_NODE_SHARING_TIER);
     Print_BOOL(  L"CrossAdapterRowMajorTextureSupported", options.CrossAdapterRowMajorTextureSupported);
     Print_BOOL(  L"VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation", options.VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation);
-    PrintEnum(   L"ResourceHeapTier                    ", options.ResourceHeapTier, Enum_D3D12_RESOURCE_HEAP_TIER);
+    PrintEnum(   L"ResourceHeapTier", options.ResourceHeapTier, Enum_D3D12_RESOURCE_HEAP_TIER);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_ARCHITECTURE(const D3D12_FEATURE_DATA_ARCHITECTURE& architecture)
 {
-    Print_uint32(L"NodeIndex        ", architecture.NodeIndex);
+    PrintStructBegin(L"D3D12_FEATURE_DATA_ARCHITECTURE");
+    Print_uint32(L"NodeIndex", architecture.NodeIndex);
     Print_BOOL  (L"TileBasedRenderer", architecture.TileBasedRenderer);
-    Print_BOOL  (L"UMA              ", architecture.UMA);
-    Print_BOOL  (L"CacheCoherentUMA ", architecture.CacheCoherentUMA);
+    Print_BOOL  (L"UMA", architecture.UMA);
+    Print_BOOL  (L"CacheCoherentUMA", architecture.CacheCoherentUMA);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_ARCHITECTURE1(const D3D12_FEATURE_DATA_ARCHITECTURE1& architecture1)
 {
-    Print_uint32(L"NodeIndex        ", architecture1.NodeIndex);
+    PrintStructBegin(L"D3D12_FEATURE_DATA_ARCHITECTURE1");
+    Print_uint32(L"NodeIndex", architecture1.NodeIndex);
     Print_BOOL  (L"TileBasedRenderer", architecture1.TileBasedRenderer);
-    Print_BOOL  (L"UMA              ", architecture1.UMA);
-    Print_BOOL  (L"CacheCoherentUMA ", architecture1.CacheCoherentUMA);
-    Print_BOOL  (L"IsolatedMMU      ", architecture1.IsolatedMMU);
+    Print_BOOL  (L"UMA", architecture1.UMA);
+    Print_BOOL  (L"CacheCoherentUMA", architecture1.CacheCoherentUMA);
+    Print_BOOL  (L"IsolatedMMU", architecture1.IsolatedMMU);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(const D3D12_FEATURE_DATA_FEATURE_LEVELS& featureLevels)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_FEATURE_LEVELS");
     Print_uint32(L"NumFeatureLevels", featureLevels.NumFeatureLevels);
 #if 0//TODO
     BeginArray();
@@ -358,96 +392,123 @@ static void Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(const D3D12_FEATURE_DATA_FEA
     EndArray();
 #endif
     PrintEnum(L"MaxSupportedFeatureLevel", featureLevels.MaxSupportedFeatureLevel, Enum_D3D_FEATURE_LEVEL);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(const D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT& virtualAddressSupport)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT");
     Print_uint32(L"MaxGPUVirtualAddressBitsPerResource", virtualAddressSupport.MaxGPUVirtualAddressBitsPerResource);
-    Print_uint32(L"MaxGPUVirtualAddressBitsPerProcess ", virtualAddressSupport.MaxGPUVirtualAddressBitsPerProcess);
+    Print_uint32(L"MaxGPUVirtualAddressBitsPerProcess", virtualAddressSupport.MaxGPUVirtualAddressBitsPerProcess);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_SHADER_MODEL(const D3D12_FEATURE_DATA_SHADER_MODEL& shaderModel)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_SHADER_MODEL");
     PrintEnum(L"HighestShaderModel", shaderModel.HighestShaderModel, Enum_D3D_SHADER_MODEL);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(const D3D12_FEATURE_DATA_D3D12_OPTIONS1& options1)
 {
-    Print_BOOL  (L"WaveOps                      ", options1.WaveOps);
-    Print_uint32(L"WaveLaneCountMin             ", options1.WaveLaneCountMin);
-    Print_uint32(L"WaveLaneCountMax             ", options1.WaveLaneCountMax);
-    Print_uint32(L"TotalLaneCount               ", options1.TotalLaneCount);
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS1");
+    Print_BOOL  (L"WaveOps", options1.WaveOps);
+    Print_uint32(L"WaveLaneCountMin", options1.WaveLaneCountMin);
+    Print_uint32(L"WaveLaneCountMax", options1.WaveLaneCountMax);
+    Print_uint32(L"TotalLaneCount", options1.TotalLaneCount);
     Print_BOOL  (L"ExpandedComputeResourceStates", options1.ExpandedComputeResourceStates);
-    Print_BOOL  (L"Int64ShaderOps               ", options1.Int64ShaderOps);
+    Print_BOOL  (L"Int64ShaderOps", options1.Int64ShaderOps);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(const D3D12_FEATURE_DATA_ROOT_SIGNATURE& rootSignature)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_ROOT_SIGNATURE");
     PrintEnum(L"HighestVersion", rootSignature.HighestVersion, Enum_D3D_ROOT_SIGNATURE_VERSION);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(const D3D12_FEATURE_DATA_D3D12_OPTIONS2& options2)
 {
-    Print_BOOL(L"DepthBoundsTestSupported       ", options2.DepthBoundsTestSupported);
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS2");
+    Print_BOOL(L"DepthBoundsTestSupported", options2.DepthBoundsTestSupported);
     PrintEnum (L"ProgrammableSamplePositionsTier", options2.ProgrammableSamplePositionsTier, Enum_D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_SHADER_CACHE(const D3D12_FEATURE_DATA_SHADER_CACHE& shaderCache)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_SHADER_CACHE");
     PrintFlags(L"SupportFlags", shaderCache.SupportFlags, Enum_D3D12_SHADER_CACHE_SUPPORT_FLAGS);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(const D3D12_FEATURE_DATA_D3D12_OPTIONS3& options3)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3");
     Print_BOOL(L"CopyQueueTimestampQueriesSupported", options3.CopyQueueTimestampQueriesSupported);
-    Print_BOOL(L"CastingFullyTypedFormatSupported  ", options3.CastingFullyTypedFormatSupported);
-    PrintFlags(L"WriteBufferImmediateSupportFlags  ", options3.WriteBufferImmediateSupportFlags, Enum_D3D12_COMMAND_LIST_SUPPORT_FLAGS);
-    PrintEnum (L"ViewInstancingTier                ", options3.ViewInstancingTier, Enum_D3D12_VIEW_INSTANCING_TIER);
-    Print_BOOL(L"BarycentricsSupported             ", options3.BarycentricsSupported);
+    Print_BOOL(L"CastingFullyTypedFormatSupported", options3.CastingFullyTypedFormatSupported);
+    PrintFlags(L"WriteBufferImmediateSupportFlags", options3.WriteBufferImmediateSupportFlags, Enum_D3D12_COMMAND_LIST_SUPPORT_FLAGS);
+    PrintEnum (L"ViewInstancingTier", options3.ViewInstancingTier, Enum_D3D12_VIEW_INSTANCING_TIER);
+    Print_BOOL(L"BarycentricsSupported", options3.BarycentricsSupported);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS4(const D3D12_FEATURE_DATA_D3D12_OPTIONS4& options4)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS4");
     Print_BOOL(L"MSAA64KBAlignedTextureSupported", options4.MSAA64KBAlignedTextureSupported);
     PrintEnum(L"SharedResourceCompatibilityTier", options4.SharedResourceCompatibilityTier, Enum_D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER);
     Print_BOOL(L"Native16BitShaderOpsSupported", options4.Native16BitShaderOpsSupported);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS5(const D3D12_FEATURE_DATA_D3D12_OPTIONS5& options5)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS5");
     Print_BOOL(L"SRVOnlyTiledResourceTier3", options5.SRVOnlyTiledResourceTier3);
     PrintEnum(L"RenderPassesTier", options5.RenderPassesTier, Enum_D3D12_RENDER_PASS_TIER);
     PrintEnum(L"RaytracingTier", options5.RaytracingTier, Enum_D3D12_RAYTRACING_TIER);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS6(const D3D12_FEATURE_DATA_D3D12_OPTIONS6& o)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS6");
     Print_BOOL(L"AdditionalShadingRatesSupported", o.AdditionalShadingRatesSupported);
     Print_BOOL(L"PerPrimitiveShadingRateSupportedWithViewportIndexing", o.PerPrimitiveShadingRateSupportedWithViewportIndexing);
     PrintEnum(L"VariableShadingRateTier", o.VariableShadingRateTier, Enum_D3D12_VARIABLE_SHADING_RATE_TIER);
     Print_uint32(L"ShadingRateImageTileSize", o.ShadingRateImageTileSize);
     Print_BOOL(L"BackgroundProcessingSupported", o.BackgroundProcessingSupported);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS7(const D3D12_FEATURE_DATA_D3D12_OPTIONS7& o)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS7");
     PrintEnum(L"MeshShaderTier", o.MeshShaderTier, Enum_D3D12_MESH_SHADER_TIER);
     PrintEnum(L"SamplerFeedbackTier", o.SamplerFeedbackTier, Enum_D3D12_SAMPLER_FEEDBACK_TIER);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS8(const D3D12_FEATURE_DATA_D3D12_OPTIONS8& o)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS8");
     Print_BOOL(L"UnalignedBlockTexturesSupported", o.UnalignedBlockTexturesSupported);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(const D3D12_FEATURE_DATA_D3D12_OPTIONS9& o)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS9");
     Print_BOOL(L"MeshShaderPipelineStatsSupported", o.MeshShaderPipelineStatsSupported);
     Print_BOOL(L"MeshShaderSupportsFullRangeRenderTargetArrayIndex", o.MeshShaderSupportsFullRangeRenderTargetArrayIndex);
     Print_BOOL(L"AtomicInt64OnTypedResourceSupported", o.AtomicInt64OnTypedResourceSupported);
     Print_BOOL(L"AtomicInt64OnGroupSharedSupported", o.AtomicInt64OnGroupSharedSupported);
     Print_BOOL(L"DerivativesInMeshAndAmplificationShadersSupported", o.DerivativesInMeshAndAmplificationShadersSupported);
     PrintEnum(L"WaveMMATier", o.WaveMMATier, Enum_D3D12_WAVE_MMA_TIER);
+    PrintStructEnd();
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS10(const D3D12_FEATURE_DATA_D3D12_OPTIONS10& o)
@@ -465,17 +526,26 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS11(const D3D12_FEATURE_DATA_D3
     PrintStructEnd();
 }
 
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS12(const D3D12_FEATURE_DATA_D3D12_OPTIONS12& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS12");
+    PrintEnum(L"MSPrimitivesPipelineStatisticIncludesCulledPrimitives", o.MSPrimitivesPipelineStatisticIncludesCulledPrimitives, Enum_D3D12_TRI_STATE);
+    Print_BOOL(L"EnhancedBarriersSupported", o.EnhancedBarriersSupported);
+    PrintStructEnd();
+}
+
 static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXISTING_HEAPS& existingHeaps)
 {
+    PrintStructBegin(L"D3D12_FEATURE_DATA_EXISTING_HEAPS");
     Print_BOOL(L"Supported", existingHeaps.Supported);
+    PrintStructEnd();
 }
 
 static void Print_DXGI_QUERY_VIDEO_MEMORY_INFO(const DXGI_QUERY_VIDEO_MEMORY_INFO& videoMemoryInfo)
 {
+    // Not printing videoMemoryInfo.CurrentUsage, videoMemoryInfo.CurrentReservation.
     Print_size(L"Budget", videoMemoryInfo.Budget);
-    Print_size(L"CurrentUsage", videoMemoryInfo.CurrentUsage);
     Print_size(L"AvailableForReservation", videoMemoryInfo.AvailableForReservation);
-    Print_size(L"CurrentReservation", videoMemoryInfo.CurrentReservation);
 }
 
 static wstring MakeBuildDateTime()
@@ -531,6 +601,11 @@ static void PrintGeneralParams()
 {
     Print_string(L"Current date", MakeCurrentDate().c_str());
     Print_uint32(L"D3D12SDKVersion", uint32_t(D3D12SDKVersion));
+
+    NvAPI_ShortString nvShortString;
+    NvAPI_Status nvStatus = NvAPI_GetInterfaceVersionString(nvShortString);
+    if(nvStatus == NVAPI_OK)
+        Print_string(L"NvAPI_GetInterfaceVersionString", NvShortStringToStr(nvShortString).c_str());
 }
 
 static void PrintGeneralData()
@@ -629,16 +704,16 @@ static void PrintEnumsData()
 static void PrintAdapterDesc1(const DXGI_ADAPTER_DESC1& desc1)
 {
     PrintStructBegin(L"DXGI_ADAPTER_DESC1");
-    Print_string(L"Description          ", desc1.Description);
-    Print_hex32 (L"VendorId             ", desc1.VendorId);
-    Print_hex32 (L"DeviceId             ", desc1.DeviceId);
-    Print_hex32 (L"SubSysId             ", desc1.SubSysId);
-    Print_hex32 (L"Revision             ", desc1.Revision);
-    Print_size  (L"DedicatedVideoMemory ", desc1.DedicatedVideoMemory);
+    Print_string(L"Description", desc1.Description);
+    Print_hex32 (L"VendorId", desc1.VendorId);
+    Print_hex32 (L"DeviceId", desc1.DeviceId);
+    Print_hex32 (L"SubSysId", desc1.SubSysId);
+    Print_hex32 (L"Revision", desc1.Revision);
+    Print_size  (L"DedicatedVideoMemory", desc1.DedicatedVideoMemory);
     Print_size  (L"DedicatedSystemMemory", desc1.DedicatedSystemMemory);
-    Print_size  (L"SharedSystemMemory   ", desc1.SharedSystemMemory);
-    Print_string(L"AdapterLuid          ", LuidToStr(desc1.AdapterLuid).c_str());
-    PrintFlags  (L"Flags                ", desc1.Flags, Enum_DXGI_ADAPTER_FLAG);
+    Print_size  (L"SharedSystemMemory", desc1.SharedSystemMemory);
+    Print_string(L"AdapterLuid", LuidToStr(desc1.AdapterLuid).c_str());
+    PrintFlags  (L"Flags", desc1.Flags, Enum_DXGI_ADAPTER_FLAG);
     PrintStructEnd();
 }
 
@@ -814,9 +889,23 @@ static void PrintFormatInformation(ID3D12Device* device)
         PrintEmptyLine();
 }
 
+static void PrintNvApiData()
+{
+    {
+        NvU32 pDriverVersion = UINT32_MAX;
+        NvAPI_ShortString szBuildBranchString = {};
+        if(NvAPI_SYS_GetDriverAndBranchVersion(&pDriverVersion, szBuildBranchString) == NVAPI_OK)
+        {
+            PrintStructBegin(L"NvAPI_SYS_GetDriverAndBranchVersion");
+            Print_uint32(L"pDriverVersion", pDriverVersion);
+            Print_string(L"szBuildBranchString", NvShortStringToStr(szBuildBranchString).c_str());
+            PrintStructEnd();
+        }
+    }
+}
+
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1)
 {
-    HRESULT hr;
     ComPtr<ID3D12Device> device;
 #if defined(AUTO_LINK_DX12)
     CHECK_HR( ::D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device)) );
@@ -825,108 +914,84 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1)
 #endif
     if (!device)
         return PROGRAM_EXIT_ERROR_D3D12;
-        
-    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS");
-    D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
-    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options)) );
-    Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(options);
-    PrintStructEnd();
-
-    D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT gpuVirtualAddressSupport = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &gpuVirtualAddressSupport, sizeof(gpuVirtualAddressSupport));
-    if(SUCCEEDED(hr))
+     
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT");
-        Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(gpuVirtualAddressSupport);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(options);
+    }
+
+    {
+        D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT gpuVirtualAddressSupport = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &gpuVirtualAddressSupport, sizeof(gpuVirtualAddressSupport))))
+            Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(gpuVirtualAddressSupport);
     }
 
     /*
     Microsoft documentation says:
 
-        ID3D12Device::CheckFeatureSupport returns E_INVALIDARG if HighestShaderModel
-        isn't known by the current runtime. For that reason, we recommend that you call
-        this in a loop with decreasing shader models to determine the highest supported
-        shader model.
+    ID3D12Device::CheckFeatureSupport returns E_INVALIDARG if HighestShaderModel
+    isn't known by the current runtime. For that reason, we recommend that you call
+    this in a loop with decreasing shader models to determine the highest supported
+    shader model.
     */
     {
         D3D12_FEATURE_DATA_SHADER_MODEL shaderModel = {};
         for(size_t enumItemIndex = _countof(Enum_D3D_SHADER_MODEL) - 1; enumItemIndex--; )
         {
             shaderModel.HighestShaderModel = D3D_SHADER_MODEL(Enum_D3D_SHADER_MODEL[enumItemIndex].m_Value);
-            hr = device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel));
-            if(SUCCEEDED(hr))
+            if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel))))
             {
-                PrintStructBegin(L"D3D12_FEATURE_DATA_SHADER_MODEL");
                 Print_D3D12_FEATURE_DATA_SHADER_MODEL(shaderModel);
-                PrintStructEnd();
                 break;
             }
         }
     }
 
-    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS1");
-    D3D12_FEATURE_DATA_D3D12_OPTIONS1 options1 = {};
-    CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1)) );
-    Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(options1);
-    PrintStructEnd();
-
-    D3D12_FEATURE_DATA_ROOT_SIGNATURE rootSignature = {};
-    rootSignature.HighestVersion = HIGHEST_ROOT_SIGNATURE_VERSION;
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &rootSignature, sizeof(rootSignature));
-    if(SUCCEEDED(hr))
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_ROOT_SIGNATURE");
-        Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(rootSignature);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_D3D12_OPTIONS1 options1 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(options1);
     }
 
-    D3D12_FEATURE_DATA_ARCHITECTURE1 architecture1 = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &architecture1, sizeof(architecture1));
-    if(SUCCEEDED(hr))
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_ARCHITECTURE1");
-        Print_D3D12_FEATURE_DATA_ARCHITECTURE1(architecture1);
-        PrintStructEnd();
-    }
-    else
-    {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_ARCHITECTURE");
-        D3D12_FEATURE_DATA_ARCHITECTURE architecture = {};
-        CHECK_HR( device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &architecture, sizeof(architecture)) );
-        Print_D3D12_FEATURE_DATA_ARCHITECTURE(architecture);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_ROOT_SIGNATURE rootSignature = {};
+        rootSignature.HighestVersion = HIGHEST_ROOT_SIGNATURE_VERSION;
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &rootSignature, sizeof(rootSignature))))
+            Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(rootSignature);
     }
 
-    D3D12_FEATURE_DATA_FEATURE_LEVELS featureLevels =
     {
-        _countof(FEATURE_LEVELS_ARRAY), FEATURE_LEVELS_ARRAY, HIGHEST_FEATURE_LEVEL
-    };
-
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &featureLevels, sizeof(featureLevels));
-    if(SUCCEEDED(hr))
-    {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_FEATURE_LEVELS");
-        Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(featureLevels);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_ARCHITECTURE1 architecture1 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &architecture1, sizeof(architecture1))))
+            Print_D3D12_FEATURE_DATA_ARCHITECTURE1(architecture1);
+        else
+        {
+            D3D12_FEATURE_DATA_ARCHITECTURE architecture = {};
+            if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &architecture, sizeof(architecture))))
+                Print_D3D12_FEATURE_DATA_ARCHITECTURE(architecture);
+        }
     }
 
-    D3D12_FEATURE_DATA_D3D12_OPTIONS2 options2 = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2));
-    if(SUCCEEDED(hr))
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS2");
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(options2);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_FEATURE_LEVELS featureLevels =
+        {
+            _countof(FEATURE_LEVELS_ARRAY), FEATURE_LEVELS_ARRAY, HIGHEST_FEATURE_LEVEL
+        };
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &featureLevels, sizeof(featureLevels))))
+            Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(featureLevels);
     }
 
-    D3D12_FEATURE_DATA_SHADER_CACHE shaderCache = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &shaderCache, sizeof(shaderCache));
-    if(SUCCEEDED(hr))
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_SHADER_CACHE");
-        Print_D3D12_FEATURE_DATA_SHADER_CACHE(shaderCache);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_D3D12_OPTIONS2 options2 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(options2);
+    }
+
+    {
+        D3D12_FEATURE_DATA_SHADER_CACHE shaderCache = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &shaderCache, sizeof(shaderCache))))
+            Print_D3D12_FEATURE_DATA_SHADER_CACHE(shaderCache);
     }
 
     /*
@@ -941,92 +1006,74 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1)
     }
     */
         
-    D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3 = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3));
-    if(SUCCEEDED(hr))
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3");
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(options3);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(options3);
     }
 
-    D3D12_FEATURE_DATA_EXISTING_HEAPS existingHeaps = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeaps, sizeof(existingHeaps));
-    if(SUCCEEDED(hr))
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_EXISTING_HEAPS");
-        Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(existingHeaps);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_EXISTING_HEAPS existingHeaps = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeaps, sizeof(existingHeaps))))
+            Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(existingHeaps);
     }
 
-    D3D12_FEATURE_DATA_D3D12_OPTIONS4 options4 = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &options4, sizeof(options4));
-    if(SUCCEEDED(hr))
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS4");
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS4(options4);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_D3D12_OPTIONS4 options4 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &options4, sizeof(options4))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS4(options4);
     }
 
-    D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5));
-    if(SUCCEEDED(hr))
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS5");
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS5(options5);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS5(options5);
     }
 
-    D3D12_FEATURE_DATA_D3D12_OPTIONS6 options6 = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &options6, sizeof(options6));
-    if(SUCCEEDED(hr))
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS6");
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS6(options6);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_D3D12_OPTIONS6 options6 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &options6, sizeof(options6))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS6(options6);
     }
 
-    D3D12_FEATURE_DATA_D3D12_OPTIONS7 options7 = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7));
-    if(SUCCEEDED(hr))
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS7");
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS7(options7);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_D3D12_OPTIONS7 options7 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS7(options7);
     }
 
-    D3D12_FEATURE_DATA_D3D12_OPTIONS8 options8 = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &options8, sizeof(options8));
-    if(SUCCEEDED(hr))
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS8");
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS8(options8);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_D3D12_OPTIONS8 options8 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &options8, sizeof(options8))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS8(options8);
     }
 
-    D3D12_FEATURE_DATA_D3D12_OPTIONS9 options9 = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &options9, sizeof(options9));
-    if(SUCCEEDED(hr))
     {
-        PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS9");
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(options9);
-        PrintStructEnd();
+        D3D12_FEATURE_DATA_D3D12_OPTIONS9 options9 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &options9, sizeof(options9))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(options9);
     }
 
-    D3D12_FEATURE_DATA_D3D12_OPTIONS10 options10 = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS10, &options10, sizeof(options10));
-    if(SUCCEEDED(hr))
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS10(options10);
+    {
+        D3D12_FEATURE_DATA_D3D12_OPTIONS10 options10 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS10, &options10, sizeof(options10))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS10(options10);
+    }
 
-    D3D12_FEATURE_DATA_D3D12_OPTIONS11 options11 = {};
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS11, &options11, sizeof(options11));
-    if(SUCCEEDED(hr))
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS11(options11);
+    {
+        D3D12_FEATURE_DATA_D3D12_OPTIONS11 options11 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS11, &options11, sizeof(options11))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS11(options11);
+    }
+
+    {
+        D3D12_FEATURE_DATA_D3D12_OPTIONS12 options12 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS12, &options12, sizeof(options12))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS12(options12);
+    }
 
     if(g_PrintFormats)
         PrintFormatInformation(device.Get());
-
-    --g_Indent;
 
     return PROGRAM_EXIT_SUCCESS;
 }
@@ -1220,6 +1267,11 @@ int wmain2(int argc, wchar_t** argv)
     PrintGeneralData();
 
     PrintOsVersionInfo();
+
+    NvAPI_Inititalize_RAII NvApiInitializeObj;
+
+    if(NvApiInitializeObj.IsInitialized())
+        PrintNvApiData();
 
     if(g_PrintEnums)
         PrintEnumsData();
