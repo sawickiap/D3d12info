@@ -1,14 +1,9 @@
 #include "pch.hpp"
+#include "NvApiData.hpp"
 #include "Utils.hpp"
 #include "Enums.hpp"
 #include "Json.hpp"
-
-#define USE_NVAPI 1
-
-#if USE_NVAPI
-#include <nvapi.h>
-#pragma comment(lib, "nvapi64.lib")
-#endif
+#include "Printing.hpp"
 
 // For Direct3D 12 Agility SDK
 extern "C" {
@@ -62,287 +57,14 @@ PFN_D3D12_GET_DEBUG_INTERFACE g_D3D12GetDebugInterface;
 #endif // #if defined(AUTO_LINK_DX12)
 
 static bool g_ListAdapters = false;
-static bool g_UseJson = false;
 static bool g_PrintFormats = false;
 static bool g_PrintEnums = false;
-
-static uint32_t g_Indent;
-static uint32_t g_ArrayIndex = UINT32_MAX;
-
-#if USE_NVAPI
-
-class NvAPI_Inititalize_RAII
-{
-public:
-    NvAPI_Inititalize_RAII()
-    {
-        m_Initialized = NvAPI_Initialize() == NVAPI_OK;
-    }
-    ~NvAPI_Inititalize_RAII()
-    {
-        if(m_Initialized)
-            NvAPI_Unload();
-    }
-    bool IsInitialized() const { return m_Initialized; }
-
-private:
-    bool m_Initialized;
-};
-
-wstring NvShortStringToStr(NvAPI_ShortString str)
-{
-    wchar_t w[NVAPI_SHORT_STRING_MAX];
-    swprintf_s(w, L"%hs", str);
-    return wstring{w};
-}
-
-#endif // #if USE_NVAPI
-
-static void PrintIndent()
-{
-    assert(!g_UseJson);
-    if(g_Indent == 0)
-        return;
-    static const wchar_t* maxIndentStr = L"                                                                ";
-    const uint32_t offset = 64u - (g_Indent * 4u);
-    assert(offset < wcslen(maxIndentStr));
-    wprintf(L"%s", maxIndentStr + offset);
-}
-#if 0 // TODO
-static void BeginArray()
-{
-    g_ArrayIndex = 0;
-}
-static void EndArray()
-{
-    g_ArrayIndex = UINT32_MAX;
-}
-static void StepArray()
-{
-    ++g_ArrayIndex;
-}
-#endif
-
-static void PrintEmptyLine()
-{
-    assert(!g_UseJson);
-    wprintf(L"\n");
-}
-
-static void PrintHeader(const wchar_t* s, uint8_t headerLevel)
-{
-    assert(!g_UseJson);
-    assert(headerLevel < 2);
-
-    const size_t len = wcslen(s);
-    assert(len > 0 && len < 80);
-    PrintIndent();
-    wprintf(L"%s:\n", s);
-    static const wchar_t* underline1 = L"================================================================================";
-    static const wchar_t* underline2 = L"--------------------------------------------------------------------------------";
-    const wchar_t* const currUnderline = headerLevel == 0 ? underline1 : underline2;
-    PrintIndent();
-    wprintf(L"%s\n", currUnderline + 80 - len - 1);
-}
-
-static void PrintName(const wchar_t* name)
-{
-    assert(!g_UseJson);
-    if(g_ArrayIndex != UINT32_MAX)
-    {
-        wprintf(L"%s[%u]", name, g_ArrayIndex);
-    }
-    else
-    {
-        wprintf(L"%s", name);
-    }
-}
-
-static void Print_BOOL(const wchar_t* name, BOOL value)
-{
-    if(g_UseJson)
-    {
-        Json::WriteString(name);
-        Json::WriteBool(value != FALSE);
-    }
-    else
-    {
-        PrintIndent();
-        PrintName(name);
-        wprintf(L" = %s\n", value ? L"TRUE" : L"FALSE");
-    }
-}
-static void Print_uint32(const wchar_t* name, uint32_t value)
-{
-    if(g_UseJson)
-    {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
-    }
-    else
-    {
-        PrintIndent();
-        PrintName(name);
-        wprintf(L" = %u\n", value);
-    }
-}
-static void Print_uint64(const wchar_t* name, uint64_t value)
-{
-    if(g_UseJson)
-    {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
-    }
-    else
-    {
-        PrintIndent();
-        PrintName(name);
-        wprintf(L" = %llu\n", value);
-    }
-}
-static void Print_size(const wchar_t* name, uint64_t value)
-{
-    if(g_UseJson)
-    {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
-    }
-    else
-    {
-        PrintIndent();
-        PrintName(name);
-        if(value == 0)
-            wprintf(L" = 0\n");
-        else if(value < 1024)
-            wprintf(L" = %zu (0x%llx)\n", value, value);
-        else
-        {
-            wstring sizeStr = SizeToStr(value);
-            wprintf(L" = %zu (0x%llx) (%s)\n", value, value, sizeStr.c_str());
-        }
-    }
-}
-static void Print_hex32(const wchar_t* name, uint32_t value)
-{
-    if(g_UseJson)
-    {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
-    }
-    else
-    {
-        PrintIndent();
-        PrintName(name);
-        wprintf(L" = 0x%X\n", value);
-    }
-}
-static void Print_string(const wchar_t* name, const wchar_t* value)
-{
-    if(g_UseJson)
-    {
-        Json::WriteString(name);
-        Json::WriteString(value);
-    }
-    else
-    {
-        PrintIndent();
-        PrintName(name);
-        wprintf(L" = %s\n", value);
-    }
-}
 
 static wstring LuidToStr(LUID value)
 {
     wchar_t s[64];
     swprintf_s(s, L"%08X-%08X", (uint32_t)value.HighPart, (uint32_t)value.LowPart);
     return wstring{s};
-}
-
-static void PrintEnum(const wchar_t* name, uint32_t value,
-    const EnumItem* enumItems)
-{
-    if(g_UseJson)
-    {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
-    }
-    else
-    {
-        PrintIndent();
-        PrintName(name);
-        const wchar_t* enumItemName = FindEnumItemName(value, enumItems);
-        if(enumItemName != nullptr)
-            wprintf(L" = %s (0x%X)\n", enumItemName, value);
-        else
-            wprintf(L" = 0x%X\n", value);
-    }
-}
-
-static void PrintFlags(const wchar_t* name, uint32_t value,
-    const EnumItem* enumItems)
-{
-    if(g_UseJson)
-    {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
-    }
-    else
-    {
-        PrintIndent();
-        PrintName(name);
-        wprintf(L" = 0x%X\n", value);
-
-        ++g_Indent;
-        size_t zeroFlagIndex = SIZE_MAX;
-        for(size_t i = 0; enumItems[i].m_Name != nullptr; ++i)
-        {
-            if(enumItems[i].m_Value == 0)
-            {
-                zeroFlagIndex = i;
-            }
-            else
-            {
-                if((value & enumItems[i].m_Value) != 0)
-                {
-                    PrintIndent();
-                    wprintf(L"%s\n", enumItems[i].m_Name);
-                }
-            }
-        }
-        if(value == 0 && zeroFlagIndex != SIZE_MAX)
-        {
-            PrintIndent();
-            wprintf(L"%s\n", enumItems[zeroFlagIndex].m_Name);
-        }
-        --g_Indent;
-    }
-}
-
-static void PrintStructBegin(const wchar_t* structName)
-{
-    if(g_UseJson)
-    {
-        Json::WriteString(structName);
-        Json::BeginObject();
-    }
-    else
-    {
-        PrintHeader(structName, 1);
-        ++g_Indent;
-    }
-}
-
-static void PrintStructEnd()
-{
-    if(g_UseJson)
-    {
-        Json::EndObject();
-    }
-    else
-    {
-        --g_Indent;
-        PrintEmptyLine();
-    }
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(const D3D12_FEATURE_DATA_D3D12_OPTIONS& options)
@@ -606,33 +328,31 @@ static wstring MakeCurrentDate()
     return wstring{dateStr};
 }
 
-static void PrintGeneralParams()
+static void PrintGeneralParams(NvAPI_Inititalize_RAII* nvAPI)
 {
     Print_string(L"Current date", MakeCurrentDate().c_str());
     Print_uint32(L"D3D12SDKVersion", uint32_t(D3D12SDKVersion));
 
 #if USE_NVAPI
-    NvAPI_ShortString nvShortString;
-    NvAPI_Status nvStatus = NvAPI_GetInterfaceVersionString(nvShortString);
-    if(nvStatus == NVAPI_OK)
-        Print_string(L"NvAPI_GetInterfaceVersionString", NvShortStringToStr(nvShortString).c_str());
+    if(nvAPI->IsInitialized())
+        nvAPI->PrintGeneralParams();
 #endif
 }
 
-static void PrintGeneralData()
+static void PrintGeneralData(NvAPI_Inititalize_RAII* nvAPI)
 {
     if(g_UseJson)
     {
         Json::WriteString(L"General");
         Json::BeginObject();
-        PrintGeneralParams();
+        PrintGeneralParams(nvAPI);
         Json::EndObject();
     }
     else
     {
         PrintHeader(L"General", 0);
         ++g_Indent;
-        PrintGeneralParams();
+        PrintGeneralParams(nvAPI);
         --g_Indent;
         PrintEmptyLine();
     }
@@ -899,25 +619,6 @@ static void PrintFormatInformation(ID3D12Device* device)
     else
         PrintEmptyLine();
 }
-
-#if USE_NVAPI
-
-static void PrintNvApiData()
-{
-    {
-        NvU32 pDriverVersion = UINT32_MAX;
-        NvAPI_ShortString szBuildBranchString = {};
-        if(NvAPI_SYS_GetDriverAndBranchVersion(&pDriverVersion, szBuildBranchString) == NVAPI_OK)
-        {
-            PrintStructBegin(L"NvAPI_SYS_GetDriverAndBranchVersion");
-            Print_uint32(L"pDriverVersion", pDriverVersion);
-            Print_string(L"szBuildBranchString", NvShortStringToStr(szBuildBranchString).c_str());
-            PrintStructEnd();
-        }
-    }
-}
-
-#endif // #if USE_NVAPI
 
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1)
 {
@@ -1279,15 +980,21 @@ int wmain2(int argc, wchar_t** argv)
     }
 #endif
 
-    PrintGeneralData();
+#if USE_NVAPI
+    NvAPI_Inititalize_RAII nvApiInitializeObj;
+    NvAPI_Inititalize_RAII* nvApiObjPtr = &nvApiInitializeObj;
+#else
+    NvAPI_Inititalize_RAII* nvApiObjPtr = nullptr;
+#endif
 
-    PrintOsVersionInfo();
+    PrintGeneralData(nvApiObjPtr);
 
 #if USE_NVAPI
-    NvAPI_Inititalize_RAII NvApiInitializeObj;
-    if(NvApiInitializeObj.IsInitialized())
-        PrintNvApiData();
+    if(nvApiInitializeObj.IsInitialized())
+        nvApiInitializeObj.PrintData();
 #endif
+
+    PrintOsVersionInfo();
 
     if(g_PrintEnums)
         PrintEnumsData();
