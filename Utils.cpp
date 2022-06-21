@@ -19,6 +19,20 @@ wstring SizeToStr(uint64_t size)
 	return s;
 }
 
+wstring StrToWstr(const char* str, uint32_t codePage)
+{
+    if(!str || !*str)
+        return wstring{};
+    const int size = MultiByteToWideChar(codePage, 0, str, (int)strlen(str), NULL, 0);
+    if(size == 0)
+        return wstring{};
+    std::vector<wchar_t> buf((size_t)size);
+    const int result = MultiByteToWideChar(codePage, 0, str, (int)strlen(str), buf.data(), size);
+    if(result == 0)
+        return wstring{};
+    return wstring{buf.data(), buf.size()};
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // class CmdLineParser
 

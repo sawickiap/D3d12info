@@ -109,7 +109,7 @@ void Print_BOOL(const wchar_t* name, BOOL value)
     }
 }
 
-void Print_uint32(const wchar_t* name, uint32_t value)
+void Print_uint32(const wchar_t* name, uint32_t value, const wchar_t* unit)
 {
     if(g_UseJson)
     {
@@ -120,11 +120,14 @@ void Print_uint32(const wchar_t* name, uint32_t value)
     {
         PrintIndent();
         PrintName(name);
-        wprintf(L" = %u\n", value);
+        if(unit && *unit)
+            wprintf(L" = %u %s\n", value, unit);
+        else
+            wprintf(L" = %u\n", value);
     }
 }
 
-void Print_uint64(const wchar_t* name, uint64_t value)
+void Print_uint64(const wchar_t* name, uint64_t value, const wchar_t* unit)
 {
     if(g_UseJson)
     {
@@ -135,7 +138,10 @@ void Print_uint64(const wchar_t* name, uint64_t value)
     {
         PrintIndent();
         PrintName(name);
-        wprintf(L" = %llu\n", value);
+        if(unit && *unit)
+            wprintf(L" = %llu %s\n", value, unit);
+        else
+            wprintf(L" = %llu\n", value);
     }
 }
 
@@ -155,10 +161,7 @@ void Print_size(const wchar_t* name, uint64_t value)
         else if(value < 1024)
             wprintf(L" = %zu (0x%llx)\n", value, value);
         else
-        {
-            wstring sizeStr = SizeToStr(value);
-            wprintf(L" = %zu (0x%llx) (%s)\n", value, value, sizeStr.c_str());
-        }
+            wprintf(L" = %zu (0x%llx) (%s)\n", value, value, SizeToStr(value).c_str());
     }
 }
 

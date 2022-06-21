@@ -14,7 +14,8 @@ public:
     
     void PrintGeneralParams();
     void PrintData();
-    void PrintDeviceData(ID3D12Device* device);
+    void PrintD3d12DeviceData(ID3D12Device* device);
+    void PrintPhysicalGpuData(const LUID& adapterLuid);
 
 private:
     bool m_Initialized = false;

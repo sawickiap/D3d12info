@@ -790,7 +790,13 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
 
 #if USE_NVAPI
     if(nvAPI && nvAPI->IsInitialized())
-        nvAPI->PrintDeviceData(device.Get());
+    {
+        nvAPI->PrintD3d12DeviceData(device.Get());
+
+        DXGI_ADAPTER_DESC1 desc1 = {};
+        if(SUCCEEDED(adapter1->GetDesc1(&desc1)))
+            nvAPI->PrintPhysicalGpuData(desc1.AdapterLuid);
+    }
 #endif
 
     if(g_PrintFormats)

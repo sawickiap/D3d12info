@@ -1,6 +1,8 @@
 #pragma once
 
 wstring SizeToStr(uint64_t size);
+// As codePage use e.g. CP_ACP (native Windows), CP_UTF8.
+wstring StrToWstr(const char* str, uint32_t codePage);
 
 class CmdLineParser
 {
