@@ -63,6 +63,23 @@ static const EnumItem Enum_VendorId[] = {
 	{ NULL, UINT32_MAX } };
 static EnumRegistration g_Enum_VendorId_Registration(L"VendorId", Enum_VendorId);
 
+static const EnumItem Enum_NV_EXTN_OP[] = {
+	{ L"NV_EXTN_OP_SHFL", 1 },
+	{ L"NV_EXTN_OP_SHFL_UP", 2 },
+	{ L"NV_EXTN_OP_SHFL_DOWN", 3 },
+	{ L"NV_EXTN_OP_SHFL_XOR", 4 },
+	{ L"NV_EXTN_OP_VOTE_ALL", 5 },
+	{ L"NV_EXTN_OP_VOTE_ANY", 6 },
+	{ L"NV_EXTN_OP_VOTE_BALLOT", 7 },
+	{ L"NV_EXTN_OP_GET_LANE_ID", 8 },
+	{ L"NV_EXTN_OP_FP16_ATOMIC", 12 },
+	{ L"NV_EXTN_OP_FP32_ATOMIC", 13 },
+	{ L"NV_EXTN_OP_UINT64_ATOMIC", 20 },
+	{ L"NV_EXTN_OP_GET_SHADING_RATE", 30 },
+	{ L"NV_EXTN_OP_VPRS_EVAL_ATTRIB_AT_SAMPLE", 51 },
+	{ NULL, UINT32_MAX } };
+static EnumRegistration g_Enum_NV_EXTN_OP_Registration(L"NV_EXTN_OP", Enum_NV_EXTN_OP);
+
 ////////////////////////////////////////////////////////////////////////////////
 // WinAPI enums
 

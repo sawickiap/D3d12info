@@ -620,7 +620,7 @@ static void PrintFormatInformation(ID3D12Device* device)
         PrintEmptyLine();
 }
 
-static int PrintDeviceDetails(IDXGIAdapter1* adapter1)
+static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI)
 {
     ComPtr<ID3D12Device> device;
 #if defined(AUTO_LINK_DX12)
@@ -787,6 +787,11 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1)
         if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS12, &options12, sizeof(options12))))
             Print_D3D12_FEATURE_DATA_D3D12_OPTIONS12(options12);
     }
+
+#if USE_NVAPI
+    if(nvAPI && nvAPI->IsInitialized())
+        nvAPI->PrintDeviceData(device.Get());
+#endif
 
     if(g_PrintFormats)
         PrintFormatInformation(device.Get());
@@ -1083,7 +1088,7 @@ int wmain2(int argc, wchar_t** argv)
 
                 PrintAdapterData(adapter.Get());
                 
-                programResult = PrintDeviceDetails(adapter.Get());
+                programResult = PrintDeviceDetails(adapter.Get(), nvApiObjPtr);
 
                 if(g_UseJson)
                     Json::EndObject();

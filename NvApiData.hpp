@@ -14,6 +14,7 @@ public:
     
     void PrintGeneralParams();
     void PrintData();
+    void PrintDeviceData(ID3D12Device* device);
 
 private:
     bool m_Initialized = false;
