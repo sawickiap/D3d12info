@@ -51,6 +51,19 @@ inline const wchar_t* FindEnumItemName(uint32_t value, const EnumItem* items)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Other enums
+
+static const EnumItem Enum_VendorId[] = {
+	{ L"AMD",      0x1002 },
+	{ L"ImgTec",   0x1010 },
+	{ L"NVIDIA",   0x10DE },
+	{ L"ARM",      0x13B5 },
+	{ L"Qualcomm", 0x5143 },
+	{ L"Intel",    0x8086 },
+	{ NULL, UINT32_MAX } };
+static EnumRegistration g_Enum_VendorId_Registration(L"VendorId", Enum_VendorId);
+
+////////////////////////////////////////////////////////////////////////////////
 // WinAPI enums
 
 ENUM_BEGIN(VER_SUITE)

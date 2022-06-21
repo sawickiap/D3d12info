@@ -436,7 +436,7 @@ static void PrintAdapterDesc1(const DXGI_ADAPTER_DESC1& desc1)
 {
     PrintStructBegin(L"DXGI_ADAPTER_DESC1");
     Print_string(L"Description", desc1.Description);
-    Print_hex32 (L"VendorId", desc1.VendorId);
+    PrintEnum   (L"VendorId", desc1.VendorId, Enum_VendorId);
     Print_hex32 (L"DeviceId", desc1.DeviceId);
     Print_hex32 (L"SubSysId", desc1.SubSysId);
     Print_hex32 (L"Revision", desc1.Revision);

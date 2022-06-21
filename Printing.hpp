@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Enums.hpp"
+struct EnumItem;
 
 extern bool g_UseJson;
 extern uint32_t g_Indent;
