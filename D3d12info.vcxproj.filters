@@ -5,12 +5,16 @@
     <ClInclude Include="Utils.hpp" />
     <ClInclude Include="Enums.hpp" />
     <ClInclude Include="Json.hpp" />
+    <ClInclude Include="Printing.hpp" />
+    <ClInclude Include="NvApiData.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="D3d12info.cpp" />
+    <ClCompile Include="Main.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Json.cpp" />
+    <ClCompile Include="Printing.cpp" />
+    <ClCompile Include="NvApiData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ThirdParty">
