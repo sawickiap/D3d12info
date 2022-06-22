@@ -381,6 +381,15 @@ static bool FindPhysicalGpu(const LUID& adapterLuid, NvPhysicalGpuHandle& outGpu
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC
 
+void NvAPI_Inititalize_RAII::PrintStaticParams()
+{
+    Print_string(L"NvAPI compiled version", NVAPI_COMPILED_VERSION);
+
+    NvAPI_ShortString nvShortString;
+    if(NvAPI_GetInterfaceVersionString(nvShortString) == NVAPI_OK)
+        Print_string(L"NvAPI_GetInterfaceVersionString", NvShortStringToStr(nvShortString).c_str());
+}
+
 NvAPI_Inititalize_RAII::NvAPI_Inititalize_RAII()
 {
     m_Initialized = NvAPI_Initialize() == NVAPI_OK;
@@ -394,16 +403,10 @@ NvAPI_Inititalize_RAII::~NvAPI_Inititalize_RAII()
         NvAPI_Unload();
 }
 
-void NvAPI_Inititalize_RAII::PrintGeneralParams()
-{
-    Print_string(L"NvAPI compiled version", NVAPI_COMPILED_VERSION);
-    NvAPI_ShortString nvShortString;
-    if(NvAPI_GetInterfaceVersionString(nvShortString) == NVAPI_OK)
-        Print_string(L"NvAPI_GetInterfaceVersionString", NvShortStringToStr(nvShortString).c_str());
-}
-
 void NvAPI_Inititalize_RAII::PrintData()
 {
+	assert(m_Initialized);
+    
     NvU32 pDriverVersion = UINT32_MAX;
     NvAPI_ShortString szBuildBranchString = {};
     if(NvAPI_SYS_GetDriverAndBranchVersion(&pDriverVersion, szBuildBranchString) == NVAPI_OK)
@@ -433,6 +436,8 @@ void NvAPI_Inititalize_RAII::PrintData()
 
 void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
 {
+	assert(m_Initialized);
+    
     wstring s;
 
     PrintStructBegin(L"NvAPI_D3D12_IsNvShaderExtnOpCodeSupported");
@@ -447,6 +452,8 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
 
 void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
 {
+	assert(m_Initialized);
+
     NvPhysicalGpuHandle gpu = {};
     if(!FindPhysicalGpu(adapterLuid, gpu))
         return;

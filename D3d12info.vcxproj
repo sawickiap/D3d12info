@@ -65,15 +65,15 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>f:\Libraries\NVAPI\R515-developer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4100;4189;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>f:\Libraries\NVAPI\R515-developer;f:\Libraries\AMD\AGS_SDK-6.0.1\ags_lib\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>
       </AdditionalDependencies>
-      <AdditionalLibraryDirectories>f:\Libraries\NVAPI\R515-developer\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>f:\Libraries\NVAPI\R515-developer\amd64;f:\Libraries\AMD\AGS_SDK-6.0.1\ags_lib\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -88,8 +88,8 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>f:\Libraries\NVAPI\R515-developer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4100;4189;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>f:\Libraries\NVAPI\R515-developer;f:\Libraries\AMD\AGS_SDK-6.0.1\ags_lib\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -98,10 +98,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>
       </AdditionalDependencies>
-      <AdditionalLibraryDirectories>f:\Libraries\NVAPI\R515-developer\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>f:\Libraries\NVAPI\R515-developer\amd64;f:\Libraries\AMD\AGS_SDK-6.0.1\ags_lib\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AgsData.hpp" />
     <ClInclude Include="Enums.hpp" />
     <ClInclude Include="Json.hpp" />
     <ClInclude Include="NvApiData.hpp" />
@@ -110,6 +111,7 @@
     <ClInclude Include="Utils.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AgsData.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Json.cpp" />
     <ClCompile Include="NvApiData.cpp" />

@@ -17,5 +17,7 @@ void Print_uint32(const wchar_t* name, uint32_t value, const wchar_t* unit = nul
 void Print_uint64(const wchar_t* name, uint64_t value, const wchar_t* unit = nullptr);
 void Print_size(const wchar_t* name, uint64_t value);
 void Print_hex32(const wchar_t* name, uint32_t value);
+void Print_int32(const wchar_t* name, int32_t value, const wchar_t* unit = nullptr);
+void Print_float(const wchar_t* name, float value, const wchar_t* unit = nullptr);
 void PrintEnum(const wchar_t* name, uint32_t value, const EnumItem* enumItems);
 void PrintFlags(const wchar_t* name, uint32_t value, const EnumItem* enumItems);

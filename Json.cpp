@@ -134,6 +134,16 @@ void WriteNumber(uint64_t value)
 	PushValue(ValueType{value});
 }
 
+void WriteNumber(int32_t value)
+{
+	PushValue(ValueType{value});
+}
+
+void WriteNumber(float value)
+{
+	PushValue(ValueType{value});
+}
+
 void BeginObject()
 {
 	PushValue(ValueType{rapidjson::kObjectType});

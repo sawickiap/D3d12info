@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "NvApiData.hpp"
+#include "AgsData.hpp"
 #include "Utils.hpp"
 #include "Enums.hpp"
 #include "Json.hpp"
@@ -10,8 +11,6 @@ extern "C" {
     __declspec(dllexport) extern const UINT D3D12SDKVersion = 700;
     __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\";
 }
-
-static const wchar_t* const PROGRAM_VERSION = L"0.0.2-development";
 
 static const int PROGRAM_EXIT_SUCCESS            = 0;
 static const int PROGRAM_EXIT_ERROR_INIT         = -1;
@@ -324,31 +323,33 @@ static wstring MakeCurrentDate()
     return wstring{dateStr};
 }
 
-static void PrintGeneralParams(NvAPI_Inititalize_RAII* nvAPI)
+static void PrintGeneralParams()
 {
     Print_string(L"Current date", MakeCurrentDate().c_str());
     Print_uint32(L"D3D12SDKVersion", uint32_t(D3D12SDKVersion));
 
 #if USE_NVAPI
-    if(nvAPI->IsInitialized())
-        nvAPI->PrintGeneralParams();
+    NvAPI_Inititalize_RAII::PrintStaticParams();
+#endif
+#if USE_AGS
+    AGS_Initialize_RAII::PrintStaticParams();
 #endif
 }
 
-static void PrintGeneralData(NvAPI_Inititalize_RAII* nvAPI)
+static void PrintGeneralData()
 {
     if(g_UseJson)
     {
         Json::WriteString(L"General");
         Json::BeginObject();
-        PrintGeneralParams(nvAPI);
+        PrintGeneralParams();
         Json::EndObject();
     }
     else
     {
         PrintHeader(L"General", 0);
         ++g_Indent;
-        PrintGeneralParams(nvAPI);
+        PrintGeneralParams();
         --g_Indent;
         PrintEmptyLine();
     }
@@ -616,14 +617,30 @@ static void PrintFormatInformation(ID3D12Device* device)
         PrintEmptyLine();
 }
 
-static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI)
+static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI, AGS_Initialize_RAII* ags)
 {
     ComPtr<ID3D12Device> device;
-#if defined(AUTO_LINK_DX12)
-    CHECK_HR( ::D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device)) );
-#else
-    CHECK_HR( g_D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device)) );
+
+#if USE_AGS
+    if(ags && ags->IsInitialized())
+    {
+        ComPtr<IDXGIAdapter> adapter;
+        if(SUCCEEDED(adapter1->QueryInterface(IID_PPV_ARGS(&adapter))))
+        {
+            device = ags->CreateDeviceAndPrintData(adapter.Get(), D3D_FEATURE_LEVEL_12_1/*TODO*/);
+        }
+    }
 #endif
+
+    if(!device)
+    {
+#if defined(AUTO_LINK_DX12)
+        CHECK_HR( ::D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_12_1/*TODO*/, IID_PPV_ARGS(&device)) );
+#else
+        CHECK_HR( g_D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_12_1/*TODO*/, IID_PPV_ARGS(&device)) );
+#endif
+    }
+
     if (!device)
         return PROGRAM_EXIT_ERROR_D3D12;
      
@@ -792,6 +809,11 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     if(g_PrintFormats)
         PrintFormatInformation(device.Get());
 
+#if USE_AGS
+    if(ags && ags->IsInitialized())
+        ags->DestroyDevice(std::move(device));
+#endif
+
     return PROGRAM_EXIT_SUCCESS;
 }
 
@@ -858,7 +880,7 @@ static void PrintCommandLineSyntax()
     wprintf(L"  -e --Enums           Include information about all known enums and their values.\n");
 }
 
-static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi)
+static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags)
 {
     if(g_UseJson)
     {
@@ -880,14 +902,26 @@ static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvA
 
         PrintAdapterData(currAdapter.Get());
 
-#if USE_NVAPI
-        if(nvApi && nvApi->IsInitialized())
+        DXGI_ADAPTER_DESC1 desc1 = {};
+        if(SUCCEEDED(currAdapter->GetDesc1(&desc1)))
         {
-            DXGI_ADAPTER_DESC1 desc1 = {};
-            if(SUCCEEDED(currAdapter->GetDesc1(&desc1)))
+#if USE_NVAPI
+            if(nvApi && nvApi->IsInitialized())
+            {
                 nvApi->PrintPhysicalGpuData(desc1.AdapterLuid);
-        }
+            }
 #endif
+#if USE_AGS
+            if(ags && ags->IsInitialized())
+            {
+                AGS_Initialize_RAII::DeviceId deviceId = {
+                    .vendorId = (int)desc1.VendorId,
+                    .deviceId = (int)desc1.DeviceId,
+                    .revisionId = (int)desc1.Revision};
+                ags->PrintAgsDeviceData(deviceId);
+            }
+#endif
+        }
 
         if(g_UseJson)
             Json::EndObject();
@@ -901,7 +935,8 @@ static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvA
 }
 
 // adapterIndex == UINT_MAX means first non-software and non-remote ad
-static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, uint32_t adapterIndex)
+static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
+    uint32_t adapterIndex)
 {
     int programResult = PROGRAM_EXIT_SUCCESS;
 
@@ -939,16 +974,28 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
 
         PrintAdapterData(adapter.Get());
 
-#if USE_NVAPI
-        if(nvApi && nvApi->IsInitialized())
+        DXGI_ADAPTER_DESC1 desc1 = {};
+        if(SUCCEEDED(adapter->GetDesc1(&desc1)))
         {
-            DXGI_ADAPTER_DESC1 desc1 = {};
-            if(SUCCEEDED(adapter->GetDesc1(&desc1)))
-                nvApi->PrintPhysicalGpuData(desc1.AdapterLuid);
-        }
+#if USE_NVAPI
+            if(nvApi && nvApi->IsInitialized())
+            {
+                    nvApi->PrintPhysicalGpuData(desc1.AdapterLuid);
+            }
 #endif
+#if USE_AGS
+            if(ags && ags->IsInitialized())
+            {
+                AGS_Initialize_RAII::DeviceId deviceId = {
+                    .vendorId = (int)desc1.VendorId,
+                    .deviceId = (int)desc1.DeviceId,
+                    .revisionId = (int)desc1.Revision};
+                ags->PrintAgsDeviceData(deviceId);
+            }
+#endif
+        }
 
-        programResult = PrintDeviceDetails(adapter.Get(), nvApi);
+        programResult = PrintDeviceDetails(adapter.Get(), nvApi, ags);
 
         if(g_UseJson)
             Json::EndObject();
@@ -1056,11 +1103,22 @@ int wmain2(int argc, wchar_t** argv)
     NvAPI_Inititalize_RAII* nvApiObjPtr = nullptr;
 #endif
 
-    PrintGeneralData(nvApiObjPtr);
+#if USE_AGS
+    AGS_Initialize_RAII agsInitializeObj;
+    AGS_Initialize_RAII* agsObjPtr = &agsInitializeObj;
+#else
+    AGS_Initialize_RAII* agsObjPtr = nullptr;
+#endif
+
+    PrintGeneralData();
 
 #if USE_NVAPI
     if(nvApiInitializeObj.IsInitialized())
         nvApiInitializeObj.PrintData();
+#endif
+#if USE_AGS
+    if(agsInitializeObj.IsInitialized())
+        agsInitializeObj.PrintData();
 #endif
 
     PrintOsVersionInfo();
@@ -1081,9 +1139,9 @@ int wmain2(int argc, wchar_t** argv)
         assert(dxgiFactory != nullptr);
 
         if(g_ListAdapters)
-            ListAdapters(dxgiFactory.Get(), nvApiObjPtr);
+            ListAdapters(dxgiFactory.Get(), nvApiObjPtr, agsObjPtr);
         else
-            InspectAdapter(dxgiFactory.Get(), nvApiObjPtr, adapterIndex);
+            InspectAdapter(dxgiFactory.Get(), nvApiObjPtr, agsObjPtr, adapterIndex);
     }
 
 #if !defined(AUTO_LINK_DX12)

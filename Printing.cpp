@@ -180,6 +180,42 @@ void Print_hex32(const wchar_t* name, uint32_t value)
     }
 }
 
+void Print_int32(const wchar_t* name, int32_t value, const wchar_t* unit)
+{
+    if(g_UseJson)
+    {
+        Json::WriteString(name);
+        Json::WriteNumber(value);
+    }
+    else
+    {
+        PrintIndent();
+        PrintName(name);
+        if(unit && *unit)
+            wprintf(L" = %i %s\n", value, unit);
+        else
+            wprintf(L" = %i\n", value);
+    }
+}
+
+void Print_float(const wchar_t* name, float value, const wchar_t* unit)
+{
+    if(g_UseJson)
+    {
+        Json::WriteString(name);
+        Json::WriteNumber(value);
+    }
+    else
+    {
+        PrintIndent();
+        PrintName(name);
+        if(unit && *unit)
+            wprintf(L" = %g %s\n", value, unit);
+        else
+            wprintf(L" = %g\n", value);
+    }
+}
+
 void PrintEnum(const wchar_t* name, uint32_t value, const EnumItem* enumItems)
 {
     if(g_UseJson)

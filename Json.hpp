@@ -13,6 +13,8 @@ void WriteNull();
 void WriteBool(bool value);
 void WriteNumber(uint32_t value);
 void WriteNumber(uint64_t value);
+void WriteNumber(int32_t value);
+void WriteNumber(float value);
 void BeginObject();
 void EndObject();
 void BeginArray();
