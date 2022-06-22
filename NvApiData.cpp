@@ -443,18 +443,6 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
             Print_BOOL(ei->m_Name, supported);
     }
     PrintStructEnd();
-
-    {
-        NV_DISPLAY_DRIVER_MEMORY_INFO memInfo = {NV_DISPLAY_DRIVER_MEMORY_INFO_VER};
-        if(NvAPI_GPU_GetMemoryInfo(g_PhysicalGpus[0], &memInfo) == NVAPI_OK)
-        {
-            PrintStructBegin(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO");
-            Print_uint32(L"dedicatedVideoMemory", memInfo.dedicatedVideoMemory, L"KB");
-            Print_uint32(L"systemVideoMemory", memInfo.systemVideoMemory, L"KB");
-            Print_uint32(L"sharedSystemMemory", memInfo.sharedSystemMemory, L"KB");
-            PrintStructEnd();
-        }
-    }
 }
 
 void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
@@ -540,6 +528,16 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
         NvAPI_Status status = NvAPI_GPU_QueryWorkstationFeatureSupport(gpu, (NV_GPU_WORKSTATION_FEATURE_TYPE)ei->m_Value);
         PrintEnum(std::format(L"NvAPI_GPU_QueryWorkstationFeatureSupport({})", ei->m_Name).c_str(),
             status, Enum_NvAPI_Status);
+    }
+
+    {
+        NV_DISPLAY_DRIVER_MEMORY_INFO memInfo = {NV_DISPLAY_DRIVER_MEMORY_INFO_VER};
+        if(NvAPI_GPU_GetMemoryInfo(gpu, &memInfo) == NVAPI_OK)
+        {
+            Print_uint32(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO::dedicatedVideoMemory", memInfo.dedicatedVideoMemory, L"KB");
+            Print_uint32(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO::systemVideoMemory", memInfo.systemVideoMemory, L"KB");
+            Print_uint32(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO::sharedSystemMemory", memInfo.sharedSystemMemory, L"KB");
+        }
     }
 
     PrintStructEnd();

@@ -12,7 +12,9 @@ public:
     ~NvAPI_Inititalize_RAII();
     bool IsInitialized() const { return m_Initialized; }
     
+    // Prints basic struct parameters related to NVAPI itself.
     void PrintGeneralParams();
+    // Prints structs from NVAPI unrelated to any specific GPU.
     void PrintData();
     void PrintD3d12DeviceData(ID3D12Device* device);
     void PrintPhysicalGpuData(const LUID& adapterLuid);

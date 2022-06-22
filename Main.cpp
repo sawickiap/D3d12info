@@ -786,13 +786,7 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
 
 #if USE_NVAPI
     if(nvAPI && nvAPI->IsInitialized())
-    {
         nvAPI->PrintD3d12DeviceData(device.Get());
-
-        DXGI_ADAPTER_DESC1 desc1 = {};
-        if(SUCCEEDED(adapter1->GetDesc1(&desc1)))
-            nvAPI->PrintPhysicalGpuData(desc1.AdapterLuid);
-    }
 #endif
 
     if(g_PrintFormats)
@@ -862,6 +856,110 @@ static void PrintCommandLineSyntax()
     wprintf(L"  -j --JSON            Print output in JSON format instead of human-friendly text.\n");
     wprintf(L"  -f --Formats         Include information about DXGI format capabilities.\n");
     wprintf(L"  -e --Enums           Include information about all known enums and their values.\n");
+}
+
+static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi)
+{
+    if(g_UseJson)
+    {
+        Json::WriteString(L"Adapters");
+        Json::BeginArray();
+    }
+
+    ComPtr<IDXGIAdapter1> currAdapter;
+    UINT currAdapterIndex = 0;
+    while(dxgiFactory->EnumAdapters1(currAdapterIndex, &currAdapter) != DXGI_ERROR_NOT_FOUND)
+    {
+        if(g_UseJson)
+            Json::BeginObject();
+        else
+        {
+            PrintHeader(std::format(L"DXGI Adapter {}", currAdapterIndex).c_str(), 0);
+            PrintEmptyLine();
+        }
+
+        PrintAdapterData(currAdapter.Get());
+
+#if USE_NVAPI
+        if(nvApi && nvApi->IsInitialized())
+        {
+            DXGI_ADAPTER_DESC1 desc1 = {};
+            if(SUCCEEDED(currAdapter->GetDesc1(&desc1)))
+                nvApi->PrintPhysicalGpuData(desc1.AdapterLuid);
+        }
+#endif
+
+        if(g_UseJson)
+            Json::EndObject();
+
+        currAdapter.Reset();
+        ++currAdapterIndex;
+    }
+
+    if(g_UseJson)
+        Json::EndArray();
+}
+
+// adapterIndex == UINT_MAX means first non-software and non-remote ad
+static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, uint32_t adapterIndex)
+{
+    int programResult = PROGRAM_EXIT_SUCCESS;
+
+    ComPtr<IDXGIAdapter1> adapter;
+    if(adapterIndex != UINT32_MAX)
+        dxgiFactory->EnumAdapters1(adapterIndex, &adapter);
+    else
+    {
+        // No explicit adapter requested: Choose first non-software and non-remote.
+        adapterIndex = 0;
+        DXGI_ADAPTER_DESC1 desc = {};
+        while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND)
+        {
+            adapter->GetDesc1(&desc);
+            if(desc.Flags == 0)
+                break;
+            adapter.Reset();
+            ++adapterIndex;
+        }
+    }
+
+    if(adapter)
+    {
+        wstring adapterStr = std::format(L"DXGI Adapter {}", adapterIndex);
+        if(g_UseJson)
+        {
+            Json::WriteString(std::move(adapterStr));
+            Json::BeginObject();
+        }
+        else
+        {
+            PrintHeader(adapterStr.c_str(), 0);
+            PrintEmptyLine();
+        }
+
+        PrintAdapterData(adapter.Get());
+
+#if USE_NVAPI
+        if(nvApi && nvApi->IsInitialized())
+        {
+            DXGI_ADAPTER_DESC1 desc1 = {};
+            if(SUCCEEDED(adapter->GetDesc1(&desc1)))
+                nvApi->PrintPhysicalGpuData(desc1.AdapterLuid);
+        }
+#endif
+
+        programResult = PrintDeviceDetails(adapter.Get(), nvApi);
+
+        if(g_UseJson)
+            Json::EndObject();
+    }
+    else
+    {
+        programResult = PROGRAM_EXIT_ERROR_NO_ADAPTER;
+        wprintf(L"ERROR: No valid adapter chosen to show D3D12 device details.\n");
+    }
+
+    return programResult;
 }
 
 int wmain2(int argc, wchar_t** argv)
@@ -983,84 +1081,9 @@ int wmain2(int argc, wchar_t** argv)
         assert(dxgiFactory != nullptr);
 
         if(g_ListAdapters)
-        {
-            if(g_UseJson)
-            {
-                Json::WriteString(L"Adapters");
-                Json::BeginArray();
-            }
-
-            ComPtr<IDXGIAdapter1> currAdapter;
-            UINT currAdapterIndex = 0;
-            while(dxgiFactory->EnumAdapters1(currAdapterIndex, &currAdapter) != DXGI_ERROR_NOT_FOUND)
-            {
-                if(g_UseJson)
-                    Json::BeginObject();
-                else
-                {
-                    PrintHeader(std::format(L"DXGI Adapter {}", currAdapterIndex).c_str(), 0);
-                    PrintEmptyLine();
-                }
-
-                PrintAdapterData(currAdapter.Get());
-
-                if(g_UseJson)
-                    Json::EndObject();
-
-                currAdapter.Reset();
-                ++currAdapterIndex;
-            }
-
-            if(g_UseJson)
-                Json::EndArray();
-        }
+            ListAdapters(dxgiFactory.Get(), nvApiObjPtr);
         else
-        {
-            ComPtr<IDXGIAdapter1> adapter;
-            if(adapterIndex != UINT32_MAX)
-                dxgiFactory->EnumAdapters1(adapterIndex, &adapter);
-            else
-            {
-                // No explicit adapter requested: Choose first non-software and non-remote.
-                adapterIndex = 0;
-                DXGI_ADAPTER_DESC1 desc = {};
-                while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND)
-                {
-                    adapter->GetDesc1(&desc);
-                    if(desc.Flags == 0)
-                        break;
-                    adapter.Reset();
-                    ++adapterIndex;
-                }
-            }
-
-            wstring adapterStr = std::format(L"DXGI Adapter {}", adapterIndex);
-            if(adapter)
-            {
-                if(g_UseJson)
-                {
-                    Json::WriteString(std::move(adapterStr));
-                    Json::BeginObject();
-                }
-                else
-                {
-                    PrintHeader(adapterStr.c_str(), 0);
-                    PrintEmptyLine();
-                }
-
-                PrintAdapterData(adapter.Get());
-                
-                programResult = PrintDeviceDetails(adapter.Get(), nvApiObjPtr);
-
-                if(g_UseJson)
-                    Json::EndObject();
-            }
-            else
-            {
-                programResult = PROGRAM_EXIT_ERROR_NO_ADAPTER;
-                wprintf(L"ERROR: No valid adapter chosen to show D3D12 device details.\n");
-            }
-        }
+            InspectAdapter(dxgiFactory.Get(), nvApiObjPtr, adapterIndex);
     }
 
 #if !defined(AUTO_LINK_DX12)
