@@ -24,6 +24,7 @@
 #include <cmath>
 #include <cwchar>
 
+using std::string;
 using std::wstring;
 using Microsoft::WRL::ComPtr;
 

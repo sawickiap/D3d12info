@@ -273,3 +273,11 @@ void PrintFlags(const wchar_t* name, uint32_t value, const EnumItem* enumItems)
         --g_Indent;
     }
 }
+
+void PrintHexBytes(const wchar_t* name, const void* data, size_t byteCount)
+{
+    wstring valStr;
+    for(size_t i = 0; i < byteCount; ++i)
+        valStr += std::format(L"{:02X}", *((const uint8_t*)data + i));
+    Print_string(name, valStr.c_str());
+}

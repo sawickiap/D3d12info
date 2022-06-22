@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "NvApiData.hpp"
 #include "AgsData.hpp"
+#include "VulkanData.hpp"
 #include "Utils.hpp"
 #include "Enums.hpp"
 #include "Json.hpp"
@@ -334,6 +335,9 @@ static void PrintGeneralParams()
 #if USE_AGS
     AGS_Initialize_RAII::PrintStaticParams();
 #endif
+#if USE_VULKAN
+    Vulkan_Initialize_RAII::PrintStaticParams();
+#endif
 }
 
 static void PrintGeneralData()
@@ -626,9 +630,7 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     {
         ComPtr<IDXGIAdapter> adapter;
         if(SUCCEEDED(adapter1->QueryInterface(IID_PPV_ARGS(&adapter))))
-        {
             device = ags->CreateDeviceAndPrintData(adapter.Get(), D3D_FEATURE_LEVEL_12_1/*TODO*/);
-        }
     }
 #endif
 
@@ -1110,6 +1112,13 @@ int wmain2(int argc, wchar_t** argv)
     AGS_Initialize_RAII* agsObjPtr = nullptr;
 #endif
 
+#if USE_VULKAN
+    Vulkan_Initialize_RAII vkInitializeObj;
+    Vulkan_Initialize_RAII* vkObjPtr = &vkInitializeObj;
+#else
+    Vulkan_Initialize_RAII* vkObjPtr = nullptr;
+#endif
+
     PrintGeneralData();
 
 #if USE_NVAPI
@@ -1119,6 +1128,10 @@ int wmain2(int argc, wchar_t** argv)
 #if USE_AGS
     if(agsInitializeObj.IsInitialized())
         agsInitializeObj.PrintData();
+#endif
+#if USE_VULKAN
+    if(vkInitializeObj.IsInitialized())
+        vkInitializeObj.PrintData();
 #endif
 
     PrintOsVersionInfo();

@@ -8,6 +8,7 @@
     <ClInclude Include="Printing.hpp" />
     <ClInclude Include="NvApiData.hpp" />
     <ClInclude Include="AgsData.hpp" />
+    <ClInclude Include="VulkanData.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
@@ -17,6 +18,7 @@
     <ClCompile Include="Printing.cpp" />
     <ClCompile Include="NvApiData.cpp" />
     <ClCompile Include="AgsData.cpp" />
+    <ClCompile Include="VulkanData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ThirdParty">

@@ -1,12 +1,14 @@
 #pragma once
 
 extern const wchar_t* const PROGRAM_NAME;
+extern const char* const PROGRAM_NAME_ANSI;
 extern const wchar_t* const PROGRAM_VERSION;
 extern const uint32_t PROGRAM_VERSION_NUMBER;
 
 wstring SizeToStr(uint64_t size);
 // As codePage use e.g. CP_ACP (native Windows), CP_UTF8.
 wstring StrToWstr(const char* str, uint32_t codePage);
+string WstrToStr(const wchar_t* str, uint32_t codePage);
 
 class CmdLineParser
 {
