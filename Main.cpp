@@ -50,10 +50,6 @@ const wchar_t* DYN_LIB_DX12 = L"d3d12.dll";
 PFN_DXGI_CREATE_FACTORY1 g_CreateDXGIFactory1;
 PFN_D3D12_CREATE_DEVICE g_D3D12CreateDevice;
 
-#if defined(_DEBUG)
-PFN_D3D12_GET_DEBUG_INTERFACE g_D3D12GetDebugInterface;
-#endif
-
 #endif // #if defined(AUTO_LINK_DX12)
 
 static bool g_ListAdapters = false;
@@ -835,14 +831,6 @@ static bool LoadLibraries()
         return false;
     }
 
-#if defined(_DEBUG)
-    g_D3D12GetDebugInterface = reinterpret_cast<PFN_D3D12_GET_DEBUG_INTERFACE>(::GetProcAddress(g_Dx12Library, "D3D12GetDebugInterface"));
-    if (!g_D3D12GetDebugInterface)
-    {
-        return false;
-    }
-#endif
-
     return true;
 }
 
@@ -850,10 +838,6 @@ static void UnloadLibraries()
 {
     g_CreateDXGIFactory1 = nullptr;
     g_D3D12CreateDevice = nullptr;
-
-#if defined(_DEBUG)
-    g_D3D12GetDebugInterface = nullptr;
-#endif
 
     BOOL rc;
 
@@ -867,30 +851,6 @@ static void UnloadLibraries()
 }
 
 #endif
-
-#if defined(_DEBUG)
-
-ComPtr<ID3D12Debug> EnableDebugLayer()
-{
-    HRESULT hr;
-    ComPtr<ID3D12Debug> debugController = nullptr;
-
-#if defined(AUTO_LINK_DX12)
-    hr = ::D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
-#else
-    hr = g_D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
-#endif
-
-    if (SUCCEEDED(hr))
-    {
-        assert(debugController != nullptr);
-        debugController->EnableDebugLayer();
-    }
-
-    return debugController;
-}
-
-#endif // #if defined(_DEBUG)
 
 static void PrintCommandLineSyntax()
 {
@@ -1014,10 +974,6 @@ int wmain2(int argc, wchar_t** argv)
 
     // Scope for COM objects.
     {
-#if defined(_DEBUG)
-        ComPtr<ID3D12Debug> debugController = EnableDebugLayer();
-#endif
-
         ComPtr<IDXGIFactory4> dxgiFactory = nullptr;
 #if defined(AUTO_LINK_DX12)
         CHECK_HR( ::CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );

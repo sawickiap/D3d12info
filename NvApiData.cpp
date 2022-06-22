@@ -10,7 +10,7 @@
 #pragma comment(lib, "nvapi64.lib")
 
 // Don't forget to update when linking with a new version!
-static const wchar_t* NVAPI_USED_VERSION = L"R515-developer";
+static const wchar_t* NVAPI_COMPILED_VERSION = L"R515-developer";
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE
@@ -396,7 +396,7 @@ NvAPI_Inititalize_RAII::~NvAPI_Inititalize_RAII()
 
 void NvAPI_Inititalize_RAII::PrintGeneralParams()
 {
-    Print_string(L"NvAPI used version", NVAPI_USED_VERSION);
+    Print_string(L"NvAPI compiled version", NVAPI_COMPILED_VERSION);
     NvAPI_ShortString nvShortString;
     if(NvAPI_GetInterfaceVersionString(nvShortString) == NVAPI_OK)
         Print_string(L"NvAPI_GetInterfaceVersionString", NvShortStringToStr(nvShortString).c_str());
