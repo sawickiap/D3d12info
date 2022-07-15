@@ -261,6 +261,35 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS12(const D3D12_FEATURE_DATA_D3
     PrintStructEnd();
 }
 
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS13(const D3D12_FEATURE_DATA_D3D12_OPTIONS13& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS13");
+    Print_BOOL(L"UnrestrictedBufferTextureCopyPitchSupported", o.UnrestrictedBufferTextureCopyPitchSupported);
+    Print_BOOL(L"UnrestrictedVertexElementAlignmentSupported", o.UnrestrictedVertexElementAlignmentSupported);
+    Print_BOOL(L"InvertedViewportHeightFlipsYSupported", o.InvertedViewportHeightFlipsYSupported);
+    Print_BOOL(L"InvertedViewportDepthFlipsZSupported", o.InvertedViewportDepthFlipsZSupported);
+    Print_BOOL(L"TextureCopyBetweenDimensionsSupported", o.TextureCopyBetweenDimensionsSupported);
+    Print_BOOL(L"AlphaBlendFactorSupported", o.AlphaBlendFactorSupported);
+    PrintStructEnd();
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS14(const D3D12_FEATURE_DATA_D3D12_OPTIONS14& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS14");
+    Print_BOOL(L"AdvancedTextureOpsSupported", o.AdvancedTextureOpsSupported);
+    Print_BOOL(L"WriteableMSAATexturesSupported", o.WriteableMSAATexturesSupported);
+    Print_BOOL(L"IndependentFrontAndBackStencilRefMaskSupported", o.IndependentFrontAndBackStencilRefMaskSupported);
+    PrintStructEnd();
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS15(const D3D12_FEATURE_DATA_D3D12_OPTIONS15& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS15");
+    Print_BOOL(L"TriangleFanSupported", o.TriangleFanSupported);
+    Print_BOOL(L"DynamicIndexBufferStripCutSupported", o.DynamicIndexBufferStripCutSupported);
+    PrintStructEnd();
+}
+
 static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXISTING_HEAPS& existingHeaps)
 {
     PrintStructBegin(L"D3D12_FEATURE_DATA_EXISTING_HEAPS");
@@ -801,6 +830,24 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         D3D12_FEATURE_DATA_D3D12_OPTIONS12 options12 = {};
         if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS12, &options12, sizeof(options12))))
             Print_D3D12_FEATURE_DATA_D3D12_OPTIONS12(options12);
+    }
+
+    {
+        D3D12_FEATURE_DATA_D3D12_OPTIONS13 options13 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS13, &options13, sizeof(options13))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS13(options13);
+    }
+
+    {
+        D3D12_FEATURE_DATA_D3D12_OPTIONS14 options14 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS14, &options14, sizeof(options14))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS14(options14);
+    }
+
+    {
+        D3D12_FEATURE_DATA_D3D12_OPTIONS15 options15 = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS15, &options15, sizeof(options15))))
+            Print_D3D12_FEATURE_DATA_D3D12_OPTIONS15(options15);
     }
 
 #if USE_NVAPI
