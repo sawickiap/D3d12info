@@ -9,7 +9,7 @@
 
 // For Direct3D 12 Agility SDK
 extern "C" {
-    __declspec(dllexport) extern const UINT D3D12SDKVersion = 700;
+    __declspec(dllexport) extern const UINT D3D12SDKVersion = D3D12_PREVIEW_SDK_VERSION;
     __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\";
 }
 
@@ -659,16 +659,16 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     {
         ComPtr<IDXGIAdapter> adapter;
         if(SUCCEEDED(adapter1->QueryInterface(IID_PPV_ARGS(&adapter))))
-            device = ags->CreateDeviceAndPrintData(adapter.Get(), D3D_FEATURE_LEVEL_12_1/*TODO*/);
+            device = ags->CreateDeviceAndPrintData(adapter.Get(), HIGHEST_FEATURE_LEVEL);
     }
 #endif
 
     if(!device)
     {
 #if defined(AUTO_LINK_DX12)
-        CHECK_HR( ::D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_12_1/*TODO*/, IID_PPV_ARGS(&device)) );
+        CHECK_HR( ::D3D12CreateDevice(adapter1, HIGHEST_FEATURE_LEVEL, IID_PPV_ARGS(&device)) );
 #else
-        CHECK_HR( g_D3D12CreateDevice(adapter1, D3D_FEATURE_LEVEL_12_1/*TODO*/, IID_PPV_ARGS(&device)) );
+        CHECK_HR( g_D3D12CreateDevice(adapter1, HIGHEST_FEATURE_LEVEL, IID_PPV_ARGS(&device)) );
 #endif
     }
 
