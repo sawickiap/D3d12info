@@ -15,8 +15,8 @@ public:
 	~Vulkan_Initialize_RAII();
 	bool IsInitialized() const { return m_Initialized; }
 
-	// Prints structs from Vulkan unrelated to any specific GPU.
-    void PrintData();
+	// Prints structs from Vulkan related to the specific adapter.
+    void PrintData(const DXGI_ADAPTER_DESC1& adapterDesc);
 	
 private:
 	bool m_Initialized = false;

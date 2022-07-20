@@ -63,17 +63,52 @@ static std::vector<VkPhysicalDevice> g_PhysicalDevices;
 struct PhysicalDevicePropertySet
 {
 	VkPhysicalDeviceProperties2 properties2;
-	VkPhysicalDeviceVulkan11Properties vulkan11Properties;
 	VkPhysicalDeviceVulkan12Properties vulkan12Properties;
+	VkPhysicalDeviceIDProperties IDProperties;
 };
 static std::vector<PhysicalDevicePropertySet> g_PhysicalDeviceProperties;
+
+template<typename DstStruct, typename SrcStruct>
+static inline void AddToPnextChain(DstStruct* dst, SrcStruct* src)
+{
+	src->pNext = dst->pNext;
+	dst->pNext = src;
+}
+
+static bool FindPhysicalDevice(const DXGI_ADAPTER_DESC1& adapterDesc, size_t& outIndex)
+{
+	outIndex = SIZE_MAX;
+	// Match LUID
+	for(size_t i = 0; i < g_PhysicalDeviceProperties.size(); ++i)
+	{
+		if(g_PhysicalDeviceProperties[i].IDProperties.deviceLUIDValid &&
+			memcmp(g_PhysicalDeviceProperties[i].IDProperties.deviceLUID, &adapterDesc.AdapterLuid, VK_LUID_SIZE) == 0)
+		{
+			outIndex = i;
+			return true;
+		}
+	}
+	// Match VendorID and DeviceID
+	for(size_t i = 0; i < g_PhysicalDeviceProperties.size(); ++i)
+	{
+		if(g_PhysicalDeviceProperties[i].properties2.properties.vendorID == adapterDesc.VendorId &&
+			g_PhysicalDeviceProperties[i].properties2.properties.deviceID == adapterDesc.DeviceId)
+		{
+			if(outIndex != SIZE_MAX)
+				// Multiple matches found.
+				return false;
+			outIndex = i;
+		}
+	}
+	return outIndex != SIZE_MAX;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC
 
 void Vulkan_Initialize_RAII::PrintStaticParams()
 {
-	Print_string(L"Vulkan SDK version", VULKAN_SDK_VERSION);
+	// Empty.
 }
 
 Vulkan_Initialize_RAII::Vulkan_Initialize_RAII()
@@ -123,17 +158,12 @@ Vulkan_Initialize_RAII::Vulkan_Initialize_RAII()
 	g_PhysicalDeviceProperties.resize(physDeviceCount);
 	for(uint32_t i = 0; i < physDeviceCount; ++i)
 	{
-		g_PhysicalDeviceProperties[i].properties2 = {
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
-			.pNext = &g_PhysicalDeviceProperties[i].vulkan11Properties};
-		g_PhysicalDeviceProperties[i].vulkan11Properties = {
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_PROPERTIES};
+		g_PhysicalDeviceProperties[i].properties2 = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
+		g_PhysicalDeviceProperties[i].IDProperties = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES};
+		g_PhysicalDeviceProperties[i].vulkan12Properties = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES};
+		AddToPnextChain(&g_PhysicalDeviceProperties[i].properties2, &g_PhysicalDeviceProperties[i].IDProperties);
 		if(g_ApiVersion >= VK_API_VERSION_1_2)
-		{
-			g_PhysicalDeviceProperties[i].vulkan11Properties.pNext = &g_PhysicalDeviceProperties[i].vulkan12Properties;
-			g_PhysicalDeviceProperties[i].vulkan12Properties = {
-				.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES};
-		}
+			AddToPnextChain(&g_PhysicalDeviceProperties[i].properties2, &g_PhysicalDeviceProperties[i].vulkan12Properties);
 		g_vkGetPhysicalDeviceProperties2(g_PhysicalDevices[i], &g_PhysicalDeviceProperties[i].properties2);
 	}
 
@@ -146,35 +176,41 @@ Vulkan_Initialize_RAII::~Vulkan_Initialize_RAII()
 		g_vkDestroyInstance(g_vkInstance, nullptr);
 }
 
-void Vulkan_Initialize_RAII::PrintData()
+void Vulkan_Initialize_RAII::PrintData(const DXGI_ADAPTER_DESC1& adapterDesc)
 {
 	assert(IsInitialized());
 
-	PrintStructBegin(L"Vulkan SDK");
-	Print_string(L"Used apiVersion", std::format(L"{}.{}.{}",
-		VK_API_VERSION_MAJOR(g_ApiVersion), VK_API_VERSION_MINOR(g_ApiVersion), VK_API_VERSION_PATCH(g_ApiVersion)).c_str());
-	PrintStructEnd();
+	size_t physDevIndex = SIZE_MAX;
+	if(!FindPhysicalDevice(adapterDesc, physDevIndex))
+		return;
+	const PhysicalDevicePropertySet& propSet = g_PhysicalDeviceProperties[physDevIndex];
 
-	const VkPhysicalDeviceProperties& props = g_PhysicalDeviceProperties[0].properties2.properties;//TODO
-	PrintStructBegin(L"VkPhysicalDeviceProperties");
-	Print_string(L"apiVersion", std::format(L"{}.{}.{}",
-		VK_API_VERSION_MAJOR(props.apiVersion), VK_API_VERSION_MINOR(props.apiVersion), VK_API_VERSION_PATCH(props.apiVersion)).c_str());
-	Print_uint32(L"driverVersion", props.driverVersion);
-	Print_hex32(L"vendorID", props.vendorID);
-	Print_hex32(L"deviceID", props.deviceID);
-	PrintEnum(L"deviceType", props.deviceType, Enum_VkPhysicalDeviceType);
-	Print_string(L"deviceName", StrToWstr(props.deviceName, CP_UTF8).c_str());
-	PrintStructEnd();
+	{
+		const VkPhysicalDeviceProperties& props = propSet.properties2.properties;
+		PrintStructBegin(L"VkPhysicalDeviceProperties");
+		Print_string(L"apiVersion", std::format(L"{}.{}.{}",
+			VK_API_VERSION_MAJOR(props.apiVersion), VK_API_VERSION_MINOR(props.apiVersion), VK_API_VERSION_PATCH(props.apiVersion)).c_str());
+		Print_uint32(L"driverVersion", props.driverVersion);
+		Print_hex32(L"vendorID", props.vendorID);
+		Print_hex32(L"deviceID", props.deviceID);
+		PrintEnum(L"deviceType", props.deviceType, Enum_VkPhysicalDeviceType);
+		Print_string(L"deviceName", StrToWstr(props.deviceName, CP_UTF8).c_str());
+		PrintStructEnd();
+	}
 
-	const VkPhysicalDeviceVulkan11Properties& vulkan11Props = g_PhysicalDeviceProperties[0].vulkan11Properties;//TODO
-	PrintStructBegin(L"VkPhysicalDeviceVulkan11Properties");
-	PrintHexBytes(L"deviceUUID", vulkan11Props.deviceUUID, VK_UUID_SIZE);
-	PrintHexBytes(L"driverUUID", vulkan11Props.driverUUID, VK_UUID_SIZE);
-	PrintStructEnd();
+	{
+		const VkPhysicalDeviceIDProperties& IDProps = propSet.IDProperties;
+		PrintStructBegin(L"VkPhysicalDeviceIDProperties");
+		PrintHexBytes(L"deviceUUID", IDProps.deviceUUID, VK_UUID_SIZE);
+		PrintHexBytes(L"driverUUID", IDProps.driverUUID, VK_UUID_SIZE);
+		if(IDProps.deviceLUIDValid)
+			PrintHexBytes(L"deviceLUID", IDProps.deviceLUID, VK_LUID_SIZE);
+		PrintStructEnd();
+	}
 
 	if(g_ApiVersion >= VK_API_VERSION_1_2)
 	{
-		const VkPhysicalDeviceVulkan12Properties& vulkan12Props = g_PhysicalDeviceProperties[0].vulkan12Properties;//TODO
+		const VkPhysicalDeviceVulkan12Properties& vulkan12Props = propSet.vulkan12Properties;
 		PrintStructBegin(L"VkPhysicalDeviceVulkan12Properties");
 		PrintEnum(L"driverID", vulkan12Props.driverID, Enum_VkDriverId);
 		Print_string(L"driverName", StrToWstr(vulkan12Props.driverName, CP_UTF8).c_str());

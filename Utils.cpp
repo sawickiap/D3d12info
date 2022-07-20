@@ -4,7 +4,7 @@
 const wchar_t* const PROGRAM_NAME = L"D3d12info";
 const char* const PROGRAM_NAME_ANSI = "D3d12info";
 const wchar_t* const PROGRAM_VERSION = L"0.0.2-development";
-const uint32_t PROGRAM_VERSION_NUMBER = (0u << 20) | (0u << 10) | (1u);
+const uint32_t PROGRAM_VERSION_NUMBER = (0u << 20) | (0u << 10) | (2u);
 
 wstring SizeToStr(uint64_t size)
 {

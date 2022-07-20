@@ -945,7 +945,8 @@ static void PrintCommandLineSyntax()
     wprintf(L"  --PureD3D12          Extract information only from D3D12 and no other sources.\n");
 }
 
-static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags)
+static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
+    Vulkan_Initialize_RAII* vk)
 {
     if(g_UseJson)
     {
@@ -986,6 +987,10 @@ static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvA
                 ags->PrintAgsDeviceData(deviceId);
             }
 #endif
+#if USE_VULKAN
+            if(vk && vk->IsInitialized())
+                vk->PrintData(desc1);
+#endif
         }
 
         if(g_UseJson)
@@ -1001,7 +1006,7 @@ static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvA
 
 // adapterIndex == UINT_MAX means first non-software and non-remote ad
 static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
-    uint32_t adapterIndex)
+    Vulkan_Initialize_RAII* vk, uint32_t adapterIndex)
 {
     int programResult = PROGRAM_EXIT_SUCCESS;
 
@@ -1057,6 +1062,10 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
                     .revisionId = (int)desc1.Revision};
                 ags->PrintAgsDeviceData(deviceId);
             }
+#endif
+#if USE_VULKAN
+            if(vk && vk->IsInitialized())
+                vk->PrintData(desc1);
 #endif
         }
 
@@ -1188,10 +1197,6 @@ int wmain2(int argc, wchar_t** argv)
     if(agsObjPtr && agsObjPtr->IsInitialized())
         agsObjPtr->PrintData();
 #endif
-#if USE_VULKAN
-    if(vkObjPtr && vkObjPtr->IsInitialized())
-        vkObjPtr->PrintData();
-#endif
 
     if(!g_PureD3D12)
         PrintOsVersionInfo();
@@ -1212,9 +1217,9 @@ int wmain2(int argc, wchar_t** argv)
         assert(dxgiFactory != nullptr);
 
         if(g_ListAdapters)
-            ListAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get());
+            ListAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get());
         else
-            InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), adapterIndex);
+            InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get(), adapterIndex);
     }
 
 #if !defined(AUTO_LINK_DX12)
