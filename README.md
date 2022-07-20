@@ -1,17 +1,28 @@
 # D3d12info
 
-A simple Windows console program that gets all the information about the GPU (graphics chip) installed in the system, through DXGI and Direct3D 12 (D3D12) + AMD AGS, NVAPI, WinAPI, and some other sources.
+A Windows console program that gets all the information about the GPU (graphics chip) installed in the system, through DXGI and Direct3D 12 (D3D12) + AMD AGS, NVAPI, WinAPI, and some other sources.
 
 Built and tested on Windows 10 64-bit using Visual Studio 2022.
 
 ![Example output](Docs/Gfx/Example_output.png "Example output")
 
-Run it with parameter `-h` to see command line syntax.
-
 Inspired by `vulkaninfo` - a similar tool that prints all the information about device capabilities using Vulkan API.
 
-Alternative for D3D12 is GUI program "DirectX Caps Viewer", which is part of Windows SDK and can be found in path like:
+An alternative for D3D12 is a GUI program "DirectX Caps Viewer", which is part of Windows SDK and can be found in path like:
 `c:\Program Files (x86)\Windows Kits\10\bin\*\x64\dxcapsviewer.exe`.
+
+# Command-line syntax
+
+```
+Options:
+  -v --Version         Only print program version information.
+  -h --Help            Only print this help (command line syntax).
+  -l --List            Only print the list of all adapters.
+  -a --Adapter=<Index> Print details of adapter at specified index (default is the first hardware adapter).
+  -j --JSON            Print output in JSON format instead of human-friendly text.
+  -f --Formats         Include information about DXGI format capabilities.
+  -e --Enums           Include information about all known enums and their values.
+```
 
 # License
 
