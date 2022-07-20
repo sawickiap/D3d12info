@@ -305,11 +305,24 @@ static wstring MakeBuildDateTime()
     return wstring{s};
 }
 
+#ifdef _DEBUG
+    static const wchar_t* const CONFIG_STR = L"Debug";
+#else
+    static const wchar_t* const CONFIG_STR = L"Release";
+#endif
+
+#ifdef _WIN64
+    static const wchar_t* const CONFIG_BIT_STR = L"64-bit";
+#else
+    static const wchar_t* const CONFIG_BIT_STR = L"32-bit";
+#endif
+
 static void PrintHeader_Text()
 {
     wprintf(L"============================\n");
     wprintf(L"D3D12INFO %s\n", PROGRAM_VERSION);
     wprintf(L"Built: %s\n", MakeBuildDateTime().c_str());
+    wprintf(L"Configuration: %s, %s\n", CONFIG_STR, CONFIG_BIT_STR);
     wprintf(L"============================\n");
     PrintEmptyLine();
 }
@@ -325,6 +338,10 @@ static void PrintHeader_Json()
     Json::WriteString(PROGRAM_VERSION);
     Json::WriteString(L"Built");
     Json::WriteString(MakeBuildDateTime());
+    Json::WriteString(L"Configuration");
+    Json::WriteString(CONFIG_STR);
+    Json::WriteString(L"Configuration bits");
+    Json::WriteString(CONFIG_BIT_STR);
 
     Json::EndObject();
 }
