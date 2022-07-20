@@ -13,13 +13,6 @@ extern "C" {
     __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\";
 }
 
-static const int PROGRAM_EXIT_SUCCESS            = 0;
-static const int PROGRAM_EXIT_ERROR_INIT         = -1;
-static const int PROGRAM_EXIT_ERROR_COMMAND_LINE = -2;
-static const int PROGRAM_EXIT_ERROR_EXCEPTION    = -3;
-static const int PROGRAM_EXIT_ERROR_NO_ADAPTER   = -4;
-static const int PROGRAM_EXIT_ERROR_D3D12        = -5;
-
 //#define AUTO_LINK_DX12    // use this on everything before Win10
 #if defined(AUTO_LINK_DX12)
 
@@ -1051,10 +1044,7 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
             Json::EndObject();
     }
     else
-    {
-        programResult = PROGRAM_EXIT_ERROR_NO_ADAPTER;
-        wprintf(L"ERROR: No valid adapter chosen to show D3D12 device details.\n");
-    }
+        throw std::runtime_error("No valid adapter chosen to show D3D12 device details.");
 
     return programResult;
 }
@@ -1226,12 +1216,12 @@ int wmain(int argc, wchar_t** argv)
     }
     catch(const std::exception& ex)
     {
-        wprintf(L"ERROR: %hs\n", ex.what());
+        fwprintf(stderr, L"ERROR: %hs\n", ex.what());
         return PROGRAM_EXIT_ERROR_EXCEPTION;
     }
     catch(...)
     {
-        wprintf(L"UNKNOWN ERROR.\n");
+        fwprintf(stderr, L"UNKNOWN ERROR.\n");
         return PROGRAM_EXIT_ERROR_EXCEPTION;
     }
 }

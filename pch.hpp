@@ -16,6 +16,7 @@
 #include <string>
 #include <exception>
 #include <format>
+#include <stdexcept>
 
 #include <cstdint>
 #include <cassert>
@@ -28,4 +29,12 @@ using std::string;
 using std::wstring;
 using Microsoft::WRL::ComPtr;
 
-#define CHECK_HR(expr)		do { HRESULT hr__ = (expr); if(FAILED(hr__)) assert(0 && #expr); } while(false)
+#define CHECK_HR(expr)		do { HRESULT hr__ = (expr); if(FAILED(hr__)) { \
+		throw std::runtime_error(std::format("{} returned 0x{:08X}", #expr, (uint32_t)hr__)); \
+	} } while(false)
+
+static const int PROGRAM_EXIT_SUCCESS            = 0;
+static const int PROGRAM_EXIT_ERROR_INIT         = -1;
+static const int PROGRAM_EXIT_ERROR_COMMAND_LINE = -2;
+static const int PROGRAM_EXIT_ERROR_EXCEPTION    = -3;
+static const int PROGRAM_EXIT_ERROR_D3D12        = -5;
