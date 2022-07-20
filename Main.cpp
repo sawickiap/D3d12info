@@ -635,7 +635,10 @@ static void PrintFormatInformation(ID3D12Device* device)
         if(g_UseJson)
             Json::EndObject();
         else
+        {
             --g_Indent;
+            PrintEmptyLine();
+        }
     }
     
     if(g_UseJson)
