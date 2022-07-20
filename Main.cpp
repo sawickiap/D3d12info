@@ -49,6 +49,7 @@ PFN_D3D12_CREATE_DEVICE g_D3D12CreateDevice;
 static bool g_ListAdapters = false;
 static bool g_PrintFormats = false;
 static bool g_PrintEnums = false;
+static bool g_PureD3D12 = false;
 
 static wstring LuidToStr(LUID value)
 {
@@ -941,6 +942,7 @@ static void PrintCommandLineSyntax()
     wprintf(L"  -j --JSON            Print output in JSON format instead of human-friendly text.\n");
     wprintf(L"  -f --Formats         Include information about DXGI format capabilities.\n");
     wprintf(L"  -e --Enums           Include information about all known enums and their values.\n");
+    wprintf(L"  --PureD3D12          Extract information only from D3D12 and no other sources.\n");
 }
 
 static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags)
@@ -1043,7 +1045,7 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
 #if USE_NVAPI
             if(nvApi && nvApi->IsInitialized())
             {
-                    nvApi->PrintPhysicalGpuData(desc1.AdapterLuid);
+                nvApi->PrintPhysicalGpuData(desc1.AdapterLuid);
             }
 #endif
 #if USE_AGS
@@ -1084,6 +1086,7 @@ int wmain2(int argc, wchar_t** argv)
         CMD_LINE_OPT_JSON,
         CMD_LINE_OPT_FORMATS,
         CMD_LINE_OPT_ENUMS,
+        CMD_LINE_OPT_PURE_D3D12,
     };
 
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_VERSION, L"Version", false);
@@ -1100,6 +1103,7 @@ int wmain2(int argc, wchar_t** argv)
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS, L'f', false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,   L"Enums", false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,   L'e', false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_PURE_D3D12, L"PureD3D12", false);
 
     CmdLineParser::RESULT cmdLineResult;
     while((cmdLineResult = cmdLineParser.ReadNext()) != CmdLineParser::RESULT_END)
@@ -1133,6 +1137,9 @@ int wmain2(int argc, wchar_t** argv)
             case CMD_LINE_OPT_ENUMS:
                 g_PrintEnums = true;
                 break;
+            case CMD_LINE_OPT_PURE_D3D12:
+                g_PureD3D12 = true;
+                break;
             default:
                 PrintCommandLineSyntax();
                 return PROGRAM_EXIT_ERROR_COMMAND_LINE;
@@ -1150,49 +1157,44 @@ int wmain2(int argc, wchar_t** argv)
 
 #if !defined(AUTO_LINK_DX12)
     if (!LoadLibraries())
-    {
-        wprintf(L"ERROR: Could not load DXGI & D3D12 libraries.\n");
-        return PROGRAM_EXIT_ERROR_INIT;
-    }
+        throw std::runtime_error("Could not load DXGI & D3D12 libraries.");
 #endif
 
+    std::unique_ptr<NvAPI_Inititalize_RAII> nvApiObjPtr;
 #if USE_NVAPI
-    NvAPI_Inititalize_RAII nvApiInitializeObj;
-    NvAPI_Inititalize_RAII* nvApiObjPtr = &nvApiInitializeObj;
-#else
-    NvAPI_Inititalize_RAII* nvApiObjPtr = nullptr;
+    if(!g_PureD3D12)
+        nvApiObjPtr = std::make_unique<NvAPI_Inititalize_RAII>();
 #endif
 
+    std::unique_ptr<AGS_Initialize_RAII> agsObjPtr;
 #if USE_AGS
-    AGS_Initialize_RAII agsInitializeObj;
-    AGS_Initialize_RAII* agsObjPtr = &agsInitializeObj;
-#else
-    AGS_Initialize_RAII* agsObjPtr = nullptr;
+    if(!g_PureD3D12)
+        agsObjPtr = std::make_unique<AGS_Initialize_RAII>();
 #endif
 
+    std::unique_ptr<Vulkan_Initialize_RAII> vkObjPtr;
 #if USE_VULKAN
-    Vulkan_Initialize_RAII vkInitializeObj;
-    Vulkan_Initialize_RAII* vkObjPtr = &vkInitializeObj;
-#else
-    Vulkan_Initialize_RAII* vkObjPtr = nullptr;
+    if(!g_PureD3D12)
+        vkObjPtr = std::make_unique<Vulkan_Initialize_RAII>();
 #endif
 
     PrintGeneralData();
 
 #if USE_NVAPI
-    if(nvApiInitializeObj.IsInitialized())
-        nvApiInitializeObj.PrintData();
+    if(nvApiObjPtr && nvApiObjPtr->IsInitialized())
+        nvApiObjPtr->PrintData();
 #endif
 #if USE_AGS
-    if(agsInitializeObj.IsInitialized())
-        agsInitializeObj.PrintData();
+    if(agsObjPtr && agsObjPtr->IsInitialized())
+        agsObjPtr->PrintData();
 #endif
 #if USE_VULKAN
-    if(vkInitializeObj.IsInitialized())
-        vkInitializeObj.PrintData();
+    if(vkObjPtr && vkObjPtr->IsInitialized())
+        vkObjPtr->PrintData();
 #endif
 
-    PrintOsVersionInfo();
+    if(!g_PureD3D12)
+        PrintOsVersionInfo();
 
     if(g_PrintEnums)
         PrintEnumsData();
@@ -1210,9 +1212,9 @@ int wmain2(int argc, wchar_t** argv)
         assert(dxgiFactory != nullptr);
 
         if(g_ListAdapters)
-            ListAdapters(dxgiFactory.Get(), nvApiObjPtr, agsObjPtr);
+            ListAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get());
         else
-            InspectAdapter(dxgiFactory.Get(), nvApiObjPtr, agsObjPtr, adapterIndex);
+            InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), adapterIndex);
     }
 
 #if !defined(AUTO_LINK_DX12)

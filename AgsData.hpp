@@ -34,6 +34,6 @@ private:
 
 #else
 
-class AGS_Initialize_RAII;
+class AGS_Initialize_RAII { };
 
 #endif // #if USE_AGS

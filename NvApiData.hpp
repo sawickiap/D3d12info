@@ -26,6 +26,6 @@ private:
 
 #else
 
-class NvAPI_Inititalize_RAII;
+class NvAPI_Inititalize_RAII { };
 
 #endif // #if USE_NVAPI

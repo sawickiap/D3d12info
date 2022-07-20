@@ -22,6 +22,7 @@ Options:
   -j --JSON            Print output in JSON format instead of human-friendly text.
   -f --Formats         Include information about DXGI format capabilities.
   -e --Enums           Include information about all known enums and their values.
+  --PureD3D12          Extract information only from D3D12 and no other sources.
 ```
 
 # License

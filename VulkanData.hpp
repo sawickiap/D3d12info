@@ -24,6 +24,6 @@ private:
 
 #else
 
-class Vulkan_Initialize_RAII;
+class Vulkan_Initialize_RAII { };
 
 #endif // #if USE_VULKAN
