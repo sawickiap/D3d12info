@@ -75,7 +75,7 @@ static inline void AddToPnextChain(DstStruct* dst, SrcStruct* src)
 	dst->pNext = src;
 }
 
-static bool FindPhysicalDevice(const DXGI_ADAPTER_DESC1& adapterDesc, size_t& outIndex)
+static bool FindPhysicalDevice(const DXGI_ADAPTER_DESC& adapterDesc, size_t& outIndex)
 {
 	outIndex = SIZE_MAX;
 	// Match LUID
@@ -176,7 +176,7 @@ Vulkan_Initialize_RAII::~Vulkan_Initialize_RAII()
 		g_vkDestroyInstance(g_vkInstance, nullptr);
 }
 
-void Vulkan_Initialize_RAII::PrintData(const DXGI_ADAPTER_DESC1& adapterDesc)
+void Vulkan_Initialize_RAII::PrintData(const DXGI_ADAPTER_DESC& adapterDesc)
 {
 	assert(IsInitialized());
 

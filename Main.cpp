@@ -50,6 +50,7 @@ static bool g_ListAdapters = false;
 static bool g_PrintFormats = false;
 static bool g_PrintEnums = false;
 static bool g_PureD3D12 = false;
+static bool g_WARP = false;
 
 static wstring LuidToStr(LUID value)
 {
@@ -251,7 +252,7 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS11(const D3D12_FEATURE_DATA_D3
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS12(const D3D12_FEATURE_DATA_D3D12_OPTIONS12& o)
 {
     PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS12");
-    PrintEnum(L"MSPrimitivesPipelineStatisticIncludesCulledPrimitives", o.MSPrimitivesPipelineStatisticIncludesCulledPrimitives, Enum_D3D12_TRI_STATE);
+    PrintEnum(L"MSPrimitivesPipelineStatisticIncludesCulledPrimitives", o.MSPrimitivesPipelineStatisticIncludesCulledPrimitives, Enum_D3D12_TRI_STATE, true);
     Print_BOOL(L"EnhancedBarriersSupported", o.EnhancedBarriersSupported);
     PrintStructEnd();
 }
@@ -498,17 +499,22 @@ static void PrintAdapterDesc2(const DXGI_ADAPTER_DESC2& desc2)
 }
 #endif
 
+static void PrintAdapterDescMembers(const DXGI_ADAPTER_DESC& desc)
+{
+    Print_string(L"Description", desc.Description);
+    PrintEnum(L"VendorId", desc.VendorId, Enum_VendorId);
+    Print_hex32(L"DeviceId", desc.DeviceId);
+    Print_hex32(L"SubSysId", desc.SubSysId);
+    Print_hex32(L"Revision", desc.Revision);
+    Print_size(L"DedicatedVideoMemory", desc.DedicatedVideoMemory);
+    Print_size(L"DedicatedSystemMemory", desc.DedicatedSystemMemory);
+    Print_size(L"SharedSystemMemory", desc.SharedSystemMemory);
+    Print_string(L"AdapterLuid", LuidToStr(desc.AdapterLuid).c_str());
+}
+
 static void PrintAdapterDesc1Members(const DXGI_ADAPTER_DESC1& desc1)
 {
-    Print_string(L"Description", desc1.Description);
-    PrintEnum(L"VendorId", desc1.VendorId, Enum_VendorId);
-    Print_hex32(L"DeviceId", desc1.DeviceId);
-    Print_hex32(L"SubSysId", desc1.SubSysId);
-    Print_hex32(L"Revision", desc1.Revision);
-    Print_size(L"DedicatedVideoMemory", desc1.DedicatedVideoMemory);
-    Print_size(L"DedicatedSystemMemory", desc1.DedicatedSystemMemory);
-    Print_size(L"SharedSystemMemory", desc1.SharedSystemMemory);
-    Print_string(L"AdapterLuid", LuidToStr(desc1.AdapterLuid).c_str());
+    PrintAdapterDescMembers((const DXGI_ADAPTER_DESC&)desc1);
     PrintFlags(L"Flags", desc1.Flags, Enum_DXGI_ADAPTER_FLAG);
 }
 
@@ -517,6 +523,13 @@ static void PrintAdapterDesc2Members(const DXGI_ADAPTER_DESC2& desc2)
     PrintAdapterDesc1Members((const DXGI_ADAPTER_DESC1&)desc2);
     PrintEnum(L"GraphicsPreemptionGranularity", desc2.GraphicsPreemptionGranularity, Enum_DXGI_GRAPHICS_PREEMPTION_GRANULARITY);
     PrintEnum(L"ComputePreemptionGranularity", desc2.ComputePreemptionGranularity, Enum_DXGI_COMPUTE_PREEMPTION_GRANULARITY);
+}
+
+static void PrintAdapterDesc(const DXGI_ADAPTER_DESC& desc)
+{
+    PrintStructBegin(L"DXGI_ADAPTER_DESC");
+    PrintAdapterDescMembers(desc);
+    PrintStructEnd();
 }
 
 static void PrintAdapterDesc1(const DXGI_ADAPTER_DESC1& desc1)
@@ -541,28 +554,33 @@ static void PrintAdapterDesc3(const DXGI_ADAPTER_DESC3& desc3)
     PrintStructEnd();
 }
 
-static void PrintAdapterDesc(IDXGIAdapter1* adapter1)
+static void PrintAdapterDesc(IDXGIAdapter* adapter)
 {
-    if(ComPtr<IDXGIAdapter4> adapter4; SUCCEEDED(adapter1->QueryInterface(IID_PPV_ARGS(&adapter4))))
+    if(ComPtr<IDXGIAdapter4> adapter4; SUCCEEDED(adapter->QueryInterface(IID_PPV_ARGS(&adapter4))))
     {
         if(DXGI_ADAPTER_DESC3 desc3; SUCCEEDED(adapter4->GetDesc3(&desc3)))
             PrintAdapterDesc3(desc3);
     }
-    else if(ComPtr<IDXGIAdapter2> adapter2; SUCCEEDED(adapter1->QueryInterface(IID_PPV_ARGS(&adapter2))))
+    else if(ComPtr<IDXGIAdapter2> adapter2; SUCCEEDED(adapter->QueryInterface(IID_PPV_ARGS(&adapter2))))
     {
         if(DXGI_ADAPTER_DESC2 desc2; SUCCEEDED(adapter2->GetDesc2(&desc2)))
             PrintAdapterDesc2(desc2);
     }
-    else if(DXGI_ADAPTER_DESC1 desc1; SUCCEEDED(adapter1->GetDesc1(&desc1)))
+    else if(ComPtr<IDXGIAdapter1> adapter1; SUCCEEDED(adapter->QueryInterface(IID_PPV_ARGS(&adapter1))))
     {
-        PrintAdapterDesc1(desc1);
+        if(DXGI_ADAPTER_DESC1 desc1; SUCCEEDED(adapter1->GetDesc1(&desc1)))
+            PrintAdapterDesc1(desc1);
+    }
+    else if(DXGI_ADAPTER_DESC desc; SUCCEEDED(adapter->GetDesc(&desc)))
+    {
+        PrintAdapterDesc(desc);
     }
 }
 
-static void PrintAdapterMemoryInfo(IDXGIAdapter1* adapter1)
+static void PrintAdapterMemoryInfo(IDXGIAdapter* adapter)
 {
     ComPtr<IDXGIAdapter3> adapter3;
-    if(SUCCEEDED(adapter1->QueryInterface<IDXGIAdapter3>(&adapter3)))
+    if(SUCCEEDED(adapter->QueryInterface<IDXGIAdapter3>(&adapter3)))
     {
         for(uint32_t memorySegmentGroup = 0; memorySegmentGroup < 2; ++memorySegmentGroup)
         {
@@ -587,11 +605,11 @@ static void PrintAdapterMemoryInfo(IDXGIAdapter1* adapter1)
     }
 }
 
-static void PrintAdapterData(IDXGIAdapter1* adapter1)
+static void PrintAdapterData(IDXGIAdapter* adapter)
 {
-    assert(adapter1 != nullptr);
-    PrintAdapterDesc(adapter1);
-    PrintAdapterMemoryInfo(adapter1);
+    assert(adapter != nullptr);
+    PrintAdapterDesc(adapter);
+    PrintAdapterMemoryInfo(adapter);
 }
 
 static void PrintFormatInformation(ID3D12Device* device)
@@ -970,6 +988,49 @@ static void PrintCommandLineSyntax()
     wprintf(L"  -f --Formats         Include information about DXGI format capabilities.\n");
     wprintf(L"  -e --Enums           Include information about all known enums and their values.\n");
     wprintf(L"  --PureD3D12          Extract information only from D3D12 and no other sources.\n");
+    wprintf(L"  --WARP               Use WARP adapter.\n");
+}
+
+static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
+    Vulkan_Initialize_RAII* vk)
+{
+    if(g_UseJson)
+        Json::BeginObject();
+    else
+    {
+        PrintHeader(std::format(L"DXGI Adapter {}", adapterIndex).c_str(), 0);
+        PrintEmptyLine();
+    }
+
+    PrintAdapterData(adapter);
+
+    DXGI_ADAPTER_DESC desc = {};
+    if(SUCCEEDED(adapter->GetDesc(&desc)))
+    {
+#if USE_NVAPI
+        if(nvApi && nvApi->IsInitialized())
+        {
+            nvApi->PrintPhysicalGpuData(desc.AdapterLuid);
+        }
+#endif
+#if USE_AGS
+        if(ags && ags->IsInitialized())
+        {
+            AGS_Initialize_RAII::DeviceId deviceId = {
+                .vendorId = (int)desc.VendorId,
+                .deviceId = (int)desc.DeviceId,
+                .revisionId = (int)desc.Revision};
+            ags->PrintAgsDeviceData(deviceId);
+        }
+#endif
+#if USE_VULKAN
+        if(vk && vk->IsInitialized())
+            vk->PrintData(desc);
+#endif
+    }
+
+    if(g_UseJson)
+        Json::EndObject();
 }
 
 static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
@@ -981,50 +1042,21 @@ static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvA
         Json::BeginArray();
     }
 
-    ComPtr<IDXGIAdapter1> currAdapter;
-    UINT currAdapterIndex = 0;
-    while(dxgiFactory->EnumAdapters1(currAdapterIndex, &currAdapter) != DXGI_ERROR_NOT_FOUND)
+    ComPtr<IDXGIAdapter> adapter;
+    if(!g_WARP)
     {
-        if(g_UseJson)
-            Json::BeginObject();
-        else
+        UINT adapterIndex = 0;
+        while(dxgiFactory->EnumAdapters(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND)
         {
-            PrintHeader(std::format(L"DXGI Adapter {}", currAdapterIndex).c_str(), 0);
-            PrintEmptyLine();
+            ListAdapter(adapterIndex, adapter.Get(), nvApi, ags, vk);
+            adapter.Reset();
+            ++adapterIndex;
         }
-
-        PrintAdapterData(currAdapter.Get());
-
-        DXGI_ADAPTER_DESC1 desc1 = {};
-        if(SUCCEEDED(currAdapter->GetDesc1(&desc1)))
-        {
-#if USE_NVAPI
-            if(nvApi && nvApi->IsInitialized())
-            {
-                nvApi->PrintPhysicalGpuData(desc1.AdapterLuid);
-            }
-#endif
-#if USE_AGS
-            if(ags && ags->IsInitialized())
-            {
-                AGS_Initialize_RAII::DeviceId deviceId = {
-                    .vendorId = (int)desc1.VendorId,
-                    .deviceId = (int)desc1.DeviceId,
-                    .revisionId = (int)desc1.Revision};
-                ags->PrintAgsDeviceData(deviceId);
-            }
-#endif
-#if USE_VULKAN
-            if(vk && vk->IsInitialized())
-                vk->PrintData(desc1);
-#endif
-        }
-
-        if(g_UseJson)
-            Json::EndObject();
-
-        currAdapter.Reset();
-        ++currAdapterIndex;
+    }
+    else
+    {
+        CHECK_HR(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&adapter)));
+        ListAdapter(0, adapter.Get(), nvApi, ags, vk);
     }
 
     if(g_UseJson)
@@ -1038,7 +1070,11 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
     int programResult = PROGRAM_EXIT_SUCCESS;
 
     ComPtr<IDXGIAdapter1> adapter;
-    if(adapterIndex != UINT32_MAX)
+    if(g_WARP)
+    {
+        CHECK_HR(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&adapter)));
+    }
+    else if(adapterIndex != UINT32_MAX)
         dxgiFactory->EnumAdapters1(adapterIndex, &adapter);
     else
     {
@@ -1071,28 +1107,28 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
 
         PrintAdapterData(adapter.Get());
 
-        DXGI_ADAPTER_DESC1 desc1 = {};
-        if(SUCCEEDED(adapter->GetDesc1(&desc1)))
+        DXGI_ADAPTER_DESC desc = {};
+        if(SUCCEEDED(adapter->GetDesc(&desc)))
         {
 #if USE_NVAPI
             if(nvApi && nvApi->IsInitialized())
             {
-                nvApi->PrintPhysicalGpuData(desc1.AdapterLuid);
+                nvApi->PrintPhysicalGpuData(desc.AdapterLuid);
             }
 #endif
 #if USE_AGS
             if(ags && ags->IsInitialized())
             {
                 AGS_Initialize_RAII::DeviceId deviceId = {
-                    .vendorId = (int)desc1.VendorId,
-                    .deviceId = (int)desc1.DeviceId,
-                    .revisionId = (int)desc1.Revision};
+                    .vendorId = (int)desc.VendorId,
+                    .deviceId = (int)desc.DeviceId,
+                    .revisionId = (int)desc.Revision};
                 ags->PrintAgsDeviceData(deviceId);
             }
 #endif
 #if USE_VULKAN
             if(vk && vk->IsInitialized())
-                vk->PrintData(desc1);
+                vk->PrintData(desc);
 #endif
         }
 
@@ -1123,6 +1159,7 @@ int wmain2(int argc, wchar_t** argv)
         CMD_LINE_OPT_FORMATS,
         CMD_LINE_OPT_ENUMS,
         CMD_LINE_OPT_PURE_D3D12,
+        CMD_LINE_OPT_WARP,
     };
 
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_VERSION, L"Version", false);
@@ -1140,6 +1177,7 @@ int wmain2(int argc, wchar_t** argv)
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,   L"Enums", false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,   L'e', false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_PURE_D3D12, L"PureD3D12", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_WARP, L"WARP", false);
 
     CmdLineParser::RESULT cmdLineResult;
     while((cmdLineResult = cmdLineParser.ReadNext()) != CmdLineParser::RESULT_END)
@@ -1175,6 +1213,9 @@ int wmain2(int argc, wchar_t** argv)
                 break;
             case CMD_LINE_OPT_PURE_D3D12:
                 g_PureD3D12 = true;
+                break;
+            case CMD_LINE_OPT_WARP:
+                g_WARP = true;
                 break;
             default:
                 PrintCommandLineSyntax();

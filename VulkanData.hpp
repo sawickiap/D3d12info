@@ -16,7 +16,7 @@ public:
 	bool IsInitialized() const { return m_Initialized; }
 
 	// Prints structs from Vulkan related to the specific adapter.
-    void PrintData(const DXGI_ADAPTER_DESC1& adapterDesc);
+    void PrintData(const DXGI_ADAPTER_DESC& adapterDesc);
 	
 private:
 	bool m_Initialized = false;
