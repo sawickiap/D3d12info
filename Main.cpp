@@ -167,6 +167,21 @@ static void Print_D3D12_FEATURE_DATA_SHADER_CACHE(const D3D12_FEATURE_DATA_SHADE
     PrintStructEnd();
 }
 
+static void Print_D3D12_FEATURE_DATA_SERIALIZATION(const D3D12_FEATURE_DATA_SERIALIZATION& serialization)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_SERIALIZATION");
+    PrintEnum(L"HeapSerializationTier", serialization.HeapSerializationTier, Enum_D3D12_HEAP_SERIALIZATION_TIER);
+    PrintStructEnd();
+}
+
+static void Print_D3D12_FEATURE_CROSS_NODE(const D3D12_FEATURE_DATA_CROSS_NODE& crossNode)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_CROSS_NODE");
+    PrintEnum(L"SharingTier", crossNode.SharingTier, Enum_D3D12_CROSS_NODE_SHARING_TIER);
+    Print_BOOL(L"AtomicShaderInstructions", crossNode.AtomicShaderInstructions);
+    PrintStructEnd();
+}
+
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(const D3D12_FEATURE_DATA_D3D12_OPTIONS3& options3)
 {
     PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3");
@@ -825,7 +840,19 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         PrintStructEnd();
     }
     */
-        
+
+    {
+        D3D12_FEATURE_DATA_SERIALIZATION serialization = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_SERIALIZATION, &serialization, sizeof(serialization))))
+            Print_D3D12_FEATURE_DATA_SERIALIZATION(serialization);
+    }
+
+    {
+        D3D12_FEATURE_DATA_CROSS_NODE crossNode = {};
+        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_CROSS_NODE, &crossNode, sizeof(crossNode))))
+            Print_D3D12_FEATURE_CROSS_NODE(crossNode);
+    }
+
     {
         D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3 = {};
         if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3))))
