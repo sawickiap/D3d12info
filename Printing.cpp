@@ -216,22 +216,35 @@ void Print_float(const wchar_t* name, float value, const wchar_t* unit)
     }
 }
 
-void PrintEnum(const wchar_t* name, uint32_t value, const EnumItem* enumItems)
+void PrintEnum(const wchar_t* name, uint32_t value, const EnumItem* enumItems, bool isSigned)
 {
     if(g_UseJson)
     {
         Json::WriteString(name);
-        Json::WriteNumber(value);
+        if(isSigned)
+            Json::WriteNumber((int32_t)value);
+        else
+            Json::WriteNumber(value);
     }
     else
     {
         PrintIndent();
         PrintName(name);
         const wchar_t* enumItemName = FindEnumItemName(value, enumItems);
-        if(enumItemName != nullptr)
-            wprintf(L" = %s (0x%X)\n", enumItemName, value);
+        if(isSigned)
+        {
+            if(enumItemName != nullptr)
+                wprintf(L" = %s (%d)\n", enumItemName, value);
+            else
+                wprintf(L" = %d\n", value);
+        }
         else
-            wprintf(L" = 0x%X\n", value);
+        {
+            if(enumItemName != nullptr)
+                wprintf(L" = %s (0x%X)\n", enumItemName, value);
+            else
+                wprintf(L" = 0x%X\n", value);
+        }
     }
 }
 

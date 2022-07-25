@@ -330,7 +330,6 @@ ENUM_END(NV_GPU_ILLUMINATION_ATTRIB)
 
 ENUM_BEGIN(NV_GPU_WORKSTATION_FEATURE_TYPE)
     ENUM_ITEM(NV_GPU_WORKSTATION_FEATURE_TYPE_NVIDIA_RTX_VR_READY)
-    ENUM_ITEM(NV_GPU_WORKSTATION_FEATURE_TYPE_QUADRO_VR_READY)
     ENUM_ITEM(NV_GPU_WORKSTATION_FEATURE_TYPE_PROVIZ)
 ENUM_END(NV_GPU_WORKSTATION_FEATURE_TYPE)
 
@@ -534,7 +533,7 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
     {
         NvAPI_Status status = NvAPI_GPU_QueryWorkstationFeatureSupport(gpu, (NV_GPU_WORKSTATION_FEATURE_TYPE)ei->m_Value);
         PrintEnum(std::format(L"NvAPI_GPU_QueryWorkstationFeatureSupport({})", ei->m_Name).c_str(),
-            status, Enum_NvAPI_Status);
+            status, Enum_NvAPI_Status, true);
     }
 
     {
