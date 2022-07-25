@@ -474,6 +474,7 @@ static void PrintEnumsData()
         PrintEnums_Text();
 }
 
+#if 0
 static void PrintAdapterDesc1(const DXGI_ADAPTER_DESC1& desc1)
 {
     PrintStructBegin(L"DXGI_ADAPTER_DESC1");
@@ -493,78 +494,104 @@ static void PrintAdapterDesc1(const DXGI_ADAPTER_DESC1& desc1)
 static void PrintAdapterDesc2(const DXGI_ADAPTER_DESC2& desc2)
 {
     PrintStructBegin(L"DXGI_ADAPTER2_DESC2");
+    PrintStructEnd();
+}
+#endif
+
+static void PrintAdapterDesc1Members(const DXGI_ADAPTER_DESC1& desc1)
+{
+    Print_string(L"Description", desc1.Description);
+    PrintEnum(L"VendorId", desc1.VendorId, Enum_VendorId);
+    Print_hex32(L"DeviceId", desc1.DeviceId);
+    Print_hex32(L"SubSysId", desc1.SubSysId);
+    Print_hex32(L"Revision", desc1.Revision);
+    Print_size(L"DedicatedVideoMemory", desc1.DedicatedVideoMemory);
+    Print_size(L"DedicatedSystemMemory", desc1.DedicatedSystemMemory);
+    Print_size(L"SharedSystemMemory", desc1.SharedSystemMemory);
+    Print_string(L"AdapterLuid", LuidToStr(desc1.AdapterLuid).c_str());
+    PrintFlags(L"Flags", desc1.Flags, Enum_DXGI_ADAPTER_FLAG);
+}
+
+static void PrintAdapterDesc2Members(const DXGI_ADAPTER_DESC2& desc2)
+{
+    PrintAdapterDesc1Members((const DXGI_ADAPTER_DESC1&)desc2);
     PrintEnum(L"GraphicsPreemptionGranularity", desc2.GraphicsPreemptionGranularity, Enum_DXGI_GRAPHICS_PREEMPTION_GRANULARITY);
     PrintEnum(L"ComputePreemptionGranularity", desc2.ComputePreemptionGranularity, Enum_DXGI_COMPUTE_PREEMPTION_GRANULARITY);
+}
+
+static void PrintAdapterDesc1(const DXGI_ADAPTER_DESC1& desc1)
+{
+    PrintStructBegin(L"DXGI_ADAPTER_DESC1");
+    PrintAdapterDesc1Members(desc1);
     PrintStructEnd();
 }
 
-#if 0
+static void PrintAdapterDesc2(const DXGI_ADAPTER_DESC2& desc2)
+{
+    PrintStructBegin(L"DXGI_ADAPTER_DESC2");
+    PrintAdapterDesc2Members(desc2);
+    PrintStructEnd();
+}
+
 static void PrintAdapterDesc3(const DXGI_ADAPTER_DESC3& desc3)
 {
-    PrintHeader(L"DXGI_ADAPTER2_DESC3", 1);
-    ++g_Indent;
-    // There are no members, makes no sense to print it.
-    --g_Indent;
-    PrintEmptyLine();
+    PrintStructBegin(L"DXGI_ADAPTER_DESC3");
+    // Same members as DESC2. They only added new items to Flags.
+    PrintAdapterDesc2Members((const DXGI_ADAPTER_DESC2&)desc3);
+    PrintStructEnd();
 }
-#endif
+
+static void PrintAdapterDesc(IDXGIAdapter1* adapter1)
+{
+    if(ComPtr<IDXGIAdapter4> adapter4; SUCCEEDED(adapter1->QueryInterface(IID_PPV_ARGS(&adapter4))))
+    {
+        if(DXGI_ADAPTER_DESC3 desc3; SUCCEEDED(adapter4->GetDesc3(&desc3)))
+            PrintAdapterDesc3(desc3);
+    }
+    else if(ComPtr<IDXGIAdapter2> adapter2; SUCCEEDED(adapter1->QueryInterface(IID_PPV_ARGS(&adapter2))))
+    {
+        if(DXGI_ADAPTER_DESC2 desc2; SUCCEEDED(adapter2->GetDesc2(&desc2)))
+            PrintAdapterDesc2(desc2);
+    }
+    else if(DXGI_ADAPTER_DESC1 desc1; SUCCEEDED(adapter1->GetDesc1(&desc1)))
+    {
+        PrintAdapterDesc1(desc1);
+    }
+}
+
+static void PrintAdapterMemoryInfo(IDXGIAdapter1* adapter1)
+{
+    ComPtr<IDXGIAdapter3> adapter3;
+    if(SUCCEEDED(adapter1->QueryInterface<IDXGIAdapter3>(&adapter3)))
+    {
+        for(uint32_t memorySegmentGroup = 0; memorySegmentGroup < 2; ++memorySegmentGroup)
+        {
+            DXGI_QUERY_VIDEO_MEMORY_INFO videoMemoryInfo = {};
+            if(SUCCEEDED(adapter3->QueryVideoMemoryInfo(0, (DXGI_MEMORY_SEGMENT_GROUP)memorySegmentGroup, &videoMemoryInfo)))
+            {
+                switch(memorySegmentGroup)
+                {
+                case 0:
+                    PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_LOCAL]");
+                    break;
+                case 1:
+                    PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]");
+                    break;
+                default:
+                    assert(0);
+                }
+                Print_DXGI_QUERY_VIDEO_MEMORY_INFO(videoMemoryInfo);
+                PrintStructEnd();
+            }
+        }
+    }
+}
 
 static void PrintAdapterData(IDXGIAdapter1* adapter1)
 {
     assert(adapter1 != nullptr);
-
-    DXGI_ADAPTER_DESC1 desc1 = {};
-    if(SUCCEEDED(adapter1->GetDesc1(&desc1)))
-        PrintAdapterDesc1(desc1);
-
-    {
-        ComPtr<IDXGIAdapter2> adapter2;
-        if(SUCCEEDED(adapter1->QueryInterface(IID_PPV_ARGS(&adapter2))))
-        {
-            DXGI_ADAPTER_DESC2 desc2;
-            if(SUCCEEDED(adapter2->GetDesc2(&desc2)))
-                PrintAdapterDesc2(desc2);
-        }
-    }
-
-    {
-        ComPtr<IDXGIAdapter3> adapter3;
-        if(SUCCEEDED(adapter1->QueryInterface<IDXGIAdapter3>(&adapter3)))
-        {
-            for(uint32_t memorySegmentGroup = 0; memorySegmentGroup < 2; ++memorySegmentGroup)
-            {
-                DXGI_QUERY_VIDEO_MEMORY_INFO videoMemoryInfo = {};
-                if(SUCCEEDED(adapter3->QueryVideoMemoryInfo(0, (DXGI_MEMORY_SEGMENT_GROUP)memorySegmentGroup, &videoMemoryInfo)))
-                {
-                    switch(memorySegmentGroup)
-                    {
-                    case 0:
-                        PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_LOCAL]");
-                        break;
-                    case 1:
-                        PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]");
-                        break;
-                    default:
-                        assert(0);
-                    }
-                    Print_DXGI_QUERY_VIDEO_MEMORY_INFO(videoMemoryInfo);
-                    PrintStructEnd();
-                }
-            }
-        }
-    }
-
-#if 0
-    {
-        ComPtr<IDXGIAdapter4> adapter4;
-        if(SUCCEEDED(adapter4->QueryInterface(IID_PPV_ARGS(&adapter4))))
-        {
-            DXGI_ADAPTER_DESC3 desc3;
-            if(SUCCEEDED(adapter4->GetDesc2(&desc3)))
-                PrintAdapterDesc3(desc3);
-        }
-    }
-#endif
+    PrintAdapterDesc(adapter1);
+    PrintAdapterMemoryInfo(adapter1);
 }
 
 static void PrintFormatInformation(ID3D12Device* device)
