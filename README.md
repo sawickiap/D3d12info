@@ -23,6 +23,7 @@ Options:
   -f --Formats         Include information about DXGI format capabilities.
   -e --Enums           Include information about all known enums and their values.
   --PureD3D12          Extract information only from D3D12 and no other sources.
+  --WARP               Use WARP adapter.
 ```
 
 # License
