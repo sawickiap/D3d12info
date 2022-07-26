@@ -1193,6 +1193,7 @@ int wmain2(int argc, wchar_t** argv)
             switch(cmdLineParser.GetOptId())
             {
             case CMD_LINE_OPT_VERSION:
+                PrintHeader_Text();
                 return PROGRAM_EXIT_SUCCESS;
             case CMD_LINE_OPT_HELP:
                 PrintCommandLineSyntax();

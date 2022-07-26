@@ -47,13 +47,13 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)build\</OutDir>
     <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_x64_dbg</TargetName>
+    <TargetName>$(ProjectName)_dbg</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)build\</OutDir>
     <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_x64</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
