@@ -439,6 +439,16 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
     
     wstring s;
 
+    {
+        NvU64 totalBytes = 0, freeBytes = 0;
+        if(NvAPI_D3D12_QueryCpuVisibleVidmem(device, &totalBytes, &freeBytes) == NVAPI_OK)
+        {
+            PrintStructBegin(L"NvAPI_D3D12_QueryCpuVisibleVidmem");
+            Print_size(L"pTotalBytes", totalBytes);
+            PrintStructEnd();
+        }
+    }
+
     PrintStructBegin(L"NvAPI_D3D12_IsNvShaderExtnOpCodeSupported");
     for(const EnumItem* ei = Enum_NV_EXTN_OP; ei->m_Name != nullptr; ++ei)
     {
