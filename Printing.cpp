@@ -165,6 +165,26 @@ void Print_size(const wchar_t* name, uint64_t value)
     }
 }
 
+void Print_sizeKilobytes(const wchar_t* name, uint64_t value)
+{
+    if(g_UseJson)
+    {
+        Json::WriteString(name);
+        Json::WriteNumber(value);
+    }
+    else
+    {
+        PrintIndent();
+        PrintName(name);
+        if(value == 0)
+            wprintf(L" = 0 KB\n");
+        else if(value < 1024)
+            wprintf(L" = %zu (0x%llx) KB\n", value, value);
+        else
+            wprintf(L" = %zu (0x%llx) KB (%s)\n", value, value, SizeToStr(value * 1024llu).c_str());
+    }
+}
+
 void Print_hex32(const wchar_t* name, uint32_t value)
 {
     if(g_UseJson)

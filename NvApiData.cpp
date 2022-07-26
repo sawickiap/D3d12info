@@ -508,11 +508,11 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
 
     NvU32 physicalFrameBufferSize = 0;
     if(NvAPI_GPU_GetPhysicalFrameBufferSize(gpu, &physicalFrameBufferSize) == NVAPI_OK)
-        Print_uint32(L"NvAPI_GPU_GetPhysicalFrameBufferSize", physicalFrameBufferSize, L"KB");
+        Print_sizeKilobytes(L"NvAPI_GPU_GetPhysicalFrameBufferSize", physicalFrameBufferSize);
 
     NvU32 virtualFrameBufferSize = 0;
     if(NvAPI_GPU_GetVirtualFrameBufferSize(gpu, &virtualFrameBufferSize) == NVAPI_OK)
-        Print_uint32(L"NvAPI_GPU_GetVirtualFrameBufferSize", virtualFrameBufferSize, L"KB");
+        Print_sizeKilobytes(L"NvAPI_GPU_GetVirtualFrameBufferSize", virtualFrameBufferSize);
 
     NV_GPU_ARCH_INFO archInfo = {NV_GPU_ARCH_INFO_VER};
     if(NvAPI_GPU_GetArchInfo(gpu, &archInfo) == NVAPI_OK)
@@ -550,9 +550,9 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
         NV_DISPLAY_DRIVER_MEMORY_INFO memInfo = {NV_DISPLAY_DRIVER_MEMORY_INFO_VER};
         if(NvAPI_GPU_GetMemoryInfo(gpu, &memInfo) == NVAPI_OK)
         {
-            Print_uint32(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO::dedicatedVideoMemory", memInfo.dedicatedVideoMemory, L"KB");
-            Print_uint32(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO::systemVideoMemory", memInfo.systemVideoMemory, L"KB");
-            Print_uint32(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO::sharedSystemMemory", memInfo.sharedSystemMemory, L"KB");
+            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO::dedicatedVideoMemory", memInfo.dedicatedVideoMemory);
+            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO::systemVideoMemory", memInfo.systemVideoMemory);
+            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO::sharedSystemMemory", memInfo.sharedSystemMemory);
         }
     }
 

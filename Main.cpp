@@ -483,6 +483,25 @@ static void PrintOsVersionInfo()
     PrintStructEnd();
 }
 
+static void PrintSystemMemoryInfo()
+{
+    PrintStructBegin(L"System memory");
+    
+    if(uint64_t physicallyInstalledSystemMemory = 0;
+        GetPhysicallyInstalledSystemMemory(&physicallyInstalledSystemMemory))
+        Print_sizeKilobytes(L"GetPhysicallyInstalledSystemMemory", physicallyInstalledSystemMemory);
+
+    if(MEMORYSTATUSEX memStatEx = {sizeof(MEMORYSTATUSEX)};
+        GlobalMemoryStatusEx(&memStatEx))
+    {
+        Print_size(L"MEMORYSTATUSEX::ullTotalPhys", memStatEx.ullTotalPhys);
+        Print_size(L"MEMORYSTATUSEX::ullTotalPageFile", memStatEx.ullTotalPageFile);
+        Print_size(L"MEMORYSTATUSEX::ullTotalVirtual", memStatEx.ullTotalVirtual);
+    }
+    
+    PrintStructEnd();
+}
+
 static void PrintEnumsData()
 {
     if(g_UseJson)
@@ -1239,6 +1258,12 @@ int wmain2(int argc, wchar_t** argv)
 
     PrintGeneralData();
 
+    if(!g_PureD3D12)
+    {
+        PrintOsVersionInfo();
+        PrintSystemMemoryInfo();
+    }
+
 #if USE_NVAPI
     if(nvApiObjPtr && nvApiObjPtr->IsInitialized())
         nvApiObjPtr->PrintData();
@@ -1247,9 +1272,6 @@ int wmain2(int argc, wchar_t** argv)
     if(agsObjPtr && agsObjPtr->IsInitialized())
         agsObjPtr->PrintData();
 #endif
-
-    if(!g_PureD3D12)
-        PrintOsVersionInfo();
 
     if(g_PrintEnums)
         PrintEnumsData();
