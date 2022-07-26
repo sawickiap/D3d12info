@@ -35,11 +35,11 @@ static const D3D_FEATURE_LEVEL FEATURE_LEVELS_ARRAY[] =
     D3D_FEATURE_LEVEL_11_1,
     D3D_FEATURE_LEVEL_11_0,
 };
-static const D3D_FEATURE_LEVEL MINIMUM_FEATURE_LEVEL = D3D_FEATURE_LEVEL_11_0;
-static const D3D_FEATURE_LEVEL HIGHEST_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_2;
+static const D3D_FEATURE_LEVEL MAX_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_2;
+static const D3D_FEATURE_LEVEL MIN_FEATURE_LEVEL = D3D_FEATURE_LEVEL_11_0;
 
-const wchar_t* DYN_LIB_DXGI = L"dxgi.dll";
-const wchar_t* DYN_LIB_DX12 = L"d3d12.dll";
+const wchar_t* const DYN_LIB_DXGI = L"dxgi.dll";
+const wchar_t* const DYN_LIB_DX12 = L"d3d12.dll";
 
 PFN_DXGI_CREATE_FACTORY1 g_CreateDXGIFactory1;
 PFN_D3D12_CREATE_DEVICE g_D3D12CreateDevice;
@@ -104,8 +104,9 @@ static void Print_D3D12_FEATURE_DATA_ARCHITECTURE1(const D3D12_FEATURE_DATA_ARCH
 static void Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(const D3D12_FEATURE_DATA_FEATURE_LEVELS& featureLevels)
 {
     PrintStructBegin(L"D3D12_FEATURE_DATA_FEATURE_LEVELS");
+
+#if 0 // TODO Is this an output parameter or not? How to correctly query and print it???
     Print_uint32(L"NumFeatureLevels", featureLevels.NumFeatureLevels);
-#if 0//TODO
     BeginArray();
     for(uint32_t i = 0; i < featureLevels.NumFeatureLevels; ++i)
     {
@@ -801,16 +802,16 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     {
         ComPtr<IDXGIAdapter> adapter;
         if(SUCCEEDED(adapter1->QueryInterface(IID_PPV_ARGS(&adapter))))
-            device = ags->CreateDeviceAndPrintData(adapter.Get(), MINIMUM_FEATURE_LEVEL);
+            device = ags->CreateDeviceAndPrintData(adapter.Get(), MIN_FEATURE_LEVEL);
     }
 #endif
 
     if(!device)
     {
 #if defined(AUTO_LINK_DX12)
-        CHECK_HR( ::D3D12CreateDevice(adapter1, MINIMUM_FEATURE_LEVEL, IID_PPV_ARGS(&device)) );
+        CHECK_HR( ::D3D12CreateDevice(adapter1, MIN_FEATURE_LEVEL, IID_PPV_ARGS(&device)) );
 #else
-        CHECK_HR( g_D3D12CreateDevice(adapter1, MINIMUM_FEATURE_LEVEL, IID_PPV_ARGS(&device)) );
+        CHECK_HR( g_D3D12CreateDevice(adapter1, MIN_FEATURE_LEVEL, IID_PPV_ARGS(&device)) );
 #endif
     }
 
@@ -863,7 +864,7 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     {
         D3D12_FEATURE_DATA_FEATURE_LEVELS featureLevels =
         {
-            _countof(FEATURE_LEVELS_ARRAY), FEATURE_LEVELS_ARRAY, HIGHEST_FEATURE_LEVEL
+            _countof(FEATURE_LEVELS_ARRAY), FEATURE_LEVELS_ARRAY, MAX_FEATURE_LEVEL
         };
         if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &featureLevels, sizeof(featureLevels))))
             Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(featureLevels);
