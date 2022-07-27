@@ -15,7 +15,7 @@ An alternative for D3D12 is a GUI program "DirectX Caps Viewer", which is part o
 
 To download an archive with compiled binary, go to **[Releases](https://github.com/sawickiap/D3d12info/releases)**. This is a portable program - it doesn't need installation.
 
-Version history can be found in [CHANGELOG](CHANGELOG.md).
+Version history can be found in file [CHANGELOG.md](CHANGELOG.md).
 
 # Command-line syntax
 
