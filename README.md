@@ -11,6 +11,12 @@ Inspired by `vulkaninfo` - a similar tool that prints all the information about 
 An alternative for D3D12 is a GUI program "DirectX Caps Viewer", which is part of Windows SDK and can be found in path like:
 `c:\Program Files (x86)\Windows Kits\10\bin\*\x64\dxcapsviewer.exe`.
 
+# Download
+
+To download an archive with compiled binary, go to **[Releases](https://github.com/sawickiap/D3d12info/releases)**. This is a portable program - it doesn't need installation.
+
+Version history can be found in [CHANGELOG](CHANGELOG.md).
+
 # Command-line syntax
 
 ```
@@ -43,10 +49,10 @@ The project uses following thirt-party libraries:
 - **[AMD GPU Services](https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK)** - custom vendor extensions to graphics APIs by AMD.
   - Linked externally. Can compile without it - see macro `USE_AGS`.
 - **[DirectX 12 Agility SDK](https://devblogs.microsoft.com/directx/directx12agility/)** - latest API to Direct3D, by Microsoft.
-  - Directory: ThirdParty\microsoft.direct3d.d3d12.*
+  - Directory: Src\ThirdParty\microsoft.direct3d.d3d12.*
 - **[NVAPI](https://developer.nvidia.com/nvapi)** - custom vendor extensions to graphics APIs by Nvidia.
   - Linked externally. Can compile without it - see macro `USE_NVAPI`.
 - **[RapidJSON](https://rapidjson.org/)** - a fast JSON parser/generator, by Tencent. License: MIT.
-  - Directory: ThirdParty\rapidjson
+  - Directory: Src\ThirdParty\rapidjson
 - **[Vulkan SDK](https://www.lunarg.com/vulkan-sdk/)**
   - Linked externally. Can compile without it - see macro `USE_VULKAN`.
