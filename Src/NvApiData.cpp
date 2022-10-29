@@ -10,7 +10,7 @@
 #pragma comment(lib, "nvapi64.lib")
 
 // Don't forget to update when linking with a new version!
-static const wchar_t* NVAPI_COMPILED_VERSION = L"R515-developer";
+static const wchar_t* NVAPI_COMPILED_VERSION = L"R520-developer";
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE
@@ -236,6 +236,7 @@ ENUM_BEGIN(NV_ARCHITECTURE_GPU_ID)
     ENUM_ITEM(NV_GPU_ARCHITECTURE_GV110)  
     ENUM_ITEM(NV_GPU_ARCHITECTURE_TU100)  
     ENUM_ITEM(NV_GPU_ARCHITECTURE_GA100)
+    ENUM_ITEM(NV_GPU_ARCHITECTURE_AD100)
 ENUM_END(NV_ARCHITECTURE_GPU_ID)
 
 ENUM_BEGIN(NV_ARCH_IMPLEMENTATION_GPU_ID)
@@ -312,6 +313,9 @@ ENUM_BEGIN(NV_ARCH_IMPLEMENTATION_GPU_ID)
     ENUM_ITEM(NV_GPU_ARCH_IMPLEMENTATION_GA100)   
     ENUM_ITEM(NV_GPU_ARCH_IMPLEMENTATION_GA102)   
     ENUM_ITEM(NV_GPU_ARCH_IMPLEMENTATION_GA104)  
+    ENUM_ITEM(NV_GPU_ARCH_IMPLEMENTATION_AD102)  
+    ENUM_ITEM(NV_GPU_ARCH_IMPLEMENTATION_AD103)  
+    ENUM_ITEM(NV_GPU_ARCH_IMPLEMENTATION_AD104)  
 ENUM_END(NV_ARCH_IMPLEMENTATION_GPU_ID)
 
 ENUM_BEGIN(NV_GPU_CHIP_REVISION)
@@ -333,9 +337,26 @@ ENUM_BEGIN(NV_GPU_WORKSTATION_FEATURE_TYPE)
     ENUM_ITEM(NV_GPU_WORKSTATION_FEATURE_TYPE_PROVIZ)
 ENUM_END(NV_GPU_WORKSTATION_FEATURE_TYPE)
 
-static NvPhysicalGpuHandle g_PhysicalGpus[NVAPI_MAX_PHYSICAL_GPUS];
-static LUID g_PhysicalGpuLuids[NVAPI_MAX_PHYSICAL_GPUS];
-static NvU32 g_PhysicalGpuCount = 0;
+ENUM_BEGIN(NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS)
+    ENUM_ITEM(NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAP_NONE)
+    ENUM_ITEM(NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAP_STANDARD)
+ENUM_END(NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS)
+
+ENUM_BEGIN(NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAPS)
+    ENUM_ITEM(NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAP_NONE)
+    ENUM_ITEM(NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAP_STANDARD)
+ENUM_END(NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAPS)
+
+ENUM_BEGIN(NV_ECC_CONFIGURATION)
+    ENUM_ITEM(NV_ECC_CONFIGURATION_NOT_SUPPORTED)
+    ENUM_ITEM(NV_ECC_CONFIGURATION_DEFERRED)
+    ENUM_ITEM(NV_ECC_CONFIGURATION_IMMEDIATE)
+ENUM_END(NV_ECC_CONFIGURATION)
+
+static NvU32 g_LogicalGpuCount = 0;
+static NvLogicalGpuHandle g_LogicalGpuHandles[NVAPI_MAX_LOGICAL_GPUS];
+static NV_LOGICAL_GPU_DATA g_LogicalGpuData[NVAPI_MAX_LOGICAL_GPUS];
+static LUID g_LogicalGpuLuids[NVAPI_MAX_LOGICAL_GPUS];
 
 static wstring NvShortStringToStr(NvAPI_ShortString str)
 {
@@ -344,13 +365,16 @@ static wstring NvShortStringToStr(NvAPI_ShortString str)
     return wstring{w};
 }
 
-static void LoadPhysicalGpus()
+static void LoadGpus()
 {
-    if(NvAPI_EnumPhysicalGPUs(g_PhysicalGpus, &g_PhysicalGpuCount) != NVAPI_OK)
-        g_PhysicalGpuCount = 0;
-    for(NvU32 i = 0; i < g_PhysicalGpuCount; ++i)
+    if(NvAPI_EnumLogicalGPUs(g_LogicalGpuHandles, &g_LogicalGpuCount) != NVAPI_OK)
+        g_LogicalGpuCount = 0;
+    for(NvU32 i = 0; i < g_LogicalGpuCount; ++i)
     {
-        NvAPI_Status status = NvAPI_GPU_GetAdapterIdFromPhysicalGpu(g_PhysicalGpus[i], &g_PhysicalGpuLuids[i]);
+        g_LogicalGpuData[i] = {
+            .version = NV_LOGICAL_GPU_DATA_VER,
+            .pOSAdapterId = &g_LogicalGpuLuids[i]};
+        NvAPI_Status status = NvAPI_GPU_GetLogicalGpuInfo(g_LogicalGpuHandles[i], &g_LogicalGpuData[i]);
         assert(status == NVAPI_OK);
     }
 }
@@ -358,10 +382,13 @@ static void LoadPhysicalGpus()
 static bool FindPhysicalGpu(const LUID& adapterLuid, NvPhysicalGpuHandle& outGpu)
 {
     NvU32 foundIndex = UINT32_MAX;
-    for(NvU32 i = 0; i < g_PhysicalGpuCount; ++i)
+    for(NvU32 i = 0; i < g_LogicalGpuCount; ++i)
     {
-        if(memcmp(&g_PhysicalGpuLuids[i], &adapterLuid, sizeof(LUID)) == 0)
+        if(memcmp(&g_LogicalGpuLuids[i], &adapterLuid, sizeof(LUID)) == 0)
         {
+            if(g_LogicalGpuData[i].physicalGpuCount != 1)
+                // A logical GPU with multiple physical GPUs not supported by this tool.
+                return false;
             if(foundIndex != UINT32_MAX)
                 // Found multiple GPUs with same LUID.
                 return false;
@@ -371,7 +398,7 @@ static bool FindPhysicalGpu(const LUID& adapterLuid, NvPhysicalGpuHandle& outGpu
     }
     if(foundIndex != UINT32_MAX)
     {
-        outGpu = g_PhysicalGpus[foundIndex];
+        outGpu = g_LogicalGpuData[foundIndex].physicalGpuHandles[0];
         return true;
     }
     return false;
@@ -393,7 +420,7 @@ NvAPI_Inititalize_RAII::NvAPI_Inititalize_RAII()
 {
     m_Initialized = NvAPI_Initialize() == NVAPI_OK;
     if(m_Initialized)
-        LoadPhysicalGpus();
+        LoadGpus();
 }
 
 NvAPI_Inititalize_RAII::~NvAPI_Inititalize_RAII()
@@ -455,6 +482,26 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
         bool supported = false;
         if(NvAPI_D3D12_IsNvShaderExtnOpCodeSupported(device, ei->m_Value, &supported) == NVAPI_OK)
             Print_BOOL(ei->m_Name, supported);
+    }
+    PrintStructEnd();
+
+    PrintStructBegin(L"NvAPI_D3D12_GetRaytracingCaps");
+    {
+        NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS threadReorderingCaps = {};
+        if(NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_THREAD_REORDERING,
+            &threadReorderingCaps, sizeof threadReorderingCaps) == NVAPI_OK)
+        {
+            PrintEnum(L"NVAPI_D3D12_RAYTRACING_CAPS_TYPE_THREAD_REORDERING", (uint32_t)threadReorderingCaps,
+                Enum_NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS);
+        }
+
+        NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAPS opacityMicromapCaps = {};
+        if(NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_OPACITY_MICROMAP,
+            &opacityMicromapCaps, sizeof opacityMicromapCaps) == NVAPI_OK)
+        {
+            PrintEnum(L"NVAPI_D3D12_RAYTRACING_CAPS_TYPE_OPACITY_MICROMAP", (uint32_t)opacityMicromapCaps,
+                Enum_NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAPS);
+        }
     }
     PrintStructEnd();
 }
@@ -547,13 +594,36 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
     }
 
     {
-        NV_DISPLAY_DRIVER_MEMORY_INFO memInfo = {NV_DISPLAY_DRIVER_MEMORY_INFO_VER};
-        if(NvAPI_GPU_GetMemoryInfo(gpu, &memInfo) == NVAPI_OK)
+        NV_GPU_MEMORY_INFO_EX memInfo = {NV_GPU_MEMORY_INFO_EX_VER};
+        if(NvAPI_GPU_GetMemoryInfoEx(gpu, &memInfo) == NVAPI_OK)
         {
-            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO::dedicatedVideoMemory", memInfo.dedicatedVideoMemory);
-            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO::systemVideoMemory", memInfo.systemVideoMemory);
-            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfo - NV_DISPLAY_DRIVER_MEMORY_INFO::sharedSystemMemory", memInfo.sharedSystemMemory);
+            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemory", memInfo.dedicatedVideoMemory);
+            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::availableDedicatedVideoMemory", memInfo.availableDedicatedVideoMemory);
+            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::systemVideoMemory", memInfo.systemVideoMemory);
+            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::sharedSystemMemory", memInfo.sharedSystemMemory);
+            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::curAvailableDedicatedVideoMemory", memInfo.curAvailableDedicatedVideoMemory);
+            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemoryEvictionsSize", memInfo.dedicatedVideoMemoryEvictionsSize);
+            Print_uint64(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemoryEvictionCount", memInfo.dedicatedVideoMemoryEvictionCount);
+            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemoryPromotionsSize", memInfo.dedicatedVideoMemoryPromotionsSize);
+            Print_uint64(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemoryPromotionCount", memInfo.dedicatedVideoMemoryPromotionCount);
         }
+    }
+
+    NvU32 shaderSubPipeCount = 0;
+    if(NvAPI_GPU_GetShaderSubPipeCount(gpu, &shaderSubPipeCount) == NVAPI_OK)
+        Print_uint32(L"NvAPI_GPU_GetShaderSubPipeCount", shaderSubPipeCount);
+
+    NvU32 gpuCoreCount = 0;
+    if(NvAPI_GPU_GetGpuCoreCount(gpu, &gpuCoreCount) == NVAPI_OK)
+        Print_uint32(L"NvAPI_GPU_GetGpuCoreCount", gpuCoreCount);
+
+    NV_GPU_ECC_STATUS_INFO GPUECCStatusInfo = {NV_GPU_ECC_STATUS_INFO_VER};
+    if(NvAPI_GPU_GetECCStatusInfo(gpu, &GPUECCStatusInfo) == NVAPI_OK)
+    {
+        Print_BOOL(L"NvAPI_GPU_GetECCStatusInfo - NV_GPU_ECC_STATUS_INFO::isSupported", GPUECCStatusInfo.isSupported != 0);
+        PrintEnum(L"NvAPI_GPU_GetECCStatusInfo - NV_GPU_ECC_STATUS_INFO::configurationOptions", GPUECCStatusInfo.configurationOptions,
+            Enum_NV_ECC_CONFIGURATION);
+        Print_BOOL(L"NvAPI_GPU_GetECCStatusInfo - NV_GPU_ECC_STATUS_INFO::isEnabled", GPUECCStatusInfo.isEnabled != 0);
     }
 
     PrintStructEnd();
