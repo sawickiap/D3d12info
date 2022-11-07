@@ -66,15 +66,18 @@
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>4100;4189;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>f:\Libraries\NVAPI\R520-developer;f:\Libraries\AMD\AGS_SDK-6.0.1\ags_lib\inc;c:\VulkanSDK\1.3.216.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%NVIDIA_NVAPI_PATH%;%AMD_AGS_PATH%\ags_lib\inc;%VULKAN_SDK%\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>
       </AdditionalDependencies>
-      <AdditionalLibraryDirectories>f:\Libraries\NVAPI\R520-developer\amd64;f:\Libraries\AMD\AGS_SDK-6.0.1\ags_lib\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%NVIDIA_NVAPI_PATH%\amd64;%AMD_AGS_PATH%\ags_lib\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>PostBuildStep.bat $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -89,7 +92,7 @@
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>4100;4189;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>f:\Libraries\NVAPI\R520-developer;f:\Libraries\AMD\AGS_SDK-6.0.1\ags_lib\inc;c:\VulkanSDK\1.3.216.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%NVIDIA_NVAPI_PATH%;%AMD_AGS_PATH%\ags_lib\inc;%VULKAN_SDK%\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -98,8 +101,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>
       </AdditionalDependencies>
-      <AdditionalLibraryDirectories>f:\Libraries\NVAPI\R520-developer\amd64;f:\Libraries\AMD\AGS_SDK-6.0.1\ags_lib\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%NVIDIA_NVAPI_PATH%\amd64;%AMD_AGS_PATH%\ags_lib\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>PostBuildStep.bat $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AgsData.hpp" />

@@ -47,12 +47,15 @@ The project source code depends on:
 The project uses following thirt-party libraries:
 
 - **[AMD GPU Services](https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK)** - custom vendor extensions to graphics APIs by AMD.
-  - Linked externally. Can compile without it - see macro `USE_AGS`.
+  - You need to obtain your copy and globally define `AMD_AGS_PATH` environment variable. You need at least version 6.0.1.
+  - Can compile without it - see macro `USE_AGS`.
 - **[DirectX 12 Agility SDK](https://devblogs.microsoft.com/directx/directx12agility/)** - latest API to Direct3D, by Microsoft.
   - Directory: Src\ThirdParty\microsoft.direct3d.d3d12.*
 - **[NVAPI](https://developer.nvidia.com/nvapi)** - custom vendor extensions to graphics APIs by Nvidia.
-  - Linked externally. Can compile without it - see macro `USE_NVAPI`.
+  - You need to obtain your copy and globally define `NVIDIA_NVAPI_PATH` environment variable. You need at least version R520.
+  - Can compile without it - see macro `USE_NVAPI`.
 - **[RapidJSON](https://rapidjson.org/)** - a fast JSON parser/generator, by Tencent. License: MIT.
   - Directory: Src\ThirdParty\rapidjson
 - **[Vulkan SDK](https://www.lunarg.com/vulkan-sdk/)**
-  - Linked externally. Can compile without it - see macro `USE_VULKAN`.
+  - You need to install Vulkan SDK on your PC. You need at least version 1.3.216.0.
+  - Can compile without it - see macro `USE_VULKAN`.
