@@ -49,7 +49,7 @@ The project uses following thirt-party libraries:
 - **[AMD GPU Services](https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK)** - custom vendor extensions to graphics APIs by AMD.
   - Linked externally. Can compile without it - see macro `USE_AGS`.
 - **[DirectX 12 Agility SDK](https://devblogs.microsoft.com/directx/directx12agility/)** - latest API to Direct3D, by Microsoft.
-  - Directory: Src\ThirdParty\microsoft.direct3d.d3d12.*
+  - Uses nuget package.
 - **[NVAPI](https://developer.nvidia.com/nvapi)** - custom vendor extensions to graphics APIs by Nvidia.
   - Linked externally. Can compile without it - see macro `USE_NVAPI`.
 - **[RapidJSON](https://rapidjson.org/)** - a fast JSON parser/generator, by Tencent. License: MIT.

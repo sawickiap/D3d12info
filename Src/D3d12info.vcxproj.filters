@@ -33,4 +33,7 @@
       <Filter>ThirdParty\rapidjson</Filter>
     </Natvis>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>
