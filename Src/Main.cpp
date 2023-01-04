@@ -9,7 +9,7 @@
 
 // For Direct3D 12 Agility SDK
 extern "C" {
-    __declspec(dllexport) extern const UINT D3D12SDKVersion = D3D12_PREVIEW_SDK_VERSION;
+    __declspec(dllexport) extern const UINT D3D12SDKVersion = D3D12_SDK_VERSION;
     __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\";
 }
 
@@ -299,6 +299,13 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS15(const D3D12_FEATURE_DATA_D3
     PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS15");
     Print_BOOL(L"TriangleFanSupported", o.TriangleFanSupported);
     Print_BOOL(L"DynamicIndexBufferStripCutSupported", o.DynamicIndexBufferStripCutSupported);
+    PrintStructEnd();
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS16(const D3D12_FEATURE_DATA_D3D12_OPTIONS16& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS16");
+    Print_BOOL(L"DynamicDepthBiasSupported", o.DynamicDepthBiasSupported);
     PrintStructEnd();
 }
 
@@ -810,6 +817,10 @@ static void PrintDeviceOptions(ID3D12Device* device)
     if (D3D12_FEATURE_DATA_D3D12_OPTIONS15 options15 = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS15, &options15, sizeof(options15))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS15(options15);
+
+    if (D3D12_FEATURE_DATA_D3D12_OPTIONS16 options16 = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS16(options16);
 }
 
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI, AGS_Initialize_RAII* ags)

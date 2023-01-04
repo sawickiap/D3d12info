@@ -6,7 +6,7 @@
 #define VC_EXTRALEAN
 
 // Agility SDK needs to be included before Windows 10 SDK - according to Microsoft.
-#include "ThirdParty/microsoft.direct3d.d3d12.1.706.3-preview/build/native/include/d3d12.h"
+#include "ThirdParty/microsoft.direct3d.d3d12.1.608.2/build/native/include/d3d12.h"
 #include <dxgi1_6.h>
 
 #include <windows.h>
