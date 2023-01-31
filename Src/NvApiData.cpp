@@ -10,7 +10,7 @@
 #pragma comment(lib, "nvapi64.lib")
 
 // Don't forget to update when linking with a new version!
-static const wchar_t* NVAPI_COMPILED_VERSION = L"R520-developer";
+static const wchar_t* NVAPI_COMPILED_VERSION = L"R525-developer";
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE
@@ -455,6 +455,7 @@ void NvAPI_Inititalize_RAII::PrintData()
             Print_BOOL(L"bIsNVIDIAGameReadyPackage", info.bIsNVIDIAGameReadyPackage != 0);
             Print_BOOL(L"bIsNVIDIARTXProductionBranchPackage", info.bIsNVIDIARTXProductionBranchPackage != 0);
             Print_BOOL(L"bIsNVIDIARTXNewFeatureBranchPackage", info.bIsNVIDIARTXNewFeatureBranchPackage != 0);
+            Print_string(L"szBuildBaseBranch", StrToWstr(info.szBuildBaseBranch, CP_ACP).c_str());
             PrintStructEnd();
         }
     }
@@ -624,6 +625,12 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
         PrintEnum(L"NvAPI_GPU_GetECCStatusInfo - NV_GPU_ECC_STATUS_INFO::configurationOptions", GPUECCStatusInfo.configurationOptions,
             Enum_NV_ECC_CONFIGURATION);
         Print_BOOL(L"NvAPI_GPU_GetECCStatusInfo - NV_GPU_ECC_STATUS_INFO::isEnabled", GPUECCStatusInfo.isEnabled != 0);
+    }
+
+    {
+        NvU32 busWidth = 0;
+        if(NvAPI_GPU_GetRamBusWidth(gpu, &busWidth) == NVAPI_OK)
+            Print_uint32(L"NvAPI_GPU_GetRamBusWidth", busWidth);
     }
 
     PrintStructEnd();

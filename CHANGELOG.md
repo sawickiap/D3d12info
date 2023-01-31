@@ -1,3 +1,7 @@
+# Version 1.3.0 (2023-01-31)
+
+Compiled with DirectX 12 Agility SDK 1.608.2, AMD AGS 6.1.0, NVAPI R525-developer.
+
 # Version 1.2.0 (2023-01-04)
 
 Changes: Decided to use normal not preview version of DirectX 12 Agility SDK. Added new information: `D3D12_FEATURE_DATA_D3D12_OPTIONS15`.

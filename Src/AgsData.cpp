@@ -23,6 +23,7 @@ static const EnumItem Enum_AGSDeviceInfo_AsicFamily[] = {
 	ENUM_ITEM(AGSDeviceInfo::AsicFamily_Vega   )
 	ENUM_ITEM(AGSDeviceInfo::AsicFamily_RDNA   )
 	ENUM_ITEM(AGSDeviceInfo::AsicFamily_RDNA2  )
+	ENUM_ITEM(AGSDeviceInfo::AsicFamily_RDNA3  )
 	ENUM_ITEM(AGSDeviceInfo::AsicFamily_Count  )
 	{ NULL, UINT32_MAX } };
 static EnumRegistration g_Enum_AGSDeviceInfo_AsicFamily_Registration(L"AGSDeviceInfo_AsicFamily", Enum_AGSDeviceInfo_AsicFamily);
