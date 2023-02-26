@@ -598,14 +598,14 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
         NV_GPU_MEMORY_INFO_EX memInfo = {NV_GPU_MEMORY_INFO_EX_VER};
         if(NvAPI_GPU_GetMemoryInfoEx(gpu, &memInfo) == NVAPI_OK)
         {
-            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemory", memInfo.dedicatedVideoMemory);
-            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::availableDedicatedVideoMemory", memInfo.availableDedicatedVideoMemory);
-            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::systemVideoMemory", memInfo.systemVideoMemory);
-            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::sharedSystemMemory", memInfo.sharedSystemMemory);
-            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::curAvailableDedicatedVideoMemory", memInfo.curAvailableDedicatedVideoMemory);
-            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemoryEvictionsSize", memInfo.dedicatedVideoMemoryEvictionsSize);
+            Print_size(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemory", memInfo.dedicatedVideoMemory);
+            Print_size(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::availableDedicatedVideoMemory", memInfo.availableDedicatedVideoMemory);
+            Print_size(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::systemVideoMemory", memInfo.systemVideoMemory);
+            Print_size(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::sharedSystemMemory", memInfo.sharedSystemMemory);
+            Print_size(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::curAvailableDedicatedVideoMemory", memInfo.curAvailableDedicatedVideoMemory);
+            Print_size(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemoryEvictionsSize", memInfo.dedicatedVideoMemoryEvictionsSize);
             Print_uint64(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemoryEvictionCount", memInfo.dedicatedVideoMemoryEvictionCount);
-            Print_sizeKilobytes(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemoryPromotionsSize", memInfo.dedicatedVideoMemoryPromotionsSize);
+            Print_size(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemoryPromotionsSize", memInfo.dedicatedVideoMemoryPromotionsSize);
             Print_uint64(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemoryPromotionCount", memInfo.dedicatedVideoMemoryPromotionCount);
         }
     }
