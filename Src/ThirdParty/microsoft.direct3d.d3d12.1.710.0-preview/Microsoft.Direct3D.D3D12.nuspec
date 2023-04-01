@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
     <id>Microsoft.Direct3D.D3D12</id>
-    <version>1.700.10-preview</version>
+    <version>1.710.0-preview</version>
     <title>Microsoft.Direct3D.D3D12</title>
     <authors>Microsoft</authors>
     <owners>Direct3D,Microsoft</owners>

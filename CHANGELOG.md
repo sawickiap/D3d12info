@@ -1,3 +1,18 @@
+# Version 1.4.0 (2023-04-01)
+
+Changes:
+
+- Updated DirectX Agility SDK to the latest version 1.710.0-preview. Added new information:
+    - `D3D12_FEATURE_DATA_D3D12_OPTIONS16::GPUUploadHeapSupported` (it was reserved before)
+    - `D3D12_FEATURE_DATA_D3D12_OPTIONS17`
+    - `D3D12_FEATURE_DATA_D3D12_OPTIONS18`
+    - `D3D12_FEATURE_DATA_D3D12_OPTIONS19`
+    - Root signature version 1.2
+    - `DXGI_FORMAT_A4B4G4R4_UNORM`
+- Updated NVAPI to the latest version R530-developer. Added new information: `NvAPI_D3D12_QueryWorkstationFeatureProperties`.
+
+Compiled with DirectX 12 Agility SDK 1.710.0-preview, AMD AGS 6.1.0, NVAPI R530-developer.
+
 # Version 1.3.1 (2023-02-26)
 
 Changes: Fixed printing of sizes in section about `NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX`. (#7)

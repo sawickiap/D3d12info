@@ -10,7 +10,7 @@
 #pragma comment(lib, "nvapi64.lib")
 
 // Don't forget to update when linking with a new version!
-static const wchar_t* NVAPI_COMPILED_VERSION = L"R525-developer";
+static const wchar_t* NVAPI_COMPILED_VERSION = L"R530-developer";
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE
@@ -505,6 +505,30 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
         }
     }
     PrintStructEnd();
+
+    {
+        PrintStructBegin(L"NvAPI_D3D12_QueryWorkstationFeatureProperties");
+        NVAPI_D3D12_WORKSTATION_FEATURE_PROPERTIES_PARAMS params = {
+            .version = NVAPI_D3D12_WORKSTATION_FEATURE_PROPERTIES_PARAMS_VER };
+
+        params.workstationFeatureType = NV_D3D12_WORKSTATION_FEATURE_TYPE_PRESENT_BARRIER;
+        if(NvAPI_D3D12_QueryWorkstationFeatureProperties(device, &params) == NVAPI_OK)
+        {
+            Print_BOOL(L"NV_D3D12_WORKSTATION_FEATURE_TYPE_PRESENT_BARRIER - supported", params.supported);
+        }
+
+        params.workstationFeatureType = NV_D3D12_WORKSTATION_FEATURE_TYPE_RDMA_BAR1_SUPPORT;
+        if(NvAPI_D3D12_QueryWorkstationFeatureProperties(device, &params) == NVAPI_OK)
+        {
+            Print_BOOL(L"NV_D3D12_WORKSTATION_FEATURE_TYPE_RDMA_BAR1_SUPPORT - supported", params.supported);
+            if(params.supported)
+            {
+                Print_uint64(L"NV_D3D12_WORKSTATION_FEATURE_TYPE_RDMA_BAR1_SUPPORT - rdmaHeapSize", params.rdmaInfo.rdmaHeapSize);
+                
+            }
+        }
+        PrintStructEnd();
+    }
 }
 
 void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)

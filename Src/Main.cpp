@@ -9,7 +9,7 @@
 
 // For Direct3D 12 Agility SDK
 extern "C" {
-    __declspec(dllexport) extern const UINT D3D12SDKVersion = D3D12_SDK_VERSION;
+    __declspec(dllexport) extern const UINT D3D12SDKVersion = D3D12_PREVIEW_SDK_VERSION;
     __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\";
 }
 
@@ -26,7 +26,7 @@ typedef HRESULT (WINAPI* PFN_DXGI_CREATE_FACTORY1)(REFIID riid, _COM_Outptr_ voi
 HMODULE g_DxgiLibrary = nullptr;
 HMODULE g_Dx12Library = nullptr;
 
-static const D3D_ROOT_SIGNATURE_VERSION HIGHEST_ROOT_SIGNATURE_VERSION = D3D_ROOT_SIGNATURE_VERSION_1_1;
+static const D3D_ROOT_SIGNATURE_VERSION HIGHEST_ROOT_SIGNATURE_VERSION = D3D_ROOT_SIGNATURE_VERSION_1_2;
 static const D3D_FEATURE_LEVEL FEATURE_LEVELS_ARRAY[] =
 {
     D3D_FEATURE_LEVEL_12_2,
@@ -306,6 +306,38 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS16(const D3D12_FEATURE_DATA_D3
 {
     PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS16");
     Print_BOOL(L"DynamicDepthBiasSupported", o.DynamicDepthBiasSupported);
+    Print_BOOL(L"GPUUploadHeapSupported", o.GPUUploadHeapSupported);
+    PrintStructEnd();
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS17(const D3D12_FEATURE_DATA_D3D12_OPTIONS17& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS17");
+    Print_BOOL(L"NonNormalizedCoordinateSamplersSupported", o.NonNormalizedCoordinateSamplersSupported);
+    Print_BOOL(L"ManualWriteTrackingResourceSupported", o.ManualWriteTrackingResourceSupported);
+    PrintStructEnd();
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS18(const D3D12_FEATURE_DATA_D3D12_OPTIONS18& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS18");
+    Print_BOOL(L"RenderPassesValid", o.RenderPassesValid);
+    PrintStructEnd();
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS19(const D3D12_FEATURE_DATA_D3D12_OPTIONS19& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS19");
+    Print_BOOL(L"MismatchingOutputDimensionsSupported", o.MismatchingOutputDimensionsSupported);
+    Print_uint32(L"SupportedSampleCountsWithNoOutputs", o.SupportedSampleCountsWithNoOutputs);
+    Print_BOOL(L"PointSamplingAddressesNeverRoundUp", o.PointSamplingAddressesNeverRoundUp);
+    Print_BOOL(L"RasterizerDesc2Supported", o.RasterizerDesc2Supported);
+    Print_BOOL(L"NarrowQuadrilateralLinesSupported", o.NarrowQuadrilateralLinesSupported);
+    Print_BOOL(L"AnisoFilterWithPointMipSupported", o.AnisoFilterWithPointMipSupported);
+    Print_uint32(L"MaxSamplerDescriptorHeapSize", o.MaxSamplerDescriptorHeapSize);
+    Print_uint32(L"MaxSamplerDescriptorHeapSizeWithStaticSamplers", o.MaxSamplerDescriptorHeapSizeWithStaticSamplers);
+    Print_uint32(L"MaxViewDescriptorHeapSize", o.MaxViewDescriptorHeapSize);
+    Print_BOOL(L"ComputeOnlyCustomHeapSupported", o.ComputeOnlyCustomHeapSupported);
     PrintStructEnd();
 }
 
@@ -395,13 +427,16 @@ static void PrintGeneralParams()
     Print_uint32(L"D3D12SDKVersion", uint32_t(D3D12SDKVersion));
 
 #if USE_NVAPI
-    NvAPI_Inititalize_RAII::PrintStaticParams();
+    if(!g_PureD3D12)
+        NvAPI_Inititalize_RAII::PrintStaticParams();
 #endif
 #if USE_AGS
-    AGS_Initialize_RAII::PrintStaticParams();
+    if(!g_PureD3D12)
+        AGS_Initialize_RAII::PrintStaticParams();
 #endif
 #if USE_VULKAN
-    Vulkan_Initialize_RAII::PrintStaticParams();
+    if(!g_PureD3D12)
+        Vulkan_Initialize_RAII::PrintStaticParams();
 #endif
 }
 
@@ -821,6 +856,18 @@ static void PrintDeviceOptions(ID3D12Device* device)
     if (D3D12_FEATURE_DATA_D3D12_OPTIONS16 options16 = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS16(options16);
+
+    if (D3D12_FEATURE_DATA_D3D12_OPTIONS17 options17 = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS17, &options17, sizeof(options17))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS17(options17);
+
+    if (D3D12_FEATURE_DATA_D3D12_OPTIONS18 options18 = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS18, &options18, sizeof(options18))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS18(options18);
+
+    if (D3D12_FEATURE_DATA_D3D12_OPTIONS19 options19 = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS19, &options19, sizeof(options19))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS19(options19);
 }
 
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI, AGS_Initialize_RAII* ags)
