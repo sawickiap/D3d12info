@@ -14,6 +14,10 @@ set(RAPIDJSON_NATVIS_FILE "Src/ThirdParty/rapidjson/contrib/natvis/rapidjson.nat
 target_sources(D3d12info PRIVATE ${RAPIDJSON_NATVIS_FILE})
 source_group("ThirdParty" FILES ${RAPIDJSON_NATVIS_FILE})
 target_precompile_headers(D3d12info PRIVATE "Src/pch.hpp")
+add_custom_command(TARGET D3d12info POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:D3d12info>/D3D12"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/Src/ThirdParty/microsoft.direct3d.d3d12.1.711.3-preview/build/native/bin/x64/D3D12Core.dll"
+        "$<TARGET_FILE_DIR:D3d12info>/D3D12/")
 
 set(AGS_DIRECTORY "" CACHE STRING "Path to AMD GPU Services (AGS) library - \"ags_lib\" directory. Leave empty to compile without AGS.")
 if(AGS_DIRECTORY)
@@ -22,6 +26,8 @@ if(AGS_DIRECTORY)
         add_compile_definitions(USE_AGS)
         target_include_directories(D3d12info PRIVATE "${AGS_DIRECTORY}/inc")
         target_link_libraries(D3d12info PRIVATE "${AGS_DIRECTORY}/lib/amd_ags_x64.lib")
+        add_custom_command(TARGET D3d12info POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${AGS_DIRECTORY}/lib/amd_ags_x64.dll" "$<TARGET_FILE_DIR:D3d12info>/")
     else()
         message(FATAL_ERROR "AMD AGS library not found - cannot find file \"${AGS_DIRECTORY}/inc/amd_ags.h\".")
     endif()
