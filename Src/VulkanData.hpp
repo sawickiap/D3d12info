@@ -1,8 +1,6 @@
 #pragma once
 
-// Define to 0 to disable usage of the entire Vulkan.
-#define USE_VULKAN 1
-
+// Macro set by Cmake.
 #if USE_VULKAN
 
 class Vulkan_Initialize_RAII

@@ -5,10 +5,10 @@
 #include "Json.hpp"
 #include "Enums.hpp"
 
+// Macro set by Cmake.
 #if USE_AGS
 
 #include <amd_ags.h>
-#pragma comment(lib, "amd_ags_x64.lib")
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE

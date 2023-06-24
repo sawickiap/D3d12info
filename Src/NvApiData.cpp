@@ -4,10 +4,10 @@
 #include "Enums.hpp"
 #include "Utils.hpp"
 
+// Macro set by Cmake.
 #if USE_NVAPI
 
 #include <nvapi.h>
-#pragma comment(lib, "nvapi64.lib")
 
 // Don't forget to update when linking with a new version!
 static const wchar_t* NVAPI_COMPILED_VERSION = L"R530-developer";

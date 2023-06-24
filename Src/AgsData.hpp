@@ -1,8 +1,6 @@
 #pragma once
 
-// Define to 0 to disable usage of the entire AMD GPU Services (AGS).
-#define USE_AGS 1
-
+// Macro set by Cmake.
 #if USE_AGS
 
 class AGS_Initialize_RAII

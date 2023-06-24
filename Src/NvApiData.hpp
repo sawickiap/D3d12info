@@ -1,8 +1,6 @@
 #pragma once
 
-// Define to 0 to disable usage of the entire NvAPI.
-#define USE_NVAPI 1
-
+// Macro set by Cmake.
 #if USE_NVAPI
 
 class NvAPI_Inititalize_RAII

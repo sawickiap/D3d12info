@@ -5,6 +5,7 @@
 #include "Json.hpp"
 #include "Enums.hpp"
 
+// Macro set by Cmake.
 #if USE_VULKAN
 
 #define VK_NO_PROTOTYPES 1
