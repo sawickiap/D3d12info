@@ -1,3 +1,16 @@
+# Version 1.5.0 (2023-06-24)
+
+Changes:
+
+- Updated DirectX Agility SDK to the latest version 1.711.3-preview. Added new information:
+  - `D3D12_FEATURE_DATA_D3D12_OPTIONS20`
+  - `D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL` - `WorkGraphsTier`
+  - `D3D12_FEATURE_DATA_WAVE_MMA`
+- Added usage of `D3D12EnableExperimentalFeatures`.
+- Created Cmake script for the project.
+
+Compiled with DirectX 12 Agility SDK 1.711.3-preview, AMD AGS 6.1.0, NVAPI R530-developer.
+
 # Version 1.4.0 (2023-04-01)
 
 Changes:
