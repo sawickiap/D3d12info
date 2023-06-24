@@ -41,8 +41,16 @@ static const D3D_FEATURE_LEVEL MIN_FEATURE_LEVEL = D3D_FEATURE_LEVEL_11_0;
 const wchar_t* const DYN_LIB_DXGI = L"dxgi.dll";
 const wchar_t* const DYN_LIB_DX12 = L"d3d12.dll";
 
+// Why did't Microsoft define this type in their header?!
+typedef HRESULT (WINAPI* PFN_D3D12_ENABLE_EXPERIMENTAL_FEATURES)(
+    UINT                                    NumFeatures,
+    _In_count_(NumFeatures) const IID*     pIIDs,
+    _In_opt_count_(NumFeatures) void*      pConfigurationStructs,
+    _In_opt_count_(NumFeatures) UINT*      pConfigurationStructSizes);
+
 PFN_DXGI_CREATE_FACTORY1 g_CreateDXGIFactory1;
 PFN_D3D12_CREATE_DEVICE g_D3D12CreateDevice;
+PFN_D3D12_ENABLE_EXPERIMENTAL_FEATURES g_D3D12EnableExperimentalFeatures; // Optional, can be null.
 
 #endif // #if defined(AUTO_LINK_DX12)
 
@@ -180,6 +188,13 @@ static void Print_D3D12_FEATURE_CROSS_NODE(const D3D12_FEATURE_DATA_CROSS_NODE& 
     PrintStructBegin(L"D3D12_FEATURE_DATA_CROSS_NODE");
     PrintEnum(L"SharingTier", crossNode.SharingTier, Enum_D3D12_CROSS_NODE_SHARING_TIER);
     Print_BOOL(L"AtomicShaderInstructions", crossNode.AtomicShaderInstructions);
+    PrintStructEnd();
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(const D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL");
+    PrintEnum(L"WorkGraphsTier", o.WorkGraphsTier, Enum_D3D12_WORK_GRAPHS_TIER);
     PrintStructEnd();
 }
 
@@ -338,6 +353,13 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS19(const D3D12_FEATURE_DATA_D3
     Print_uint32(L"MaxSamplerDescriptorHeapSizeWithStaticSamplers", o.MaxSamplerDescriptorHeapSizeWithStaticSamplers);
     Print_uint32(L"MaxViewDescriptorHeapSize", o.MaxViewDescriptorHeapSize);
     Print_BOOL(L"ComputeOnlyCustomHeapSupported", o.ComputeOnlyCustomHeapSupported);
+    PrintStructEnd();
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS20(const D3D12_FEATURE_DATA_D3D12_OPTIONS20& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS20");
+    Print_BOOL(L"ComputeOnlyWriteWatchSupported", o.ComputeOnlyWriteWatchSupported);
     PrintStructEnd();
 }
 
@@ -542,6 +564,73 @@ static void PrintSystemMemoryInfo()
     }
     
     PrintStructEnd();
+}
+
+static void EnableExperimentalFeatures()
+{
+    if(g_D3D12EnableExperimentalFeatures == nullptr)
+        return;
+
+    static const UUID FEATURE_UUIDS[] = {
+        D3D12ExperimentalShaderModels,
+        D3D12TiledResourceTier4,
+        D3D12StateObjectsExperiment };
+    static const wchar_t* FEATURE_NAMES[] = {
+        L"D3D12ExperimentalShaderModels",
+        L"D3D12TiledResourceTier4",
+        L"D3D12StateObjectsExperiment" };
+    constexpr size_t FEATURE_COUNT = _countof(FEATURE_UUIDS);
+    uint32_t featureBitMask = 0b111;
+
+    void* configStructs[FEATURE_COUNT] = {};
+    UINT configStructSizes[FEATURE_COUNT] = {};
+
+    while(featureBitMask != 0)
+    {
+        UUID featuresToEnable[FEATURE_COUNT];
+        uint32_t featuresToEnableCount = 0;
+        for(size_t featureIndex = 0; featureIndex < FEATURE_COUNT; ++featureIndex)
+        {
+            if((featureBitMask & (1u << featureIndex)) != 0)
+                featuresToEnable[featuresToEnableCount++] = FEATURE_UUIDS[featureIndex];
+        }
+
+        if(SUCCEEDED(g_D3D12EnableExperimentalFeatures(featuresToEnableCount, featuresToEnable, configStructs, configStructSizes)))
+            break;
+        --featureBitMask;
+    }
+
+    if(featureBitMask != 0) // Means enablement succeeded.
+    {
+        if(g_UseJson)
+        {
+            Json::WriteString(L"D3D12EnableExperimentalFeatures");
+            Json::BeginArray();
+            for(size_t featureIndex = 0; featureIndex < FEATURE_COUNT; ++featureIndex)
+            {
+                if((featureBitMask & (1u << featureIndex)) != 0)
+                    Json::WriteString(FEATURE_NAMES[featureIndex]);
+            }
+            Json::EndArray();
+        }
+        else
+        {
+            PrintHeader(L"D3D12EnableExperimentalFeatures", 1);
+            ++g_Indent;
+
+            for(size_t featureIndex = 0; featureIndex < FEATURE_COUNT; ++featureIndex)
+            {
+                if((featureBitMask & (1u << featureIndex)) != 0)
+                {
+                    PrintIndent();
+                    wprintf(L"%s\n", FEATURE_NAMES[featureIndex]);
+                }
+            }
+
+            --g_Indent;
+            PrintEmptyLine();
+        }
+    }   
 }
 
 static void PrintEnumsData()
@@ -868,6 +957,100 @@ static void PrintDeviceOptions(ID3D12Device* device)
     if (D3D12_FEATURE_DATA_D3D12_OPTIONS19 options19 = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS19, &options19, sizeof(options19))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS19(options19);
+
+    if (D3D12_FEATURE_DATA_D3D12_OPTIONS20 options20 = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS20, &options20, sizeof(options20))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS20(options20);
+}
+
+static void PrintWaveMMA(ID3D12Device* device)
+{
+    bool started = false;
+
+    D3D12_FEATURE_DATA_WAVE_MMA data = {};
+    for(uint32_t inputDataTypeIndex = 0; Enum_D3D12_WAVE_MMA_INPUT_DATATYPE[inputDataTypeIndex].m_Name != nullptr;
+        ++inputDataTypeIndex)
+    {
+        data.InputDataType = (D3D12_WAVE_MMA_INPUT_DATATYPE)Enum_D3D12_WAVE_MMA_INPUT_DATATYPE[inputDataTypeIndex].m_Value;
+        for(uint32_t mIndex = 0; Enum_D3D12_WAVE_MMA_DIMENSION[mIndex].m_Name != nullptr; ++mIndex)
+        {
+            data.M = (D3D12_WAVE_MMA_DIMENSION)Enum_D3D12_WAVE_MMA_DIMENSION[mIndex].m_Value;
+            for(uint32_t nIndex = 0; Enum_D3D12_WAVE_MMA_DIMENSION[nIndex].m_Name != nullptr; ++nIndex)
+            {
+                data.N = (D3D12_WAVE_MMA_DIMENSION)Enum_D3D12_WAVE_MMA_DIMENSION[nIndex].m_Value;
+                if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_WAVE_MMA, &data, sizeof(data))) &&
+                    data.Supported)
+                {
+                    data.K = 10;
+                    data.AccumDataTypes = D3D12_WAVE_MMA_ACCUM_DATATYPE_FLOAT | D3D12_WAVE_MMA_ACCUM_DATATYPE_FLOAT16;
+                    data.RequiredWaveLaneCountMin = 1;
+                    data.RequiredWaveLaneCountMax = 2;
+
+                    if(!started)
+                    {
+                        if(g_UseJson)
+                        {
+                            Json::WriteString(L"D3D12_FEATURE_DATA_WAVE_MMA");
+                            Json::BeginArray();
+                        }
+                        else
+                            PrintHeader(L"D3D12_FEATURE_DATA_WAVE_MMA", 1);
+                        started = true;
+                    }
+
+                    if(g_UseJson)
+                    {
+                        // Object as array element.
+                        Json::BeginObject();
+                        
+                        Json::WriteString(L"InputDataType");
+                        Json::WriteNumber((uint32_t)data.InputDataType);
+                        Json::WriteString(L"M");
+                        Json::WriteNumber(data.M);
+                        Json::WriteString(L"N");
+                        Json::WriteNumber(data.N);
+                        Json::WriteString(L"Supported");
+                        Json::WriteBool(true);
+                        Json::WriteString(L"K");
+                        Json::WriteNumber(data.K);
+                        Json::WriteString(L"AccumDataTypes");
+                        Json::WriteNumber((uint32_t)data.AccumDataTypes);
+                        Json::WriteString(L"RequiredWaveLaneCountMin");
+                        Json::WriteNumber(data.RequiredWaveLaneCountMin);
+                        Json::WriteString(L"RequiredWaveLaneCountMax");
+                        Json::WriteNumber(data.RequiredWaveLaneCountMax);
+
+                        Json::EndObject();
+                    }
+                    else
+                    {
+                        PrintIndent();
+                        wprintf(L"InputDataType = %s, M = %s, N = %s:\n",
+                            Enum_D3D12_WAVE_MMA_INPUT_DATATYPE[inputDataTypeIndex].m_Name,
+                            Enum_D3D12_WAVE_MMA_DIMENSION[mIndex].m_Name,
+                            Enum_D3D12_WAVE_MMA_DIMENSION[nIndex].m_Name);
+                        ++g_Indent;
+
+                        Print_BOOL(L"Supported", TRUE);
+                        Print_uint32(L"K", data.K);
+                        PrintFlags(L"AccumDataTypes", data.AccumDataTypes, Enum_D3D12_WAVE_MMA_ACCUM_DATATYPE);
+                        Print_uint32(L"RequiredWaveLaneCountMin", data.RequiredWaveLaneCountMin);
+                        Print_uint32(L"RequiredWaveLaneCountMax", data.RequiredWaveLaneCountMax);
+
+                        --g_Indent;
+                    }
+                }
+            }
+        }
+    }
+
+    if(started)
+    {
+        if(g_UseJson)
+            Json::EndArray();
+        else
+            PrintEmptyLine();
+    }
 }
 
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI, AGS_Initialize_RAII* ags)
@@ -967,7 +1150,13 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_CROSS_NODE, &crossNode, sizeof(crossNode))))
         Print_D3D12_FEATURE_CROSS_NODE(crossNode);
 
+    if(D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL experimental = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL, &experimental, sizeof(experimental))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(experimental);
+
     PrintDeviceOptions(device.Get());
+
+    PrintWaveMMA(device.Get());
 
 #if USE_NVAPI
     if(nvAPI && nvAPI->IsInitialized())
@@ -1014,6 +1203,9 @@ static bool LoadLibraries()
     {
         return false;
     }
+
+    g_D3D12EnableExperimentalFeatures = reinterpret_cast<PFN_D3D12_ENABLE_EXPERIMENTAL_FEATURES>(::GetProcAddress(g_Dx12Library, "D3D12EnableExperimentalFeatures"));
+    // Optional, null is accepted.
 
     return true;
 }
@@ -1331,6 +1523,8 @@ int wmain2(int argc, wchar_t** argv)
     if(agsObjPtr && agsObjPtr->IsInitialized())
         agsObjPtr->PrintData();
 #endif
+
+    EnableExperimentalFeatures();
 
     if(g_PrintEnums)
         PrintEnumsData();
