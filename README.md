@@ -52,6 +52,4 @@ It uses following thirt-party libraries:
 - **[NVAPI](https://developer.nvidia.com/nvapi)** - custom vendor extensions to graphics APIs by Nvidia.
   - Linked externally, optional, controlled by Cmake variable `NVAPI_DIRECTORY`.
 - **[Vulkan SDK](https://www.lunarg.com/vulkan-sdk/)**
-  - Linked externally, Cmake automatically detects Vulkan SDK Path.
-  - To manually override SDK path, set "VULKAN_SDK" environment variable.
-  - To force disable usage of Vulkan SDK, set Cmake variable `DISABLE_VULKAN` to `True`.
+  - Linked externally, Cmake automatically detects Vulkan SDK path, controlled by Cmake variable `ENABLE_VULKAN` - on by default.
