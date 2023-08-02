@@ -285,6 +285,7 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS12(const D3D12_FEATURE_DATA_D3
     PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS12");
     PrintEnum(L"MSPrimitivesPipelineStatisticIncludesCulledPrimitives", o.MSPrimitivesPipelineStatisticIncludesCulledPrimitives, Enum_D3D12_TRI_STATE, true);
     Print_BOOL(L"EnhancedBarriersSupported", o.EnhancedBarriersSupported);
+    Print_BOOL(L"RelaxedFormatCastingSupported", o.RelaxedFormatCastingSupported);
     PrintStructEnd();
 }
 

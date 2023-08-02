@@ -1,3 +1,11 @@
+# Version 1.5.1 (2023-08-02)
+
+Changes:
+
+- Added missing `D3D12_FEATURE_DATA_D3D12_OPTIONS12::RelaxedFormatCastingSupported` (#9 - thanks @didito).
+
+Compiled with DirectX 12 Agility SDK 1.711.3-preview, AMD AGS 6.1.0, NVAPI R530-developer (same as previous version).
+
 # Version 1.5.0 (2023-06-24)
 
 Changes:
