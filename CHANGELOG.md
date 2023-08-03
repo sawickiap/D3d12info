@@ -1,3 +1,11 @@
+# Version 1.5.2 (2023-08-03)
+
+Changes:
+
+- Fixed printing of `D3D12_FEATURE_DATA_WAVE_MMA` (#10 - thanks @xoofx).
+
+Compiled with DirectX 12 Agility SDK 1.711.3-preview, AMD AGS 6.1.0, NVAPI R530-developer (same as previous version).
+
 # Version 1.5.1 (2023-08-02)
 
 Changes:

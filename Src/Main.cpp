@@ -982,11 +982,6 @@ static void PrintWaveMMA(ID3D12Device* device)
                 if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_WAVE_MMA, &data, sizeof(data))) &&
                     data.Supported)
                 {
-                    data.K = 10;
-                    data.AccumDataTypes = D3D12_WAVE_MMA_ACCUM_DATATYPE_FLOAT | D3D12_WAVE_MMA_ACCUM_DATATYPE_FLOAT16;
-                    data.RequiredWaveLaneCountMin = 1;
-                    data.RequiredWaveLaneCountMax = 2;
-
                     if(!started)
                     {
                         if(g_UseJson)
