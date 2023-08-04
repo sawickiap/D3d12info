@@ -1,3 +1,11 @@
+# Version 1.5.3 (2023-08-04)
+
+Changes:
+
+- Recompiled the application with AMD AGS and NVAPI libraries enabled.
+
+Compiled with DirectX 12 Agility SDK 1.711.3-preview, AMD AGS 6.1.0, NVAPI R530-developer (same as previous version).
+
 # Version 1.5.2 (2023-08-03)
 
 Changes:
