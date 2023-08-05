@@ -10,7 +10,7 @@
 #include <nvapi.h>
 
 // Don't forget to update when linking with a new version!
-static const wchar_t* NVAPI_COMPILED_VERSION = L"R530-developer";
+static const wchar_t* NVAPI_COMPILED_VERSION = L"R535-developer";
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE
@@ -353,6 +353,11 @@ ENUM_BEGIN(NV_ECC_CONFIGURATION)
     ENUM_ITEM(NV_ECC_CONFIGURATION_IMMEDIATE)
 ENUM_END(NV_ECC_CONFIGURATION)
 
+ENUM_BEGIN(NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAPS)
+    ENUM_ITEM(NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAP_NONE)
+    ENUM_ITEM(NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAP_STANDARD)
+ENUM_END(NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAPS)
+
 static NvU32 g_LogicalGpuCount = 0;
 static NvLogicalGpuHandle g_LogicalGpuHandles[NVAPI_MAX_LOGICAL_GPUS];
 static NV_LOGICAL_GPU_DATA g_LogicalGpuData[NVAPI_MAX_LOGICAL_GPUS];
@@ -503,6 +508,14 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
             PrintEnum(L"NVAPI_D3D12_RAYTRACING_CAPS_TYPE_OPACITY_MICROMAP", (uint32_t)opacityMicromapCaps,
                 Enum_NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAPS);
         }
+
+        NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAPS displacementMicromapCaps = {};
+        if(NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_DISPLACEMENT_MICROMAP,
+            &displacementMicromapCaps, sizeof displacementMicromapCaps) == NVAPI_OK)
+        {
+            PrintEnum(L"NVAPI_D3D12_RAYTRACING_CAPS_TYPE_DISPLACEMENT_MICROMAP", (uint32_t)displacementMicromapCaps,
+                Enum_NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAPS);
+        }
     }
     PrintStructEnd();
 
@@ -528,6 +541,16 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
             }
         }
         PrintStructEnd();
+    }
+
+    {
+        bool appClampNeeded = false;
+        if(NvAPI_D3D12_GetNeedsAppFPBlendClamping(device, &appClampNeeded) == NVAPI_OK)
+        {
+            PrintStructBegin(L"NvAPI_D3D12_GetNeedsAppFPBlendClamping");
+            Print_BOOL(L"pAppClampNeeded", appClampNeeded);
+            PrintStructEnd();
+        }
     }
 }
 

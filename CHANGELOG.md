@@ -1,3 +1,11 @@
+# Version 1.6.0 (2023-08-05)
+
+Changes:
+
+- Updated NVAPI to version R535-Developer - added support for new parameters: `NVAPI_D3D12_RAYTRACING_CAPS_TYPE_DISPLACEMENT_MICROMAP` and `NvAPI_D3D12_GetNeedsAppFPBlendClamping` (#11 - thanks @oscarbg).
+
+Compiled with DirectX 12 Agility SDK 1.711.3-preview, AMD AGS 6.1.0, NVAPI R535-developer.
+
 # Version 1.5.3 (2023-08-04)
 
 Changes:
