@@ -68,7 +68,7 @@ AGS_Initialize_RAII::AGS_Initialize_RAII()
 {
 	AGSConfiguration config = {};
 	if(agsInitialize(
-		AGS_MAKE_VERSION(AMD_AGS_VERSION_MAJOR, AMD_AGS_VERSION_MINOR, AMD_AGS_VERSION_PATCH),
+		AGS_CURRENT_VERSION,
 		nullptr, // config
 		&g_AgsContext, &g_GpuInfo) == AGS_SUCCESS)
 	{
@@ -154,6 +154,7 @@ ComPtr<ID3D12Device> AGS_Initialize_RAII::CreateDeviceAndPrintData(IDXGIAdapter*
 		Print_BOOL(L"floatConversion", returnedParams.extensionsSupported.floatConversion);
 		Print_BOOL(L"readLaneAt", returnedParams.extensionsSupported.readLaneAt);
 		Print_BOOL(L"rayHitToken", returnedParams.extensionsSupported.rayHitToken);
+		Print_BOOL(L"shaderClock", returnedParams.extensionsSupported.shaderClock);
 		PrintStructEnd();
 
 		return device;

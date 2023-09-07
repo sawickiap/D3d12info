@@ -1,3 +1,11 @@
+# Version 1.7.0 (2023-09-07)
+
+Changes:
+
+- Updated AMD AGS to version 6.2 to report support for the new `shaderClock` intrinsics.
+
+Compiled with DirectX 12 Agility SDK 1.711.3-preview, AMD AGS 6.2.0, NVAPI R535-developer.
+
 # Version 1.6.0 (2023-08-05)
 
 Changes:
