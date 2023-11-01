@@ -1064,11 +1064,15 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
 
     if(!device)
     {
+        HRESULT hr;
 #if defined(AUTO_LINK_DX12)
-        CHECK_HR( ::D3D12CreateDevice(adapter1, MIN_FEATURE_LEVEL, IID_PPV_ARGS(&device)) );
+        hr = ::D3D12CreateDevice(adapter1, MIN_FEATURE_LEVEL, IID_PPV_ARGS(&device));
 #else
-        CHECK_HR( g_D3D12CreateDevice(adapter1, MIN_FEATURE_LEVEL, IID_PPV_ARGS(&device)) );
+        hr = g_D3D12CreateDevice(adapter1, MIN_FEATURE_LEVEL, IID_PPV_ARGS(&device));
 #endif
+        if(hr == 0x887E0003)
+            throw std::runtime_error("D3D12CreateDevice returned 0x887E0003. Make sure Developer Mode is enabled in Windows settings.");
+        CHECK_HR(hr);
     }
 
     if (!device)

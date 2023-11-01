@@ -30,12 +30,6 @@ Options:
   --WARP               Use WARP adapter.
 ```
 
-# Troubleshooting
-
-**ERROR: g_D3D12CreateDevice(adapter1, MIN_FEATURE_LEVEL, IID_PPV_ARGS(&device)) returned 0x887E0003**
-
-Solution: Make sure developer mode is enabled in Windows. In Windows 10 you will find it as: Settings > Update & Security > For developers > Developer Mode = On. I didn't check Windows 11, but it should be similar.
-
 # License
 
 The project is open source under MIT license. See file [LICENSE.txt](LICENSE.txt).
