@@ -20,4 +20,13 @@ void EndObject();
 void BeginArray();
 void EndArray();
 
+void WriteNameAndString(const wchar_t* name, const wchar_t* str, size_t length);
+void WriteNameAndString(const wchar_t* name, const wchar_t* str);
+void WriteNameAndString(const wchar_t* name, wstring&& str);
+void WriteNameAndBool(const wchar_t* name, bool value);
+void WriteNameAndNumber(const wchar_t* name, uint32_t value);
+void WriteNameAndNumber(const wchar_t* name, uint64_t value);
+void WriteNameAndNumber(const wchar_t* name, int32_t value);
+void WriteNameAndNumber(const wchar_t* name, float value);
+
 } // namespace Json

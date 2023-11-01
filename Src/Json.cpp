@@ -166,4 +166,52 @@ void EndArray()
 	g_ValueStack.pop_back();
 }
 
+void WriteNameAndString(const wchar_t* name, const wchar_t* str, size_t length)
+{
+	WriteString(name);
+	WriteString(str, length);
+}
+
+void WriteNameAndString(const wchar_t* name, const wchar_t* str)
+{
+	WriteString(name);
+	WriteString(str);
+}
+
+void WriteNameAndString(const wchar_t* name, wstring&& str)
+{
+	WriteString(name);
+	WriteString(std::move(str));
+}
+
+void WriteNameAndBool(const wchar_t* name, bool value)
+{
+	WriteString(name);
+	WriteBool(value);
+}
+
+void WriteNameAndNumber(const wchar_t* name, uint32_t value)
+{
+	WriteString(name);
+	WriteNumber(value);
+}
+
+void WriteNameAndNumber(const wchar_t* name, uint64_t value)
+{
+	WriteString(name);
+	WriteNumber(value);
+}
+
+void WriteNameAndNumber(const wchar_t* name, int32_t value)
+{
+	WriteString(name);
+	WriteNumber(value);
+}
+
+void WriteNameAndNumber(const wchar_t* name, float value)
+{
+	WriteString(name);
+	WriteNumber(value);
+}
+
 } // namespace Json

@@ -56,8 +56,7 @@ void Print_string(const wchar_t* name, const wchar_t* value)
 {
     if(g_UseJson)
     {
-        Json::WriteString(name);
-        Json::WriteString(value);
+        Json::WriteNameAndString(name, value);
     }
     else
     {
@@ -98,8 +97,7 @@ void Print_BOOL(const wchar_t* name, BOOL value)
 {
     if(g_UseJson)
     {
-        Json::WriteString(name);
-        Json::WriteBool(value != FALSE);
+        Json::WriteNameAndBool(name, value != FALSE);
     }
     else
     {
@@ -113,8 +111,7 @@ void Print_uint32(const wchar_t* name, uint32_t value, const wchar_t* unit)
 {
     if(g_UseJson)
     {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
+        Json::WriteNameAndNumber(name, value);
     }
     else
     {
@@ -131,8 +128,7 @@ void Print_uint64(const wchar_t* name, uint64_t value, const wchar_t* unit)
 {
     if(g_UseJson)
     {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
+        Json::WriteNameAndNumber(name, value);
     }
     else
     {
@@ -149,8 +145,7 @@ void Print_size(const wchar_t* name, uint64_t value)
 {
     if(g_UseJson)
     {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
+        Json::WriteNameAndNumber(name, value);
     }
     else
     {
@@ -169,8 +164,7 @@ void Print_sizeKilobytes(const wchar_t* name, uint64_t value)
 {
     if(g_UseJson)
     {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
+        Json::WriteNameAndNumber(name, value);
     }
     else
     {
@@ -189,8 +183,7 @@ void Print_hex32(const wchar_t* name, uint32_t value)
 {
     if(g_UseJson)
     {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
+        Json::WriteNameAndNumber(name, value);
     }
     else
     {
@@ -204,8 +197,7 @@ void Print_int32(const wchar_t* name, int32_t value, const wchar_t* unit)
 {
     if(g_UseJson)
     {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
+        Json::WriteNameAndNumber(name, value);
     }
     else
     {
@@ -222,8 +214,7 @@ void Print_float(const wchar_t* name, float value, const wchar_t* unit)
 {
     if(g_UseJson)
     {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
+        Json::WriteNameAndNumber(name, value);
     }
     else
     {
@@ -272,8 +263,7 @@ void PrintFlags(const wchar_t* name, uint32_t value, const EnumItem* enumItems)
 {
     if(g_UseJson)
     {
-        Json::WriteString(name);
-        Json::WriteNumber(value);
+        Json::WriteNameAndNumber(name, value);
     }
     else
     {

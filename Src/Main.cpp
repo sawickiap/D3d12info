@@ -412,16 +412,11 @@ static void PrintHeader_Json()
     Json::WriteString(L"Header");
     Json::BeginObject();
 
-    Json::WriteString(L"Program");
-    Json::WriteString(L"D3D12INFO");
-    Json::WriteString(L"Version");
-    Json::WriteString(PROGRAM_VERSION);
-    Json::WriteString(L"Built");
-    Json::WriteString(MakeBuildDateTime());
-    Json::WriteString(L"Configuration");
-    Json::WriteString(CONFIG_STR);
-    Json::WriteString(L"Configuration bits");
-    Json::WriteString(CONFIG_BIT_STR);
+    Json::WriteNameAndString(L"Program", L"D3D12INFO");
+    Json::WriteNameAndString(L"Version", PROGRAM_VERSION);
+    Json::WriteNameAndString(L"Built", MakeBuildDateTime());
+    Json::WriteNameAndString(L"Configuration", CONFIG_STR);
+    Json::WriteNameAndString(L"Configuration bits", CONFIG_BIT_STR);
 
     Json::EndObject();
 }
@@ -495,8 +490,7 @@ static void PrintEnums_Json()
 
         for(const EnumItem* item = it.second; item->m_Name != nullptr; ++item)
         {
-            Json::WriteString(item->m_Name);
-            Json::WriteNumber(item->m_Value);
+            Json::WriteNameAndNumber(item->m_Name, item->m_Value);
         }
 
         Json::EndObject();
@@ -832,10 +826,8 @@ static void PrintFormatInformation(ID3D12Device* device)
                         Json::WriteString(std::format(L"{}", msQualityLevels.SampleCount));
                         Json::BeginObject();
 
-                        Json::WriteString(L"NumQualityLevels");
-                        Json::WriteNumber(msQualityLevels.NumQualityLevels);
-                        Json::WriteString(L"Flags");
-                        Json::WriteNumber(uint32_t(msQualityLevels.Flags));
+                        Json::WriteNameAndNumber(L"NumQualityLevels", msQualityLevels.NumQualityLevels);
+                        Json::WriteNameAndNumber(L"Flags", uint32_t(msQualityLevels.Flags));
 
                         Json::EndObject();
                     }
@@ -999,22 +991,14 @@ static void PrintWaveMMA(ID3D12Device* device)
                         // Object as array element.
                         Json::BeginObject();
                         
-                        Json::WriteString(L"InputDataType");
-                        Json::WriteNumber((uint32_t)data.InputDataType);
-                        Json::WriteString(L"M");
-                        Json::WriteNumber(data.M);
-                        Json::WriteString(L"N");
-                        Json::WriteNumber(data.N);
-                        Json::WriteString(L"Supported");
-                        Json::WriteBool(true);
-                        Json::WriteString(L"K");
-                        Json::WriteNumber(data.K);
-                        Json::WriteString(L"AccumDataTypes");
-                        Json::WriteNumber((uint32_t)data.AccumDataTypes);
-                        Json::WriteString(L"RequiredWaveLaneCountMin");
-                        Json::WriteNumber(data.RequiredWaveLaneCountMin);
-                        Json::WriteString(L"RequiredWaveLaneCountMax");
-                        Json::WriteNumber(data.RequiredWaveLaneCountMax);
+                        Json::WriteNameAndNumber(L"InputDataType", (uint32_t)data.InputDataType);
+                        Json::WriteNameAndNumber(L"M", data.M);
+                        Json::WriteNameAndNumber(L"N", data.N);
+                        Json::WriteNameAndBool(L"Supported", true);
+                        Json::WriteNameAndNumber(L"K", data.K);
+                        Json::WriteNameAndNumber(L"AccumDataTypes", (uint32_t)data.AccumDataTypes);
+                        Json::WriteNameAndNumber(L"RequiredWaveLaneCountMin", data.RequiredWaveLaneCountMin);
+                        Json::WriteNameAndNumber(L"RequiredWaveLaneCountMax", data.RequiredWaveLaneCountMax);
 
                         Json::EndObject();
                     }
