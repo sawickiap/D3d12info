@@ -772,6 +772,21 @@ static void PrintAdapterData(IDXGIAdapter* adapter)
     PrintAdapterInterfaceSupport(adapter);
 }
 
+enum class FormatSupportResult { Ok, Failed, Crashed };
+
+static FormatSupportResult CheckFormatSupport(ID3D12Device* device, D3D12_FEATURE_DATA_FORMAT_SUPPORT& formatSupport)
+{
+    __try
+    {
+        const HRESULT hr = device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, UINT(sizeof formatSupport));
+        return SUCCEEDED(hr) ? FormatSupportResult::Ok : FormatSupportResult::Failed;
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        return FormatSupportResult::Crashed;
+    }
+}
+
 static void PrintFormatInformation(ID3D12Device* device)
 {
     if(g_UseJson)
@@ -788,6 +803,14 @@ static void PrintFormatInformation(ID3D12Device* device)
     for(size_t formatIndex = 0; Enum_DXGI_FORMAT[formatIndex].m_Name != nullptr; ++formatIndex)
     {
         const DXGI_FORMAT format = (DXGI_FORMAT)Enum_DXGI_FORMAT[formatIndex].m_Value;
+        formatSupport.Format = format;
+        const FormatSupportResult formatSupportResult = CheckFormatSupport(device, formatSupport);
+        if(formatSupportResult == FormatSupportResult::Crashed)
+        {
+            fwprintf(stderr, L"ERROR: ID3D12Device::CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, %s) crashed.\n",
+                Enum_DXGI_FORMAT[formatIndex].m_Name);
+            break;
+        }
 
         if(g_UseJson)
         {
@@ -801,8 +824,7 @@ static void PrintFormatInformation(ID3D12Device* device)
             ++g_Indent;
         }
 
-        formatSupport.Format = format;
-        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, UINT(sizeof formatSupport))))
+        if(formatSupportResult == FormatSupportResult::Ok)
         {
             PrintFlags(L"Support1", formatSupport.Support1, Enum_D3D12_FORMAT_SUPPORT1);
             PrintFlags(L"Support2", formatSupport.Support2, Enum_D3D12_FORMAT_SUPPORT2);
