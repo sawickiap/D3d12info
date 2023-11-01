@@ -3,8 +3,8 @@
 
 const wchar_t* const PROGRAM_NAME = L"D3d12info";
 const char* const PROGRAM_NAME_ANSI = "D3d12info";
-const wchar_t* const PROGRAM_VERSION = L"1.7.0";
-const uint32_t PROGRAM_VERSION_NUMBER = (1u << 20) | (7u << 10) | (0u);
+const wchar_t* const PROGRAM_VERSION = L"2.0.0";
+const uint32_t PROGRAM_VERSION_NUMBER = (2u << 20) | (0u << 10) | (0u);
 
 wstring SizeToStr(uint64_t size)
 {

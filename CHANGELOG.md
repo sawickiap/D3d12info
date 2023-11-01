@@ -1,3 +1,20 @@
+# Version 2.0.0 (2023-11-01)
+
+Changes, from most to least important:
+
+- Introduced two executables: "D3d12info.exe" (compiled with the latest main version of the DirectX 12 Agility SDK) and "D3d12info_preview.exe" (compiled with the latest preview version of the SDK), as they both have some distinct parameters to query.
+  - Added information unique to the main SDK version: `D3D12_FEATURE_DATA_PREDICATION`, `D3D12_FEATURE_DATA_HARDWARE_COPY`, `D3D12_FEATURE_DATA_D3D12_OPTIONS20::RecreateAtTier`.
+- Fixed incorrect printing of `D3D12_FEATURE_DATA_FORMAT_SUPPORT::Support2`.
+- Added information `CheckInterfaceSupport`, which returns user mode driver version.
+- Added information `DXGI_FEATURE_PRESENT_ALLOW_TEARING`.
+- Added protection against crash in the buggy AMD driver. Also added generic handling of SEH exceptions (e.g. access violation), which are now reported to standard error and returned as process exit code -4.
+
+- Changed printing of `agsGetVersionNumber` to decode as version X.Y.Z.
+- Removed dummy enum item `DXGI_FORMAT_FORCE_UINT` from the list of formats to query.
+- Improved error message printed when Developer Mode is not enabled in Windows settings.
+
+Compiled with DirectX 12 Agility SDK 1.611.0 ("D3d12info.exe") / 1.711.3-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R535-developer.
+
 # Version 1.7.0 (2023-09-07)
 
 Changes:

@@ -822,6 +822,8 @@ static FormatSupportResult CheckFormatSupport(ID3D12Device* device, D3D12_FEATUR
         const HRESULT hr = device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, UINT(sizeof formatSupport));
         return SUCCEEDED(hr) ? FormatSupportResult::Ok : FormatSupportResult::Failed;
     }
+    // This is needed because latest (as of November 2023) AMD drivers crash when calling:
+    // ID3D12Device::CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, DXGI_FORMAT_A4B4G4R4_UNORM)
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
         return FormatSupportResult::Crashed;
