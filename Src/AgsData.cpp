@@ -61,7 +61,20 @@ void AGS_Initialize_RAII::PrintStaticParams()
 {
 	Print_string(L"AMD_AGS_VERSION", std::format(L"{}.{}.{}",
 		AMD_AGS_VERSION_MAJOR, AMD_AGS_VERSION_MINOR, AMD_AGS_VERSION_PATCH).c_str());
-	Print_hex32(L"agsGetVersionNumber", (uint32_t)agsGetVersionNumber());
+
+	const uint32_t version = (uint32_t)agsGetVersionNumber();
+	if(g_UseJson)
+	{
+		Print_hex32(L"agsGetVersionNumber", version);
+	}
+	else
+	{
+		wstring s = std::format(L"{}.{}.{}",
+			version >> 22,
+			(version >> 12) & 0b11'1111'1111,
+			version & 0b1111'1111'1111);
+		Print_string(L"agsGetVersionNumber", s.c_str());
+	}
 }
 
 AGS_Initialize_RAII::AGS_Initialize_RAII()
