@@ -636,30 +636,6 @@ static void PrintEnumsData()
         PrintEnums_Text();
 }
 
-#if 0
-static void PrintAdapterDesc1(const DXGI_ADAPTER_DESC1& desc1)
-{
-    PrintStructBegin(L"DXGI_ADAPTER_DESC1");
-    Print_string(L"Description", desc1.Description);
-    PrintEnum   (L"VendorId", desc1.VendorId, Enum_VendorId);
-    Print_hex32 (L"DeviceId", desc1.DeviceId);
-    Print_hex32 (L"SubSysId", desc1.SubSysId);
-    Print_hex32 (L"Revision", desc1.Revision);
-    Print_size  (L"DedicatedVideoMemory", desc1.DedicatedVideoMemory);
-    Print_size  (L"DedicatedSystemMemory", desc1.DedicatedSystemMemory);
-    Print_size  (L"SharedSystemMemory", desc1.SharedSystemMemory);
-    Print_string(L"AdapterLuid", LuidToStr(desc1.AdapterLuid).c_str());
-    PrintFlags  (L"Flags", desc1.Flags, Enum_DXGI_ADAPTER_FLAG);
-    PrintStructEnd();
-}
-
-static void PrintAdapterDesc2(const DXGI_ADAPTER_DESC2& desc2)
-{
-    PrintStructBegin(L"DXGI_ADAPTER2_DESC2");
-    PrintStructEnd();
-}
-#endif
-
 static void PrintAdapterDescMembers(const DXGI_ADAPTER_DESC& desc)
 {
     Print_string(L"Description", desc.Description);
@@ -766,11 +742,34 @@ static void PrintAdapterMemoryInfo(IDXGIAdapter* adapter)
     }
 }
 
+static void PrintAdapterInterfaceSupport(IDXGIAdapter* adapter)
+{
+    if(LARGE_INTEGER i; SUCCEEDED(adapter->CheckInterfaceSupport(__uuidof(IDXGIDevice), &i)))
+    {
+        PrintStructBegin(L"CheckInterfaceSupport");
+        if(g_UseJson)
+        {
+            Print_uint64(L"IDXGIDevice", i.QuadPart);
+        }
+        else
+        {
+            wstring s = std::format(L"{}.{}.{}.{}",
+                i.QuadPart >> 48,
+                (i.QuadPart >> 32) & 0xFFFF,
+                (i.QuadPart >> 16) & 0xFFFF,
+                i.QuadPart & 0xFFFF);
+            Print_string(L"IDXGIDevice (user mode driver version)", s.c_str());
+        }
+        PrintStructEnd();
+    }
+}
+
 static void PrintAdapterData(IDXGIAdapter* adapter)
 {
     assert(adapter != nullptr);
     PrintAdapterDesc(adapter);
     PrintAdapterMemoryInfo(adapter);
+    PrintAdapterInterfaceSupport(adapter);
 }
 
 static void PrintFormatInformation(ID3D12Device* device)
