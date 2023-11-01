@@ -812,7 +812,7 @@ static void PrintFormatInformation(ID3D12Device* device)
         if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, UINT(sizeof formatSupport))))
         {
             PrintFlags(L"Support1", formatSupport.Support1, Enum_D3D12_FORMAT_SUPPORT1);
-            PrintFlags(L"Support2", formatSupport.Support1, Enum_D3D12_FORMAT_SUPPORT2);
+            PrintFlags(L"Support2", formatSupport.Support2, Enum_D3D12_FORMAT_SUPPORT2);
         }
 
         {
