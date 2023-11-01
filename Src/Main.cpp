@@ -1392,7 +1392,7 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
     return programResult;
 }
 
-int wmain2(int argc, wchar_t** argv)
+int wmain3(int argc, wchar_t** argv)
 {
     UINT adapterIndex = UINT32_MAX;
 
@@ -1560,11 +1560,11 @@ int wmain2(int argc, wchar_t** argv)
     return programResult;
 }
 
-int wmain(int argc, wchar_t** argv)
+int wmain2(int argc, wchar_t** argv)
 {
     try
     {
-        return wmain2(argc, argv);
+        return wmain3(argc, argv);
     }
     catch(const std::exception& ex)
     {
@@ -1575,5 +1575,18 @@ int wmain(int argc, wchar_t** argv)
     {
         fwprintf(stderr, L"UNKNOWN ERROR.\n");
         return PROGRAM_EXIT_ERROR_EXCEPTION;
+    }
+}
+
+int wmain(int argc, wchar_t** argv)
+{
+    __try
+    {
+        return wmain2(argc, argv);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        fwprintf(stderr, L"STRUCTURED EXCEPTION: 0x%08X.\n", GetExceptionCode());
+        return PROGRAM_EXIT_ERROR_SEH_EXCEPTION;
     }
 }

@@ -37,4 +37,5 @@ static const int PROGRAM_EXIT_SUCCESS            = 0;
 static const int PROGRAM_EXIT_ERROR_INIT         = -1;
 static const int PROGRAM_EXIT_ERROR_COMMAND_LINE = -2;
 static const int PROGRAM_EXIT_ERROR_EXCEPTION    = -3;
+static const int PROGRAM_EXIT_ERROR_SEH_EXCEPTION = -4;
 static const int PROGRAM_EXIT_ERROR_D3D12        = -5;
