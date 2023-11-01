@@ -1298,6 +1298,21 @@ static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvA
         Json::EndArray();
 }
 
+static void InspectDxgiFactory(IDXGIFactory4* factory4)
+{
+    if(ComPtr<IDXGIFactory5> factory5;
+        SUCCEEDED(factory4->QueryInterface(IID_PPV_ARGS(&factory5))))
+    {
+        if(BOOL allowTearing = FALSE;
+            SUCCEEDED(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof allowTearing)))
+        {
+            PrintStructBegin(L"DXGI_FEATURE_PRESENT_ALLOW_TEARING");
+            Print_BOOL(L"allowTearing", allowTearing);
+            PrintStructEnd();
+        }
+    }
+}
+
 // adapterIndex == UINT_MAX means first non-software and non-remote ad
 static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
     Vulkan_Initialize_RAII* vk, uint32_t adapterIndex)
@@ -1524,6 +1539,8 @@ int wmain2(int argc, wchar_t** argv)
         CHECK_HR( g_CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) );
 #endif
         assert(dxgiFactory != nullptr);
+
+        InspectDxgiFactory(dxgiFactory.Get());
 
         if(g_ListAdapters)
             ListAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get());
