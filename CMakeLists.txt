@@ -4,32 +4,15 @@ project(D3d12info LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 file(GLOB CPP_FILES "Src/*.cpp")
 file(GLOB HPP_FILES "Src/*.hpp")
-add_executable(D3d12info ${CPP_FILES} ${HPP_FILES})
-
-set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT "D3d12info")
-target_compile_options(D3d12info PRIVATE /W4 /wd4100 /wd4189)
-add_compile_definitions(UNICODE _UNICODE)
-
 set(RAPIDJSON_NATVIS_FILE "Src/ThirdParty/rapidjson/contrib/natvis/rapidjson.natvis")
-target_sources(D3d12info PRIVATE ${RAPIDJSON_NATVIS_FILE})
-source_group("ThirdParty" FILES ${RAPIDJSON_NATVIS_FILE})
-target_precompile_headers(D3d12info PRIVATE "Src/pch.hpp")
-add_custom_command(TARGET D3d12info POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:D3d12info>/D3D12"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/Src/ThirdParty/microsoft.direct3d.d3d12.1.711.3-preview/build/native/bin/x64/D3D12Core.dll"
-        "$<TARGET_FILE_DIR:D3d12info>/D3D12/")
 
 set(AGS_DIRECTORY "" CACHE STRING "Path to AMD GPU Services (AGS) library - \"ags_lib\" directory. Leave empty to compile without AGS.")
 if(AGS_DIRECTORY)
     if(EXISTS "${AGS_DIRECTORY}/inc/amd_ags.h")
         message(STATUS "AMD AGS library used from \"${AGS_DIRECTORY}\".")
-        target_compile_definitions(D3d12info PRIVATE USE_AGS)
-        target_include_directories(D3d12info PRIVATE "${AGS_DIRECTORY}/inc")
-        target_link_libraries(D3d12info PRIVATE "${AGS_DIRECTORY}/lib/amd_ags_x64.lib")
-        add_custom_command(TARGET D3d12info POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${AGS_DIRECTORY}/lib/amd_ags_x64.dll" "$<TARGET_FILE_DIR:D3d12info>/")
     else()
         message(FATAL_ERROR "AMD AGS library not found - cannot find file \"${AGS_DIRECTORY}/inc/amd_ags.h\".")
+        unset(AGS_DIRECTORY)
     endif()
 else()
     message(STATUS "AMD AGS library not used.")
@@ -39,11 +22,9 @@ set(NVAPI_DIRECTORY "" CACHE STRING "Path to NVAPI library. Leave empty to compi
 if(NVAPI_DIRECTORY)
     if(EXISTS "${NVAPI_DIRECTORY}/nvapi.h")
         message(STATUS "NVAPI library used from \"${NVAPI_DIRECTORY}\".")
-        target_compile_definitions(D3d12info PRIVATE USE_NVAPI)
-        target_include_directories(D3d12info PRIVATE "${NVAPI_DIRECTORY}")
-        target_link_libraries(D3d12info PRIVATE "${NVAPI_DIRECTORY}/amd64/nvapi64.lib")
     else()
         message(FATAL_ERROR "NVAPI library not found - cannot find file \"${NVAPI_DIRECTORY}/nvapi.h\".")
+        unset(NVAPI_DIRECTORY)
     endif()
 else()
     message(STATUS "NVAPI library not used.")
@@ -55,13 +36,66 @@ if (ENABLE_VULKAN)
     # if Cmake finds older version, it will print warning and set Vulkan_FOUND to false
     find_package(Vulkan 1.3.231)
     if (Vulkan_FOUND)
-        message(STATUS "Vulkan SDK found.")
-        target_compile_definitions(D3d12info PRIVATE USE_VULKAN)
-        target_include_directories(D3d12info PRIVATE ${Vulkan_INCLUDE_DIRS})
-        target_link_libraries(D3d12info PRIVATE ${Vulkan_LIBRARIES})
+        message(STATUS "Vulkan SDK found. Include directory is \"${Vulkan_INCLUDE_DIRS}\".")
     else()
         message(STATUS "Vulkan SDK not found.")
     endif()
 else()
     message(STATUS "Vulkan SDK not used.")
 endif()
+
+function(add_my_executable USE_PREVIEW_AGILITY_SDK)
+    set(EXE_NAME "D3d12info")
+    if(USE_PREVIEW_AGILITY_SDK)
+        set(EXE_NAME "${EXE_NAME}_preview")
+    endif()
+
+    add_executable(${EXE_NAME} ${CPP_FILES} ${HPP_FILES})
+    
+    target_compile_options(${EXE_NAME} PRIVATE /W4 /wd4100 /wd4189)
+    add_compile_definitions(UNICODE _UNICODE)
+    target_precompile_headers(${EXE_NAME} PRIVATE "Src/pch.hpp")
+    
+    target_sources(${EXE_NAME} PRIVATE ${RAPIDJSON_NATVIS_FILE})
+    source_group("ThirdParty" FILES ${RAPIDJSON_NATVIS_FILE})
+    
+    if(USE_PREVIEW_AGILITY_SDK)
+        target_compile_definitions(${EXE_NAME} PRIVATE USE_PREVIEW_AGILITY_SDK)
+        set(AGILITY_SDK_DIRECTORY "${PROJECT_SOURCE_DIR}/Src/ThirdParty/microsoft.direct3d.d3d12.1.711.3-preview")
+        add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${EXE_NAME}>/D3D12_preview"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${AGILITY_SDK_DIRECTORY}/build/native/bin/x64/D3D12Core.dll"
+                "$<TARGET_FILE_DIR:${EXE_NAME}>/D3D12_preview/")
+    else()
+        set(AGILITY_SDK_DIRECTORY "${PROJECT_SOURCE_DIR}/Src/ThirdParty/microsoft.direct3d.d3d12.1.611.0")
+        add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${EXE_NAME}>/D3D12"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${AGILITY_SDK_DIRECTORY}/build/native/bin/x64/D3D12Core.dll"
+                "$<TARGET_FILE_DIR:${EXE_NAME}>/D3D12/")
+    endif()
+
+    if(AGS_DIRECTORY)
+        target_compile_definitions(${EXE_NAME} PRIVATE USE_AGS)
+        target_include_directories(${EXE_NAME} PRIVATE "${AGS_DIRECTORY}/inc")
+        target_link_libraries(${EXE_NAME} PRIVATE "${AGS_DIRECTORY}/lib/amd_ags_x64.lib")
+        add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${AGS_DIRECTORY}/lib/amd_ags_x64.dll" "$<TARGET_FILE_DIR:${EXE_NAME}>/")
+    endif()
+
+    set(NVAPI_DIRECTORY "" CACHE STRING "Path to NVAPI library. Leave empty to compile without NVAPI.")
+    if(NVAPI_DIRECTORY)
+        target_compile_definitions(${EXE_NAME} PRIVATE USE_NVAPI)
+        target_include_directories(${EXE_NAME} PRIVATE "${NVAPI_DIRECTORY}")
+        target_link_libraries(${EXE_NAME} PRIVATE "${NVAPI_DIRECTORY}/amd64/nvapi64.lib")
+    endif()
+
+    if (Vulkan_FOUND)
+        target_compile_definitions(${EXE_NAME} PRIVATE USE_VULKAN)
+        target_include_directories(${EXE_NAME} PRIVATE ${Vulkan_INCLUDE_DIRS})
+        target_link_libraries(${EXE_NAME} PRIVATE ${Vulkan_LIBRARIES})
+    endif()
+endfunction()
+
+add_my_executable(FALSE)
+add_my_executable(TRUE)
+set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT "D3d12info")

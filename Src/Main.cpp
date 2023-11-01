@@ -8,9 +8,16 @@
 #include "Printing.hpp"
 
 // For Direct3D 12 Agility SDK
-extern "C" {
+extern "C"
+{
+#ifdef USE_PREVIEW_AGILITY_SDK
     __declspec(dllexport) extern const UINT D3D12SDKVersion = D3D12_PREVIEW_SDK_VERSION;
+    __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12_preview\\";
+#else
+    __declspec(dllexport) extern const UINT D3D12SDKVersion = D3D12_SDK_VERSION;
     __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\";
+#endif
+ 
 }
 
 //#define AUTO_LINK_DX12    // use this on everything before Win10
@@ -191,12 +198,30 @@ static void Print_D3D12_FEATURE_CROSS_NODE(const D3D12_FEATURE_DATA_CROSS_NODE& 
     PrintStructEnd();
 }
 
+#ifdef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(const D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL& o)
 {
     PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL");
     PrintEnum(L"WorkGraphsTier", o.WorkGraphsTier, Enum_D3D12_WORK_GRAPHS_TIER);
     PrintStructEnd();
 }
+
+#else // #ifdef USE_PREVIEW_AGILITY_SDK
+static void Print_D3D12_FEATURE_PREDICATION(const D3D12_FEATURE_DATA_PREDICATION& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_PREDICATION");
+    Print_BOOL(L"Supported", o.Supported);
+    PrintStructEnd();
+}
+
+static void Print_D3D12_FEATURE_HARDWARE_COPY(const D3D12_FEATURE_DATA_HARDWARE_COPY& o)
+{
+    PrintStructBegin(L"D3D12_FEATURE_DATA_HARDWARE_COPY");
+    Print_BOOL(L"Supported", o.Supported);
+    PrintStructEnd();
+}
+
+#endif // #ifdef USE_PREVIEW_AGILITY_SDK
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(const D3D12_FEATURE_DATA_D3D12_OPTIONS3& options3)
 {
@@ -361,6 +386,9 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS20(const D3D12_FEATURE_DATA_D3
 {
     PrintStructBegin(L"D3D12_FEATURE_DATA_D3D12_OPTIONS20");
     Print_BOOL(L"ComputeOnlyWriteWatchSupported", o.ComputeOnlyWriteWatchSupported);
+#ifndef USE_PREVIEW_AGILITY_SDK
+    PrintEnum(L"RecreateAtTier", o.RecreateAtTier, Enum_D3D12_RECREATE_AT_TIER);
+#endif
     PrintStructEnd();
 }
 
@@ -442,7 +470,11 @@ static wstring MakeCurrentDate()
 static void PrintGeneralParams()
 {
     Print_string(L"Current date", MakeCurrentDate().c_str());
-    Print_uint32(L"D3D12SDKVersion", uint32_t(D3D12SDKVersion));
+#ifdef USE_PREVIEW_AGILITY_SDK
+    Print_uint32(L"D3D12_PREVIEW_SDK_VERSION", uint32_t(D3D12SDKVersion));
+#else
+    Print_uint32(L"D3D12_SDK_VERSION", uint32_t(D3D12SDKVersion));
+#endif
 
 #if USE_NVAPI
     if(!g_PureD3D12)
@@ -566,6 +598,7 @@ static void EnableExperimentalFeatures()
     if(g_D3D12EnableExperimentalFeatures == nullptr)
         return;
 
+#ifdef USE_PREVIEW_AGILITY_SDK
     static const UUID FEATURE_UUIDS[] = {
         D3D12ExperimentalShaderModels,
         D3D12TiledResourceTier4,
@@ -574,6 +607,14 @@ static void EnableExperimentalFeatures()
         L"D3D12ExperimentalShaderModels",
         L"D3D12TiledResourceTier4",
         L"D3D12StateObjectsExperiment" };
+#else
+    static const UUID FEATURE_UUIDS[] = {
+        D3D12ExperimentalShaderModels,
+        D3D12TiledResourceTier4 };
+    static const wchar_t* FEATURE_NAMES[] = {
+        L"D3D12ExperimentalShaderModels",
+        L"D3D12TiledResourceTier4" };
+#endif // #ifdef USE_PREVIEW_AGILITY_SDK
     constexpr size_t FEATURE_COUNT = _countof(FEATURE_UUIDS);
     uint32_t featureBitMask = 0b111;
 
@@ -977,6 +1018,7 @@ static void PrintDeviceOptions(ID3D12Device* device)
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS20(options20);
 }
 
+#ifdef USE_PREVIEW_AGILITY_SDK
 static void PrintWaveMMA(ID3D12Device* device)
 {
     bool started = false;
@@ -1053,6 +1095,7 @@ static void PrintWaveMMA(ID3D12Device* device)
             PrintEmptyLine();
     }
 }
+#endif // #ifdef USE_PREVIEW_AGILITY_SDK
 
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI, AGS_Initialize_RAII* ags)
 {
@@ -1155,13 +1198,27 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_CROSS_NODE, &crossNode, sizeof(crossNode))))
         Print_D3D12_FEATURE_CROSS_NODE(crossNode);
 
+#ifdef USE_PREVIEW_AGILITY_SDK
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL experimental = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL, &experimental, sizeof(experimental))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(experimental);
 
+#else
+    if(D3D12_FEATURE_DATA_PREDICATION predication = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_PREDICATION, &predication, sizeof(predication))))
+        Print_D3D12_FEATURE_PREDICATION(predication);
+
+    if(D3D12_FEATURE_DATA_HARDWARE_COPY hardwareCopy = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_HARDWARE_COPY, &hardwareCopy, sizeof(hardwareCopy))))
+        Print_D3D12_FEATURE_HARDWARE_COPY(hardwareCopy);
+
+#endif
+
     PrintDeviceOptions(device.Get());
 
+#ifdef USE_PREVIEW_AGILITY_SDK
     PrintWaveMMA(device.Get());
+#endif
 
 #if USE_NVAPI
     if(nvAPI && nvAPI->IsInitialized())
