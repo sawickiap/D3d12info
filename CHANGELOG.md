@@ -1,3 +1,11 @@
+# Version 2.1.0 (2023-11-10)
+
+Changes:
+
+- Added information returned by `ID3D12Device::GetDescriptorHandleIncrementSize`.
+
+Compiled with DirectX 12 Agility SDK 1.611.0 ("D3d12info.exe") / 1.711.3-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R535-developer - all same as the previous version.
+
 # Version 2.0.0 (2023-11-01)
 
 Changes, from most to least important:

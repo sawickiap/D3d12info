@@ -1099,6 +1099,20 @@ static void PrintWaveMMA(ID3D12Device* device)
 }
 #endif // #ifdef USE_PREVIEW_AGILITY_SDK
 
+static void PrintDescriptorSizes(ID3D12Device* device)
+{
+    PrintStructBegin(L"GetDescriptorHandleIncrementSize");
+    Print_uint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV",
+        device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+    Print_uint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER",
+        device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
+    Print_uint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_RTV",
+        device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+    Print_uint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_DSV",
+        device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
+    PrintStructEnd();
+}
+
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI, AGS_Initialize_RAII* ags)
 {
     ComPtr<ID3D12Device> device;
@@ -1221,6 +1235,8 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
 #ifdef USE_PREVIEW_AGILITY_SDK
     PrintWaveMMA(device.Get());
 #endif
+
+    PrintDescriptorSizes(device.Get());
 
 #if USE_NVAPI
     if(nvAPI && nvAPI->IsInitialized())
