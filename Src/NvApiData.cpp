@@ -1,4 +1,3 @@
-#include "pch.hpp"
 #include "NvApiData.hpp"
 #include "Printing.hpp"
 #include "Enums.hpp"

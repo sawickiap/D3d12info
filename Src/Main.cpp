@@ -1,6 +1,6 @@
-#include "pch.hpp"
 #include "NvApiData.hpp"
 #include "AgsData.hpp"
+#include "IntelData.hpp"
 #include "VulkanData.hpp"
 #include "Utils.hpp"
 #include "Enums.hpp"
@@ -476,18 +476,21 @@ static void PrintGeneralParams()
     Print_uint32(L"D3D12_SDK_VERSION", uint32_t(D3D12SDKVersion));
 #endif
 
-#if USE_NVAPI
     if(!g_PureD3D12)
+    {
+#if USE_NVAPI
         NvAPI_Inititalize_RAII::PrintStaticParams();
 #endif
 #if USE_AGS
-    if(!g_PureD3D12)
         AGS_Initialize_RAII::PrintStaticParams();
 #endif
 #if USE_VULKAN
-    if(!g_PureD3D12)
         Vulkan_Initialize_RAII::PrintStaticParams();
 #endif
+#if USE_INTEL_GPUDETECT
+        IntelData::PrintStaticParams();
+#endif
+    }
 }
 
 static void PrintGeneralData()
@@ -1415,29 +1418,29 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
 {
     int programResult = PROGRAM_EXIT_SUCCESS;
 
-    ComPtr<IDXGIAdapter1> adapter;
+    ComPtr<IDXGIAdapter1> adapter1;
     if(g_WARP)
     {
-        CHECK_HR(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&adapter)));
+        CHECK_HR(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&adapter1)));
     }
     else if(adapterIndex != UINT32_MAX)
-        dxgiFactory->EnumAdapters1(adapterIndex, &adapter);
+        dxgiFactory->EnumAdapters1(adapterIndex, &adapter1);
     else
     {
         // No explicit adapter requested: Choose first non-software and non-remote.
         adapterIndex = 0;
         DXGI_ADAPTER_DESC1 desc = {};
-        while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND)
+        while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
         {
-            adapter->GetDesc1(&desc);
+            adapter1->GetDesc1(&desc);
             if(desc.Flags == 0)
                 break;
-            adapter.Reset();
+            adapter1.Reset();
             ++adapterIndex;
         }
     }
 
-    if(adapter)
+    if(adapter1)
     {
         wstring adapterStr = std::format(L"DXGI Adapter {}", adapterIndex);
         if(g_UseJson)
@@ -1451,10 +1454,10 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
             PrintEmptyLine();
         }
 
-        PrintAdapterData(adapter.Get());
+        PrintAdapterData(adapter1.Get());
 
         DXGI_ADAPTER_DESC desc = {};
-        if(SUCCEEDED(adapter->GetDesc(&desc)))
+        if(SUCCEEDED(adapter1->GetDesc(&desc)))
         {
 #if USE_NVAPI
             if(nvApi && nvApi->IsInitialized())
@@ -1476,9 +1479,17 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
             if(vk && vk->IsInitialized())
                 vk->PrintData(desc);
 #endif
+#if USE_INTEL_GPUDETECT
+            if(desc.VendorId == GPUDetect::INTEL_VENDOR_ID)
+            {
+                ComPtr<IDXGIAdapter> adapter;
+                adapter1->QueryInterface(IID_PPV_ARGS(&adapter));
+                IntelData::PrintAdapterData(adapter.Get());
+            }
+#endif
         }
 
-        programResult = PrintDeviceDetails(adapter.Get(), nvApi, ags);
+        programResult = PrintDeviceDetails(adapter1.Get(), nvApi, ags);
 
         if(g_UseJson)
             Json::EndObject();

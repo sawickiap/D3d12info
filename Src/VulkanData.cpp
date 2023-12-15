@@ -1,4 +1,3 @@
-#include "pch.hpp"
 #include "VulkanData.hpp"
 #include "Printing.hpp"
 #include "Utils.hpp"

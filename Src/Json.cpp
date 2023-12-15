@@ -1,4 +1,3 @@
-#include "pch.hpp"
 #include "Json.hpp"
 
 #define RAPIDJSON_HAS_STDSTRING 1

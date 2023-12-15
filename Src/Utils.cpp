@@ -1,4 +1,3 @@
-#include "pch.hpp"
 #include "Utils.hpp"
 
 const wchar_t* const PROGRAM_NAME = L"D3d12info";
