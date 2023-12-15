@@ -1489,7 +1489,7 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
                 vk->PrintData(desc);
 #endif
 #if USE_INTEL_GPUDETECT
-            if(desc.VendorId == GPUDetect::INTEL_VENDOR_ID)
+            if(!g_PureD3D12 && desc.VendorId == GPUDetect::INTEL_VENDOR_ID)
             {
                 ComPtr<IDXGIAdapter> adapter;
                 adapter1->QueryInterface(IID_PPV_ARGS(&adapter));
