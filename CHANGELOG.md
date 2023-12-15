@@ -1,3 +1,11 @@
+# Version 2.2.0 (2023-12-15)
+
+Changes:
+
+- Added usage of [Intel GPU Detect library](https://github.com/GameTechDev/gpudetect), printed as new section "Intel GPUDetect::GPUData" on Intel GPUs.
+
+Compiled with DirectX 12 Agility SDK 1.611.0 ("D3d12info.exe") / 1.711.3-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R535-developer, Intel GPU Detect from 2023-07-18.
+
 # Version 2.1.0 (2023-11-10)
 
 Changes:
