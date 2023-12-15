@@ -1,7 +1,16 @@
 /*
-Code in this file is a derivative work of Intel GPU Detect library:
+This file is part of D3d12info project:
+https://github.com/sawickiap/D3d12info
+
+Copyright (c) 2018-2023 Adam Sawicki, https://asawicki.info
+License: MIT
+
+For more information, see files README.md, LICENSE.txt.
+
+Most of the code in this file is a derivative work of Intel GPU Detect library:
 https://github.com/GameTechDev/gpudetect
-License: Apache-2.0
+License: Apache 2.0
+See the original library in directory: Src\ThirdParty\intel_gpudetect
 */
 #include "IntelData.hpp"
 #include "Printing.hpp"

@@ -48,8 +48,14 @@ It uses following thirt-party libraries:
 - **[RapidJSON](https://rapidjson.org/)** - a fast JSON parser/generator, by Tencent. License: MIT.
   - Embedded in directory: Src\ThirdParty\rapidjson
 - **[AMD GPU Services](https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK)** - custom vendor extensions to graphics APIs by AMD.
-  - Linked externally, optional, controlled by Cmake variable `AGS_DIRECTORY`.
+  - Linked externally.
+  - Optional, controlled by Cmake variable `AGS_DIRECTORY`.
 - **[NVAPI](https://developer.nvidia.com/nvapi)** - custom vendor extensions to graphics APIs by Nvidia.
-  - Linked externally, optional, controlled by Cmake variable `NVAPI_DIRECTORY`.
+  - Linked externally.
+  - Optional, controlled by Cmake variable `NVAPI_DIRECTORY`.
+- **[Intel GPU Detect](https://github.com/GameTechDev/gpudetect)** - custom vendor extensions to graphics APIs by Intel. License: Apache 2.0.
+  - Embedded in directory: Src\ThirdParty\intel_gpudetect, also copied to file: Src\IntelData.cpp.
+  - Optional, controlled by Cmake variable `ENABLE_INTEL_GPUDETECT` - on by default.
 - **[Vulkan SDK](https://www.lunarg.com/vulkan-sdk/)**
-  - Linked externally, Cmake automatically detects Vulkan SDK path, controlled by Cmake variable `ENABLE_VULKAN` - on by default.
+  - Linked externally. Cmake automatically detects Vulkan SDK path.
+  - Optional, controlled by Cmake variable `ENABLE_VULKAN` - on by default.
