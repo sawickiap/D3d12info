@@ -32,8 +32,8 @@ public:
 
 	CmdLineParser(int argc, wchar_t **argv);
 	CmdLineParser(const wchar_t *CmdLine);
-	
-    void RegisterOpt(uint32_t Id, wchar_t Opt, bool Parameter);
+
+	void RegisterOpt(uint32_t Id, wchar_t Opt, bool Parameter);
 	void RegisterOpt(uint32_t Id, const std::wstring &Opt, bool Parameter);
 
 	RESULT ReadNextOpt();
