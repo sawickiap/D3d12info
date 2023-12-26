@@ -192,6 +192,21 @@ static void Print_D3D12_FEATURE_DATA_SHADER_CACHE(const D3D12_FEATURE_DATA_SHADE
     PrintStructEnd();
 }
 
+static void Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(const std::array<bool, 9>& commandQueuePriority)
+{
+	PrintStructBegin(L"D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY");
+	Print_BOOL(L"TYPE_DIRECT.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[0]);
+	Print_BOOL(L"TYPE_DIRECT.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[1]);
+	Print_BOOL(L"TYPE_DIRECT.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[2]);
+	Print_BOOL(L"TYPE_COMPUTE.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[3]);
+	Print_BOOL(L"TYPE_COMPUTE.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[4]);
+	Print_BOOL(L"TYPE_COMPUTE.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[5]);
+	Print_BOOL(L"TYPE_COPY.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[6]);
+	Print_BOOL(L"TYPE_COPY.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[7]);
+	Print_BOOL(L"TYPE_COPY.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[8]);
+	PrintStructEnd();
+}
+
 static void Print_D3D12_FEATURE_DATA_SERIALIZATION(const D3D12_FEATURE_DATA_SERIALIZATION& serialization)
 {
     PrintStructBegin(L"D3D12_FEATURE_DATA_SERIALIZATION");
@@ -428,32 +443,51 @@ static wstring MakeBuildDateTime()
     static const wchar_t* const CONFIG_STR = L"Release";
 #endif
 
-#ifdef _WIN64
-    static const wchar_t* const CONFIG_BIT_STR = L"64-bit";
-#else
-    static const wchar_t* const CONFIG_BIT_STR = L"32-bit";
-#endif
-
-static void PrintHeader_Text()
+static void PrintToolInfo_Text()
 {
     wprintf(L"============================\n");
     wprintf(L"D3D12INFO %s\n", PROGRAM_VERSION);
-    wprintf(L"Built: %s\n", MakeBuildDateTime().c_str());
-    wprintf(L"Configuration: %s, %s\n", CONFIG_STR, CONFIG_BIT_STR);
+    wprintf(L"BuildDate: %s\n", MakeBuildDateTime().c_str());
+#ifdef USE_PREVIEW_AGILITY_SDK
+    wprintf(L"Using preview Agility SDK: true\n");
+#else
+    wprintf(L"Using preview Agility SDK: false\n");
+#endif
+    wprintf(L"D3D12_SDK_VERSION: %lu\n", unsigned long(D3D12SDKVersion));
     wprintf(L"============================\n");
     PrintEmptyLine();
 }
 
-static void PrintHeader_Json()
+static void PrintToolInfo_Json()
 {
-    Json::WriteString(L"Header");
+    Json::WriteString(L"ToolInfo");
     Json::BeginObject();
 
-    Json::WriteNameAndString(L"Program", L"D3D12INFO");
+    Json::WriteNameAndString(L"Program", L"D3d12info");
     Json::WriteNameAndString(L"Version", PROGRAM_VERSION);
-    Json::WriteNameAndString(L"Built", MakeBuildDateTime());
+    Json::WriteNameAndString(L"Build Date", MakeBuildDateTime());
     Json::WriteNameAndString(L"Configuration", CONFIG_STR);
-    Json::WriteNameAndString(L"Configuration bits", CONFIG_BIT_STR);
+#ifdef USE_PREVIEW_AGILITY_SDK
+    Json::WriteNameAndBool(L"Using preview Agility SDK", true);
+#else
+    Json::WriteNameAndBool(L"Using preview Agility SDK", false);
+#endif
+    Json::WriteNameAndNumber(L"D3D12_SDK_VERSION", uint32_t(D3D12SDKVersion));
+
+    if (!g_PureD3D12) {
+#if USE_NVAPI
+      NvAPI_Inititalize_RAII::PrintStaticParams();
+#endif
+#if USE_AGS
+      AGS_Initialize_RAII::PrintStaticParams();
+#endif
+#if USE_VULKAN
+      Vulkan_Initialize_RAII::PrintStaticParams();
+#endif
+#if USE_INTEL_GPUDETECT
+      IntelData::PrintStaticParams();
+#endif
+    }
 
     Json::EndObject();
 }
@@ -461,64 +495,9 @@ static void PrintHeader_Json()
 static void PrintHeaderData()
 {
     if(g_UseJson)
-        PrintHeader_Json();
+        PrintToolInfo_Json();
     else
-        PrintHeader_Text();
-}
-
-static wstring MakeCurrentDate()
-{
-    std::time_t time = std::time(nullptr);
-    std::tm time2;
-    localtime_s(&time2, &time);
-    wchar_t dateStr[32];
-    std::wcsftime(dateStr, _countof(dateStr), L"%Y-%m-%d", &time2);
-    return wstring{dateStr};
-}
-
-static void PrintGeneralParams()
-{
-    Print_string(L"Current date", MakeCurrentDate().c_str());
-#ifdef USE_PREVIEW_AGILITY_SDK
-    Print_uint32(L"D3D12_PREVIEW_SDK_VERSION", uint32_t(D3D12SDKVersion));
-#else
-    Print_uint32(L"D3D12_SDK_VERSION", uint32_t(D3D12SDKVersion));
-#endif
-
-    if(!g_PureD3D12)
-    {
-#if USE_NVAPI
-        NvAPI_Inititalize_RAII::PrintStaticParams();
-#endif
-#if USE_AGS
-        AGS_Initialize_RAII::PrintStaticParams();
-#endif
-#if USE_VULKAN
-        Vulkan_Initialize_RAII::PrintStaticParams();
-#endif
-#if USE_INTEL_GPUDETECT
-        IntelData::PrintStaticParams();
-#endif
-    }
-}
-
-static void PrintGeneralData()
-{
-    if(g_UseJson)
-    {
-        Json::WriteString(L"General");
-        Json::BeginObject();
-        PrintGeneralParams();
-        Json::EndObject();
-    }
-    else
-    {
-        PrintHeader(L"General", 0);
-        ++g_Indent;
-        PrintGeneralParams();
-        --g_Indent;
-        PrintEmptyLine();
-    }
+        PrintToolInfo_Text();
 }
 
 static void PrintEnums_Json()
@@ -563,27 +542,16 @@ static void PrintEnums_Text()
 static void PrintOsVersionInfo()
 {
     HMODULE m = GetModuleHandle(L"ntdll.dll");
-    if(!m)
-        return;
-    typedef int32_t(WINAPI* RtlGetVersionFunc)(OSVERSIONINFOEX*);
+    if (!m) throw std::runtime_error("Could not detect Windows version");
+    typedef int32_t(WINAPI * RtlGetVersionFunc)(OSVERSIONINFOEX*);
     RtlGetVersionFunc RtlGetVersion = (RtlGetVersionFunc)GetProcAddress(m, "RtlGetVersion");
     if(!RtlGetVersion)
-        return;
+        throw std::runtime_error("Could not detect Windows version");
     OSVERSIONINFOEX osVersionInfo = {sizeof(osVersionInfo)};
     // Documentation says it always returns success.
     RtlGetVersion(&osVersionInfo);
 
-    PrintStructBegin(L"OSVERSIONINFOEX");
-    Print_uint32(L"dwMajorVersion", osVersionInfo.dwMajorVersion);
-    Print_uint32(L"dwMinorVersion", osVersionInfo.dwMinorVersion);
-    Print_uint32(L"dwBuildNumber", osVersionInfo.dwBuildNumber);
-    Print_uint32(L"dwPlatformId", osVersionInfo.dwPlatformId);
-    Print_string(L"szCSDVersion", osVersionInfo.szCSDVersion);
-    Print_uint32(L"wServicePackMajor", uint32_t(osVersionInfo.wServicePackMajor));
-    Print_uint32(L"wServicePackMinor", uint32_t(osVersionInfo.wServicePackMinor));
-    PrintFlags(L"wSuiteMask", uint32_t(osVersionInfo.wSuiteMask), Enum_VER_SUITE);
-    PrintEnum(L"wProductType", uint32_t(osVersionInfo.wProductType), Enum_VER_SUITE);
-    PrintStructEnd();
+    PrintFormat(L"Windows version", L"%lu.%lu.%lu", osVersionInfo.dwMajorVersion, osVersionInfo.dwMinorVersion, osVersionInfo.dwBuildNumber);
 }
 
 static void PrintSystemMemoryInfo()
@@ -799,21 +767,11 @@ static void PrintAdapterInterfaceSupport(IDXGIAdapter* adapter)
 {
     if(LARGE_INTEGER i; SUCCEEDED(adapter->CheckInterfaceSupport(__uuidof(IDXGIDevice), &i)))
     {
-        PrintStructBegin(L"CheckInterfaceSupport");
-        if(g_UseJson)
-        {
-            Print_uint64(L"IDXGIDevice", i.QuadPart);
-        }
-        else
-        {
-            wstring s = std::format(L"{}.{}.{}.{}",
-                i.QuadPart >> 48,
-                (i.QuadPart >> 32) & 0xFFFF,
-                (i.QuadPart >> 16) & 0xFFFF,
-                i.QuadPart & 0xFFFF);
-            Print_string(L"IDXGIDevice (user mode driver version)", s.c_str());
-        }
-        PrintStructEnd();
+        PrintFormat(L"UMDVersion", L"%ld.%ld.%ld.%ld",
+                    unsigned int(i.QuadPart >> 48),
+                    unsigned int((i.QuadPart >> 32) & 0xFFFF),
+                    unsigned int((i.QuadPart >> 16) & 0xFFFF),
+                    unsigned int(i.QuadPart & 0xFFFF));
     }
 }
 
@@ -1125,6 +1083,39 @@ static void PrintDescriptorSizes(ID3D12Device* device)
     PrintStructEnd();
 }
 
+static void PrintCommandQueuePriorities(ID3D12Device* device)
+{
+	D3D12_COMMAND_LIST_TYPE cmdListTypes[] = {
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		D3D12_COMMAND_LIST_TYPE_COMPUTE,
+		D3D12_COMMAND_LIST_TYPE_COPY
+	};
+
+	D3D12_COMMAND_QUEUE_PRIORITY cmdQueuePriorities[] = {
+		D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
+		D3D12_COMMAND_QUEUE_PRIORITY_HIGH,
+		D3D12_COMMAND_QUEUE_PRIORITY_GLOBAL_REALTIME
+	};
+
+	std::array<bool, 9> queuePrioritySupport = {};
+	size_t queuePriorityIndex = 0;
+	for (auto cmdListType : cmdListTypes)
+	{
+		for (auto cmdQueuePriority : cmdQueuePriorities)
+		{
+			D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY commandQueuePriority = {};
+			commandQueuePriority.CommandListType = cmdListType;
+			commandQueuePriority.Priority = cmdQueuePriority;
+            if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &commandQueuePriority, sizeof(commandQueuePriority))))
+                return;
+
+            queuePrioritySupport[queuePriorityIndex++] = commandQueuePriority.PriorityForTypeIsSupported;
+		}
+	}
+
+    Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(queuePrioritySupport);
+}
+
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI, AGS_Initialize_RAII* ags)
 {
     ComPtr<ID3D12Device> device;
@@ -1210,13 +1201,7 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &shaderCache, sizeof(shaderCache))))
         Print_D3D12_FEATURE_DATA_SHADER_CACHE(shaderCache);
 
-    /*
-    D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY commandQueuePriority = {};
-    // TODO: There are IN parameters - need to fill in commandQueuePriority.CommandListType, Priority... How to query it properly?!
-    hr = device->CheckFeatureSupport(D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &commandQueuePriority, sizeof(commandQueuePriority));
-    if(SUCCEEDED(hr))
-        Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(commandQueuePriority);
-    */
+    PrintCommandQueuePriorities(device.Get());
 
     if(D3D12_FEATURE_DATA_SERIALIZATION serialization = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_SERIALIZATION, &serialization, sizeof(serialization))))
@@ -1326,7 +1311,8 @@ static void PrintCommandLineSyntax()
     wprintf(L"  -v --Version         Only print program version information.\n");
     wprintf(L"  -h --Help            Only print this help (command line syntax).\n");
     wprintf(L"  -l --List            Only print the list of all adapters.\n");
-    wprintf(L"  -a --Adapter=<Index> Print details of adapter at specified index (default is the first hardware adapter).\n");
+	wprintf(L"  -a --Adapter=<Index> Print details of adapter at specified index (default is the first hardware adapter).\n");
+	wprintf(L"  --all --AllAdapters  Print details of all (non WARP) adapters.\n");
     wprintf(L"  -j --JSON            Print output in JSON format instead of human-friendly text.\n");
     wprintf(L"  -f --Formats         Include information about DXGI format capabilities.\n");
     wprintf(L"  -e --Enums           Include information about all known enums and their values.\n");
@@ -1379,12 +1365,6 @@ static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter, NvAPI_Init
 static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
     Vulkan_Initialize_RAII* vk)
 {
-    if(g_UseJson)
-    {
-        Json::WriteString(L"Adapters");
-        Json::BeginArray();
-    }
-
     ComPtr<IDXGIAdapter> adapter;
     if(!g_WARP)
     {
@@ -1401,116 +1381,121 @@ static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvA
         CHECK_HR(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&adapter)));
         ListAdapter(0, adapter.Get(), nvApi, ags, vk);
     }
-
-    if(g_UseJson)
-        Json::EndArray();
 }
 
-static void InspectDxgiFactory(IDXGIFactory4* factory4)
+int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags, Vulkan_Initialize_RAII* vk, uint32_t& adapterIndex, ComPtr<IDXGIAdapter1>& adapter1)
 {
-    if(ComPtr<IDXGIFactory5> factory5;
-        SUCCEEDED(factory4->QueryInterface(IID_PPV_ARGS(&factory5))))
-    {
-        if(BOOL allowTearing = FALSE;
-            SUCCEEDED(factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof allowTearing)))
-        {
-            PrintStructBegin(L"DXGI_FEATURE_PRESENT_ALLOW_TEARING");
-            Print_BOOL(L"allowTearing", allowTearing);
-            PrintStructEnd();
-        }
-    }
-}
+	int programResult = PROGRAM_EXIT_SUCCESS;
 
-// adapterIndex == UINT_MAX means first non-software and non-remote ad
-static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
-    Vulkan_Initialize_RAII* vk, uint32_t adapterIndex)
-{
-    int programResult = PROGRAM_EXIT_SUCCESS;
-
-    ComPtr<IDXGIAdapter1> adapter1;
-    if(g_WARP)
+    if (g_UseJson)
     {
-        CHECK_HR(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&adapter1)));
+        Json::BeginObject();
     }
-    else if(adapterIndex != UINT32_MAX)
-        dxgiFactory->EnumAdapters1(adapterIndex, &adapter1);
     else
     {
-        // No explicit adapter requested: Choose first non-software and non-remote.
-        adapterIndex = 0;
-        DXGI_ADAPTER_DESC1 desc = {};
-        while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
-        {
-            adapter1->GetDesc1(&desc);
-            if(desc.Flags == 0)
-                break;
-            adapter1.Reset();
-            ++adapterIndex;
-        }
+        PrintEmptyLine();
     }
 
-    if(adapter1)
+    Print_uint32(L"AdapterIndex", adapterIndex);
+    PrintAdapterData(adapter1.Get());
+
+    DXGI_ADAPTER_DESC desc = {};
+    if (SUCCEEDED(adapter1->GetDesc(&desc)))
     {
-        wstring adapterStr = std::format(L"DXGI Adapter {}", adapterIndex);
-        if(g_UseJson)
-        {
-            Json::WriteString(std::move(adapterStr));
-            Json::BeginObject();
-        }
-        else
-        {
-            PrintHeader(adapterStr.c_str(), 0);
-            PrintEmptyLine();
-        }
-
-        PrintAdapterData(adapter1.Get());
-
-        DXGI_ADAPTER_DESC desc = {};
-        if(SUCCEEDED(adapter1->GetDesc(&desc)))
-        {
 #if USE_NVAPI
-            if(nvApi && nvApi->IsInitialized())
-            {
-                nvApi->PrintPhysicalGpuData(desc.AdapterLuid);
-            }
+        if (nvApi && nvApi->IsInitialized())
+        {
+            nvApi->PrintPhysicalGpuData(desc.AdapterLuid);
+        }
 #endif
 #if USE_AGS
-            if(ags && ags->IsInitialized())
-            {
-                AGS_Initialize_RAII::DeviceId deviceId = {
-                    .vendorId = (int)desc.VendorId,
-                    .deviceId = (int)desc.DeviceId,
-                    .revisionId = (int)desc.Revision};
-                ags->PrintAgsDeviceData(deviceId);
-            }
+        if (ags && ags->IsInitialized())
+        {
+            AGS_Initialize_RAII::DeviceId deviceId = {
+                .vendorId = (int)desc.VendorId,
+                .deviceId = (int)desc.DeviceId,
+                .revisionId = (int)desc.Revision };
+            ags->PrintAgsDeviceData(deviceId);
+        }
 #endif
 #if USE_VULKAN
-            if(vk && vk->IsInitialized())
-                vk->PrintData(desc);
+        if (vk && vk->IsInitialized())
+            vk->PrintData(desc);
 #endif
 #if USE_INTEL_GPUDETECT
-            if(!g_PureD3D12 && desc.VendorId == GPUDetect::INTEL_VENDOR_ID)
-            {
-                ComPtr<IDXGIAdapter> adapter;
-                adapter1->QueryInterface(IID_PPV_ARGS(&adapter));
-                IntelData::PrintAdapterData(adapter.Get());
-            }
-#endif
+        if (!g_PureD3D12 && desc.VendorId == GPUDetect::INTEL_VENDOR_ID)
+        {
+            ComPtr<IDXGIAdapter> adapter;
+            adapter1->QueryInterface(IID_PPV_ARGS(&adapter));
+            IntelData::PrintAdapterData(adapter.Get());
         }
-
-        programResult = PrintDeviceDetails(adapter1.Get(), nvApi, ags);
-
-        if(g_UseJson)
-            Json::EndObject();
+#endif
     }
-    else
-        throw std::runtime_error("No valid adapter chosen to show D3D12 device details.");
+
+    programResult = PrintDeviceDetails(adapter1.Get(), nvApi, ags);
+
+    if (g_UseJson)
+        Json::EndObject();
 
     return programResult;
 }
 
+static int InspectAllAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
+	Vulkan_Initialize_RAII* vk)
+{
+	uint32_t adapterIndex = 0;
+	ComPtr<IDXGIAdapter1> adapter1;
+	while (dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
+	{
+		int result = InspectAdapter(nvApi, ags, vk, adapterIndex, adapter1);
+		if (result != PROGRAM_EXIT_SUCCESS)
+			return result;
+		++adapterIndex;
+	}
+
+    if (adapterIndex == 0)
+        throw std::runtime_error("No valid adapter found to show D3D12 device details.");
+
+	return PROGRAM_EXIT_SUCCESS;
+}
+
+// adapterIndex == UINT_MAX means first non-software and non-remote ad
+static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
+	Vulkan_Initialize_RAII* vk, uint32_t adapterIndex)
+{
+	ComPtr<IDXGIAdapter1> adapter1;
+	if (g_WARP)
+	{
+		CHECK_HR(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&adapter1)));
+	}
+	else if (adapterIndex != UINT32_MAX)
+		dxgiFactory->EnumAdapters1(adapterIndex, &adapter1);
+	else
+	{
+		// No explicit adapter requested: Choose first non-software and non-remote.
+		adapterIndex = 0;
+		DXGI_ADAPTER_DESC1 desc = {};
+		while (dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
+		{
+			adapter1->GetDesc1(&desc);
+			if (desc.Flags == 0)
+				break;
+			adapter1.Reset();
+			++adapterIndex;
+		}
+	}
+
+	if (adapter1)
+	{
+		return InspectAdapter(nvApi, ags, vk, adapterIndex, adapter1);
+	}
+
+	throw std::runtime_error("No valid adapter chosen to show D3D12 device details.");
+}
+
 int wmain3(int argc, wchar_t** argv)
 {
+    bool showAllAdapters = true;
     UINT adapterIndex = UINT32_MAX;
 
     CmdLineParser cmdLineParser(argc, argv);
@@ -1521,6 +1506,7 @@ int wmain3(int argc, wchar_t** argv)
         CMD_LINE_OPT_HELP,
         CMD_LINE_OPT_LIST,
         CMD_LINE_OPT_ADAPTER,
+        CMD_LINE_OPT_ALL_ADAPTERS,
         CMD_LINE_OPT_JSON,
         CMD_LINE_OPT_FORMATS,
         CMD_LINE_OPT_ENUMS,
@@ -1528,25 +1514,27 @@ int wmain3(int argc, wchar_t** argv)
         CMD_LINE_OPT_WARP,
     };
 
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_VERSION, L"Version", false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_VERSION, L'v', false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_HELP,    L"Help", false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_HELP,    L'h', false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_LIST,    L"List", false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_LIST,    L'l', false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ADAPTER, L"Adapter", true);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ADAPTER, L'a', true);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,    L"JSON", false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,    L'j', false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS, L"Formats", false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS, L'f', false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,   L"Enums", false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,   L'e', false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_PURE_D3D12, L"PureD3D12", false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_WARP, L"WARP", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_VERSION,      L"Version", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_VERSION,      L'v', false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_HELP,         L"Help", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_HELP,         L'h', false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_LIST,         L"List", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_LIST,         L'l', false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ADAPTER,      L"Adapter", true);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ADAPTER,      L'a', true);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ALL_ADAPTERS, L"AllAdapters", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ALL_ADAPTERS, L"all", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,         L"JSON", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,         L'j', false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS,      L"Formats", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS,      L'f', false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,        L"Enums", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,        L'e', false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_PURE_D3D12,   L"PureD3D12", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_WARP,         L"WARP", false);
 
     CmdLineParser::RESULT cmdLineResult;
-    while((cmdLineResult = cmdLineParser.ReadNext()) != CmdLineParser::RESULT_END)
+    while((cmdLineResult = cmdLineParser.ReadNextOpt()) != CmdLineParser::RESULT_END)
     {
         switch(cmdLineResult)
         {
@@ -1558,16 +1546,40 @@ int wmain3(int argc, wchar_t** argv)
             switch(cmdLineParser.GetOptId())
             {
             case CMD_LINE_OPT_VERSION:
-                PrintHeader_Text();
+                PrintToolInfo_Text();
                 return PROGRAM_EXIT_SUCCESS;
             case CMD_LINE_OPT_HELP:
                 PrintCommandLineSyntax();
                 return PROGRAM_EXIT_SUCCESS;
             case CMD_LINE_OPT_LIST:
+                if (cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ADAPTER) || 
+                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_ADAPTERS))
+                {
+					PrintCommandLineSyntax();
+					return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+				}
                 g_ListAdapters = true;
                 break;
-            case CMD_LINE_OPT_ADAPTER:
+			case CMD_LINE_OPT_ADAPTER:
+				if (cmdLineParser.IsOptEncountered(CMD_LINE_OPT_LIST) ||
+					cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_ADAPTERS))
+				{
+					PrintCommandLineSyntax();
+					return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+				}
+                showAllAdapters = false;
                 adapterIndex = _wtoi(cmdLineParser.GetParameter().c_str());
+                break;
+			case CMD_LINE_OPT_ALL_ADAPTERS:
+				if (cmdLineParser.IsOptEncountered(CMD_LINE_OPT_LIST) ||
+					cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ADAPTER) ||
+					cmdLineParser.IsOptEncountered(CMD_LINE_OPT_WARP))
+				{
+					PrintCommandLineSyntax();
+					return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+				}
+                showAllAdapters = true;
+                adapterIndex = UINT32_MAX;
                 break;
             case CMD_LINE_OPT_JSON:
                 g_UseJson = true;
@@ -1581,7 +1593,13 @@ int wmain3(int argc, wchar_t** argv)
             case CMD_LINE_OPT_PURE_D3D12:
                 g_PureD3D12 = true;
                 break;
-            case CMD_LINE_OPT_WARP:
+			case CMD_LINE_OPT_WARP:
+				if (cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ADAPTER) ||
+					cmdLineParser.IsOptEncountered(CMD_LINE_OPT_WARP))
+				{
+					PrintCommandLineSyntax();
+					return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+				}
                 g_WARP = true;
                 break;
             default:
@@ -1622,7 +1640,11 @@ int wmain3(int argc, wchar_t** argv)
         vkObjPtr = std::make_unique<Vulkan_Initialize_RAII>();
 #endif
 
-    PrintGeneralData();
+    
+    if (g_UseJson) {
+        Json::WriteString(L"SystemInfo");
+        Json::BeginObject();
+    }
 
     if(!g_PureD3D12)
     {
@@ -1641,6 +1663,10 @@ int wmain3(int argc, wchar_t** argv)
 
     EnableExperimentalFeatures();
 
+    if (g_UseJson) {
+        Json::EndObject();
+    }
+
     if(g_PrintEnums)
         PrintEnumsData();
 
@@ -1656,12 +1682,24 @@ int wmain3(int argc, wchar_t** argv)
 #endif
         assert(dxgiFactory != nullptr);
 
-        InspectDxgiFactory(dxgiFactory.Get());
+        if (g_UseJson) {
+            Json::WriteString(L"Adapters");
+            Json::BeginArray();
+        }
 
         if(g_ListAdapters)
             ListAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get());
         else
-            InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get(), adapterIndex);
+        {
+            if (!showAllAdapters)    
+                InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get(), adapterIndex);
+            else
+                InspectAllAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get());
+        }
+
+        if (g_UseJson) {
+            Json::EndArray();
+        }
     }
 
 #if !defined(AUTO_LINK_DX12)

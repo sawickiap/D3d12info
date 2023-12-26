@@ -35,10 +35,11 @@ public:
 	
     void RegisterOpt(uint32_t Id, wchar_t Opt, bool Parameter);
 	void RegisterOpt(uint32_t Id, const std::wstring &Opt, bool Parameter);
-	
-    RESULT ReadNext();
+
+	RESULT ReadNextOpt();
 	uint32_t GetOptId();
 	const std::wstring & GetParameter();
+	bool IsOptEncountered(uint32_t Id);
 
 private:
 	struct SHORT_OPT
@@ -65,6 +66,7 @@ private:
 	size_t m_CmdLineLength;
 	size_t m_ArgIndex;
 
+	RESULT ReadNext();
 	bool ReadNextArg(std::wstring *OutArg);
 
 	std::vector<SHORT_OPT> m_ShortOpts;
@@ -78,4 +80,5 @@ private:
 	size_t m_LastArgIndex;
 	uint32_t m_LastOptId;
 	std::wstring m_LastParameter;
+	std::set<uint32_t> m_EncounteredOpts;
 };

@@ -27,6 +27,8 @@ For more information, see files README.md, LICENSE.txt.
 #include <wrl/client.h> // for ComPtr
 
 #include <vector>
+#include <array>
+#include <set>
 #include <string>
 #include <exception>
 #include <format>
