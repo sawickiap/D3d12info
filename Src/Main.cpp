@@ -780,19 +780,22 @@ static void PrintAdapterMemoryInfo(IDXGIAdapter* adapter)
             DXGI_QUERY_VIDEO_MEMORY_INFO videoMemoryInfo = {};
             if(SUCCEEDED(adapter3->QueryVideoMemoryInfo(0, (DXGI_MEMORY_SEGMENT_GROUP)memorySegmentGroup, &videoMemoryInfo)))
             {
+                const wchar_t* structName = nullptr;
                 switch(memorySegmentGroup)
                 {
                 case 0:
-                    PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_LOCAL]");
+                    structName = L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_LOCAL]";
                     break;
                 case 1:
-                    PrintStructBegin(L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]");
+                    structName = L"DXGI_QUERY_VIDEO_MEMORY_INFO[DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL]";
                     break;
                 default:
                     assert(0);
                 }
-                Print_DXGI_QUERY_VIDEO_MEMORY_INFO(videoMemoryInfo);
-                PrintStructEnd();
+                {
+                    ScopedStructRegion region(structName);
+                    Print_DXGI_QUERY_VIDEO_MEMORY_INFO(videoMemoryInfo);
+                }
             }
         }
     }

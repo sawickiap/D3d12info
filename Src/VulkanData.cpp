@@ -196,7 +196,7 @@ void Vulkan_Initialize_RAII::PrintData(const DXGI_ADAPTER_DESC& adapterDesc)
 
 	{
 		const VkPhysicalDeviceProperties& props = propSet.properties2.properties;
-		PrintStructBegin(L"VkPhysicalDeviceProperties");
+		ScopedStructRegion region(L"VkPhysicalDeviceProperties");
 		Print_string(L"apiVersion", std::format(L"{}.{}.{}",
 			VK_API_VERSION_MAJOR(props.apiVersion), VK_API_VERSION_MINOR(props.apiVersion), VK_API_VERSION_PATCH(props.apiVersion)).c_str());
 		Print_uint32(L"driverVersion", props.driverVersion);
@@ -204,27 +204,24 @@ void Vulkan_Initialize_RAII::PrintData(const DXGI_ADAPTER_DESC& adapterDesc)
 		Print_hex32(L"deviceID", props.deviceID);
 		PrintEnum(L"deviceType", props.deviceType, Enum_VkPhysicalDeviceType);
 		Print_string(L"deviceName", StrToWstr(props.deviceName, CP_UTF8).c_str());
-		PrintStructEnd();
 	}
 
 	{
 		const VkPhysicalDeviceIDProperties& IDProps = propSet.IDProperties;
-		PrintStructBegin(L"VkPhysicalDeviceIDProperties");
+		ScopedStructRegion region(L"VkPhysicalDeviceIDProperties");
 		PrintHexBytes(L"deviceUUID", IDProps.deviceUUID, VK_UUID_SIZE);
 		PrintHexBytes(L"driverUUID", IDProps.driverUUID, VK_UUID_SIZE);
 		if(IDProps.deviceLUIDValid)
 			PrintHexBytes(L"deviceLUID", IDProps.deviceLUID, VK_LUID_SIZE);
-		PrintStructEnd();
 	}
 
 	if(g_ApiVersion >= VK_API_VERSION_1_2)
 	{
 		const VkPhysicalDeviceVulkan12Properties& vulkan12Props = propSet.vulkan12Properties;
-		PrintStructBegin(L"VkPhysicalDeviceVulkan12Properties");
+		ScopedStructRegion region(L"VkPhysicalDeviceVulkan12Properties");
 		PrintEnum(L"driverID", vulkan12Props.driverID, Enum_VkDriverId);
 		Print_string(L"driverName", StrToWstr(vulkan12Props.driverName, CP_UTF8).c_str());
 		Print_string(L"driverInfo", StrToWstr(vulkan12Props.driverInfo, CP_UTF8).c_str());
-		PrintStructEnd();
 	}
 }
 

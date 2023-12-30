@@ -1994,7 +1994,7 @@ void PrintAdapterData(IDXGIAdapter* adapter)
 	if(r != EXIT_SUCCESS)
 		return;
 
-	PrintStructBegin(L"Intel GPUDetect::GPUData");
+	ScopedStructRegion region(L"Intel GPUDetect::GPUData");
 	PrintEnum(L"VendorId", gpuData.vendorID, Enum_VendorId);
 	Print_hex32(L"deviceID", gpuData.deviceID);
 	Print_BOOL(L"isUMAArchitecture", gpuData.isUMAArchitecture ? TRUE : FALSE);
@@ -2044,8 +2044,6 @@ void PrintAdapterData(IDXGIAdapter* adapter)
 			Print_uint32(L"minFrequency", gpuData.minFrequency, L"MHz");
 		}
 	}
-
-	PrintStructEnd();
 }
 
 } // namespace IntelData

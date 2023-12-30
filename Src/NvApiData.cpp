@@ -450,17 +450,16 @@ void NvAPI_Inititalize_RAII::PrintData()
     NvAPI_ShortString szBuildBranchString = {};
     if(NvAPI_SYS_GetDriverAndBranchVersion(&pDriverVersion, szBuildBranchString) == NVAPI_OK)
     {
-        PrintStructBegin(L"NvAPI_SYS_GetDriverAndBranchVersion");
+        ScopedStructRegion region(L"NvAPI_SYS_GetDriverAndBranchVersion");
         Print_uint32(L"pDriverVersion", pDriverVersion);
         Print_string(L"szBuildBranchString", NvShortStringToStr(szBuildBranchString).c_str());
-        PrintStructEnd();
     }
 
     {
         NV_DISPLAY_DRIVER_INFO info = {NV_DISPLAY_DRIVER_INFO_VER};
         if(NvAPI_SYS_GetDisplayDriverInfo(&info) == NVAPI_OK)
         {
-            PrintStructBegin(L"NvAPI_SYS_GetDisplayDriverInfo - NV_DISPLAY_DRIVER_INFO");
+            ScopedStructRegion region(L"NvAPI_SYS_GetDisplayDriverInfo - NV_DISPLAY_DRIVER_INFO");
             Print_uint32(L"driverVersion", info.driverVersion);
             Print_string(L"szBuildBranch", StrToWstr(info.szBuildBranch, CP_ACP).c_str());
             Print_BOOL(L"bIsDCHDriver", info.bIsDCHDriver != 0);
@@ -469,7 +468,6 @@ void NvAPI_Inititalize_RAII::PrintData()
             Print_BOOL(L"bIsNVIDIARTXProductionBranchPackage", info.bIsNVIDIARTXProductionBranchPackage != 0);
             Print_BOOL(L"bIsNVIDIARTXNewFeatureBranchPackage", info.bIsNVIDIARTXNewFeatureBranchPackage != 0);
             Print_string(L"szBuildBaseBranch", StrToWstr(info.szBuildBaseBranch, CP_ACP).c_str());
-            PrintStructEnd();
         }
     }
 }
@@ -484,23 +482,23 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
         NvU64 totalBytes = 0, freeBytes = 0;
         if(NvAPI_D3D12_QueryCpuVisibleVidmem(device, &totalBytes, &freeBytes) == NVAPI_OK)
         {
-            PrintStructBegin(L"NvAPI_D3D12_QueryCpuVisibleVidmem");
+            ScopedStructRegion region(L"NvAPI_D3D12_QueryCpuVisibleVidmem");
             Print_size(L"pTotalBytes", totalBytes);
-            PrintStructEnd();
         }
     }
 
-    PrintStructBegin(L"NvAPI_D3D12_IsNvShaderExtnOpCodeSupported");
-    for(const EnumItem* ei = Enum_NV_EXTN_OP; ei->m_Name != nullptr; ++ei)
     {
-        bool supported = false;
-        if(NvAPI_D3D12_IsNvShaderExtnOpCodeSupported(device, ei->m_Value, &supported) == NVAPI_OK)
-            Print_BOOL(ei->m_Name, supported);
+        ScopedStructRegion region(L"NvAPI_D3D12_IsNvShaderExtnOpCodeSupported");
+        for(const EnumItem* ei = Enum_NV_EXTN_OP; ei->m_Name != nullptr; ++ei)
+        {
+            bool supported = false;
+            if(NvAPI_D3D12_IsNvShaderExtnOpCodeSupported(device, ei->m_Value, &supported) == NVAPI_OK)
+                Print_BOOL(ei->m_Name, supported);
+        }
     }
-    PrintStructEnd();
 
-    PrintStructBegin(L"NvAPI_D3D12_GetRaytracingCaps");
     {
+        ScopedStructRegion region(L"NvAPI_D3D12_GetRaytracingCaps");
         NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS threadReorderingCaps = {};
         if(NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_THREAD_REORDERING,
             &threadReorderingCaps, sizeof threadReorderingCaps) == NVAPI_OK)
@@ -525,10 +523,9 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
                 Enum_NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAPS);
         }
     }
-    PrintStructEnd();
 
     {
-        PrintStructBegin(L"NvAPI_D3D12_QueryWorkstationFeatureProperties");
+        ScopedStructRegion region(L"NvAPI_D3D12_QueryWorkstationFeatureProperties");
         NVAPI_D3D12_WORKSTATION_FEATURE_PROPERTIES_PARAMS params = {
             .version = NVAPI_D3D12_WORKSTATION_FEATURE_PROPERTIES_PARAMS_VER };
 
@@ -548,16 +545,14 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
                 
             }
         }
-        PrintStructEnd();
     }
 
     {
         bool appClampNeeded = false;
         if(NvAPI_D3D12_GetNeedsAppFPBlendClamping(device, &appClampNeeded) == NVAPI_OK)
         {
-            PrintStructBegin(L"NvAPI_D3D12_GetNeedsAppFPBlendClamping");
+            ScopedStructRegion region(L"NvAPI_D3D12_GetNeedsAppFPBlendClamping");
             Print_BOOL(L"pAppClampNeeded", appClampNeeded);
-            PrintStructEnd();
         }
     }
 }
@@ -570,7 +565,7 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
     if(!FindPhysicalGpu(adapterLuid, gpu))
         return;
 
-    PrintStructBegin(L"NvPhysicalGpuHandle");
+    ScopedStructRegion region(L"NvPhysicalGpuHandle");
 
     NV_SYSTEM_TYPE systemType = {};
     if(NvAPI_GPU_GetSystemType(gpu, &systemType) == NVAPI_OK)
@@ -687,8 +682,6 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
         if(NvAPI_GPU_GetRamBusWidth(gpu, &busWidth) == NVAPI_OK)
             Print_uint32(L"NvAPI_GPU_GetRamBusWidth", busWidth);
     }
-
-    PrintStructEnd();
 }
 
 #endif // #if USE_NVAPI
