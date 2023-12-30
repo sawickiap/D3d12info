@@ -33,3 +33,10 @@ void PrintEnum(const wchar_t* name, uint32_t value, const EnumItem* enumItems, b
 void PrintFlags(const wchar_t* name, uint32_t value, const EnumItem* enumItems);
 void PrintHexBytes(const wchar_t* name, const void* data, size_t byteCount);
 void PrintFormat(const wchar_t* name, const wchar_t* format, ...);
+
+struct ScopedStructRegion
+{
+public:
+    ScopedStructRegion(const wchar_t* name);
+    ~ScopedStructRegion();
+};

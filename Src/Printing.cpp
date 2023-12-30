@@ -321,3 +321,13 @@ void PrintFormat(const wchar_t* name, const wchar_t* format, ...) {
     va_end(argList);
     Print_string(name, buffer);
 }
+
+ScopedStructRegion::ScopedStructRegion(const wchar_t* name) 
+{
+    PrintStructBegin(name);
+}
+
+ScopedStructRegion::~ScopedStructRegion() 
+{
+    PrintStructEnd();
+}
