@@ -492,7 +492,8 @@ static void PrintGeneralData() {
     Print_uint32(L"D3D12_SDK_VERSION", uint32_t(D3D12SDKVersion));
 #endif
 
-    if(!g_PureD3D12) {
+    if(!g_PureD3D12)
+    {
 #if USE_NVAPI
         NvAPI_Inititalize_RAII::PrintStaticParams();
 #endif
@@ -549,18 +550,20 @@ static void PrintEnums_Text()
     }
 }
 
-static void PrintOsVersionInfo() 
+static void PrintOsVersionInfo()
 {
     ScopedStructRegion region(L"OS Info");
     HMODULE m = GetModuleHandle(L"ntdll.dll");
-    if(!m) {
+    if(!m)
+    {
         Print_string(L"Windows version", L"Unknown");
         return;
     }
 
     typedef int32_t(WINAPI * RtlGetVersionFunc)(OSVERSIONINFOEX*);
     RtlGetVersionFunc RtlGetVersion = (RtlGetVersionFunc)GetProcAddress(m, "RtlGetVersion");
-    if(!RtlGetVersion){
+    if(!RtlGetVersion)
+    {
         Print_string(L"Windows version", L"Unknown");
         return;
     }
@@ -1539,7 +1542,7 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
         // No explicit adapter requested: Choose first non-software and non-remote.
         adapterIndex = 0;
         DXGI_ADAPTER_DESC1 desc = {};
-        while (dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
+        while(dxgiFactory->EnumAdapters1(adapterIndex, &adapter1) != DXGI_ERROR_NOT_FOUND)
         {
             adapter1->GetDesc1(&desc);
             if(desc.Flags == 0)
