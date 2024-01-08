@@ -450,10 +450,11 @@ static void PrintHeader_Json()
     Json::WriteNameAndString(L"Generated on", MakeCurrentDate().c_str());
 #ifdef USE_PREVIEW_AGILITY_SDK
     Json::WriteNameAndBool(L"Using preview Agility SDK", true);
+    Json::WriteNameAndNumber(L"D3D12_PREVIEW_SDK_VERSION", uint32_t(D3D12SDKVersion));
 #else
     Json::WriteNameAndBool(L"Using preview Agility SDK", false);
-#endif
     Json::WriteNameAndNumber(L"D3D12_SDK_VERSION", uint32_t(D3D12SDKVersion));
+#endif
 
     if(!g_PureD3D12) 
     {
@@ -482,7 +483,8 @@ static void PrintHeaderData()
         PrintHeader_Text();
 }
 
-static void PrintGeneralData() {
+static void PrintGeneralData()
+{
     PrintHeader(L"General", 0);
     ++g_Indent;
     Print_string(L"Current date", MakeCurrentDate().c_str());
@@ -1729,7 +1731,8 @@ int wmain3(int argc, wchar_t** argv)
 #endif
 
     
-    if(g_UseJson) {
+    if(g_UseJson)
+    {
         Json::WriteString(L"SystemInfo");
         Json::BeginObject();
     }
@@ -1757,7 +1760,8 @@ int wmain3(int argc, wchar_t** argv)
 
     EnableExperimentalFeatures();
 
-    if(g_UseJson) {
+    if(g_UseJson)
+    {
         Json::EndObject();
     }
 
@@ -1776,7 +1780,8 @@ int wmain3(int argc, wchar_t** argv)
 #endif
         assert(dxgiFactory != nullptr);
 
-        if(g_UseJson) {
+        if(g_UseJson)
+        {
             Json::WriteString(L"Adapters");
             Json::BeginArray();
         }
@@ -1791,7 +1796,8 @@ int wmain3(int argc, wchar_t** argv)
                 InspectAllAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get());
         }
 
-        if(g_UseJson) {
+        if(g_UseJson)
+        {
             Json::EndArray();
         }
     }
