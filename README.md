@@ -22,7 +22,9 @@ Options:
   -v --Version         Only print program version information.
   -h --Help            Only print this help (command line syntax).
   -l --List            Only print the list of all adapters.
-  -a --Adapter=<Index> Print details of adapter at specified index (default is the first hardware adapter).
+  -a --Adapter=<Index> Print details of adapter at specified index.
+  --AllNonSoftware     Print details of all (except WARP and Software) adapters (default behavior).
+  --AllAdapters        Print details of all (except WARP) adapters.
   -j --JSON            Print output in JSON format instead of human-friendly text.
   -f --Formats         Include information about DXGI format capabilities.
   -e --Enums           Include information about all known enums and their values.

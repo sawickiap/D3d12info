@@ -32,3 +32,11 @@ void Print_float(const wchar_t* name, float value, const wchar_t* unit = nullptr
 void PrintEnum(const wchar_t* name, uint32_t value, const EnumItem* enumItems, bool isSigned = false);
 void PrintFlags(const wchar_t* name, uint32_t value, const EnumItem* enumItems);
 void PrintHexBytes(const wchar_t* name, const void* data, size_t byteCount);
+void PrintFormat(const wchar_t* name, const wchar_t* format, ...);
+
+struct ScopedStructRegion
+{
+public:
+    ScopedStructRegion(const wchar_t* name);
+    ~ScopedStructRegion();
+};

@@ -107,10 +107,9 @@ void AGS_Initialize_RAII::PrintData()
 {
 	assert(m_Initialized);
 
-	PrintStructBegin(L"AGSGPUInfo");
+	ScopedStructRegion region(L"AGSGPUInfo");
 	Print_string(L"driverVersion", StrToWstr(g_GpuInfo.driverVersion, CP_ACP).c_str());
 	Print_string(L"radeonSoftwareVersion", StrToWstr(g_GpuInfo.radeonSoftwareVersion, CP_ACP).c_str());
-	PrintStructEnd();
 }
 
 void AGS_Initialize_RAII::PrintAgsDeviceData(const DeviceId& id)
@@ -122,7 +121,7 @@ void AGS_Initialize_RAII::PrintAgsDeviceData(const DeviceId& id)
 		return;
 	const AGSDeviceInfo& device = g_GpuInfo.devices[deviceIndex];
 
-	PrintStructBegin(L"AGSDeviceInfo");
+	ScopedStructRegion region(L"AGSDeviceInfo");
 	Print_string(L"adapterString", StrToWstr(device.adapterString, CP_ACP).c_str());
 	PrintEnum(L"asicFamily", device.asicFamily, Enum_AGSDeviceInfo_AsicFamily);
 	Print_BOOL(L"isAPU", device.isAPU);
@@ -139,7 +138,6 @@ void AGS_Initialize_RAII::PrintAgsDeviceData(const DeviceId& id)
 	Print_float(L"teraFlops", device.teraFlops, L"TFLOPS");
 	Print_size(L"localMemoryInBytes", device.localMemoryInBytes);
 	Print_size(L"sharedMemoryInBytes", device.sharedMemoryInBytes);
-	PrintStructEnd();
 }
 
 ComPtr<ID3D12Device> AGS_Initialize_RAII::CreateDeviceAndPrintData(IDXGIAdapter* adapter, D3D_FEATURE_LEVEL featureLevel)
@@ -162,7 +160,7 @@ ComPtr<ID3D12Device> AGS_Initialize_RAII::CreateDeviceAndPrintData(IDXGIAdapter*
 		ComPtr<ID3D12Device> device{returnedParams.pDevice};
 		g_DeviceCreatedWithAgs = true;
 
-		PrintStructBegin(L"AGSDX12ReturnedParams::ExtensionsSupported");
+		ScopedStructRegion region(L"AGSDX12ReturnedParams::ExtensionsSupported");
 		Print_BOOL(L"intrinsics16", returnedParams.extensionsSupported.intrinsics16);
 		Print_BOOL(L"intrinsics17", returnedParams.extensionsSupported.intrinsics17);
 		Print_BOOL(L"userMarkers", returnedParams.extensionsSupported.userMarkers);
@@ -176,7 +174,6 @@ ComPtr<ID3D12Device> AGS_Initialize_RAII::CreateDeviceAndPrintData(IDXGIAdapter*
 		Print_BOOL(L"readLaneAt", returnedParams.extensionsSupported.readLaneAt);
 		Print_BOOL(L"rayHitToken", returnedParams.extensionsSupported.rayHitToken);
 		Print_BOOL(L"shaderClock", returnedParams.extensionsSupported.shaderClock);
-		PrintStructEnd();
 
 		return device;
 	}

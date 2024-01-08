@@ -207,6 +207,24 @@ void CmdLineParser::RegisterOpt(uint32_t Id, const std::wstring &Opt, bool Param
 	m_LongOpts.push_back(LONG_OPT(Id, Opt, Parameter));
 }
 
+CmdLineParser::RESULT CmdLineParser::ReadNextOpt()
+{
+	RESULT Result = ReadNext();
+	while (Result != RESULT_END && Result != RESULT_ERROR && Result != RESULT_OPT)
+	{
+		Result = ReadNext();
+	}
+
+	if (Result == RESULT_OPT)
+	{
+		if (m_EncounteredOpts.contains(m_LastOptId))
+			return RESULT_ERROR;
+		m_EncounteredOpts.insert(m_LastOptId);
+	}
+
+	return Result;
+}
+
 CmdLineParser::RESULT CmdLineParser::ReadNext()
 {
 	if (m_InsideMultioption)
@@ -472,4 +490,9 @@ uint32_t CmdLineParser::GetOptId()
 const std::wstring & CmdLineParser::GetParameter()
 {
 	return m_LastParameter;
+}
+
+bool CmdLineParser::IsOptEncountered(uint32_t Id)
+{
+	return m_EncounteredOpts.contains(Id);
 }

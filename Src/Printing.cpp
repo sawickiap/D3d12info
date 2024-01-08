@@ -312,3 +312,22 @@ void PrintHexBytes(const wchar_t* name, const void* data, size_t byteCount)
         valStr += std::format(L"{:02X}", *((const uint8_t*)data + i));
     Print_string(name, valStr.c_str());
 }
+
+void PrintFormat(const wchar_t* name, const wchar_t* format, ...) {
+    va_list argList;
+    va_start(argList, format);
+    wchar_t buffer[256];
+    _vsnwprintf_s(buffer, ARRAYSIZE(buffer), format, argList);
+    va_end(argList);
+    Print_string(name, buffer);
+}
+
+ScopedStructRegion::ScopedStructRegion(const wchar_t* name) 
+{
+    PrintStructBegin(name);
+}
+
+ScopedStructRegion::~ScopedStructRegion() 
+{
+    PrintStructEnd();
+}
