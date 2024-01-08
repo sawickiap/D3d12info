@@ -1528,7 +1528,7 @@ static int InspectAllAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII
     return PROGRAM_EXIT_SUCCESS;
 }
 
-// adapterIndex == UINT_MAX means first non-software and non-remote ad
+// adapterIndex == UINT_MAX means first non-software and non-remote adapter.
 static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
     Vulkan_Initialize_RAII* vk, uint32_t adapterIndex)
 {
@@ -1790,7 +1790,9 @@ int wmain3(int argc, wchar_t** argv)
             ListAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get());
         else
         {
-            if(!g_ShowAllAdapters)    
+            if(g_WARP)
+                InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get(), UINT32_MAX);
+            else if(!g_ShowAllAdapters)
                 InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get(), adapterIndex);
             else
                 InspectAllAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get());
