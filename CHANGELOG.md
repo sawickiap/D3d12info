@@ -1,3 +1,16 @@
+# Version 3.0.0 (2024-01-10)
+
+Changes:
+
+- Parameters of all non-SOFTWARE and non-WARP adapters are now printed by default, not just the first one. New command-line parameters are available: `--AllNonSoftware` (same as default behavior), `--AllAdapters` (to print all adapters). Existing parameters `--Adapter=<Index>`, `--WARP`, and other are still available.
+- Changed structure of the output JSON format to simplify automated processing. It now always contains an array of adapters. Renamed and reorganized some of the parameters printed.
+- Added information returned by `D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY`.
+- Added Windows version returned by function `RtlGetVersion` from "ntdll.dll".
+
+This whole change was developed by @Devaniti as #12.
+
+Compiled with DirectX 12 Agility SDK 1.611.0 ("D3d12info.exe") / 1.711.3-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R535-developer, Intel GPU Detect from 2023-07-18 (all same as previous version).
+
 # Version 2.2.0 (2023-12-15)
 
 Changes:
