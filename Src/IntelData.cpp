@@ -10,7 +10,7 @@ For more information, see files README.md, LICENSE.txt.
 Most of the code in this file is a derivative work of Intel GPU Detect library:
 https://github.com/GameTechDev/gpudetect
 License: Apache 2.0
-See the original library in directory: Src\ThirdParty\intel_gpudetect
+See the original library in directory: Src\ThirdParty\gpudetect
 */
 #include "IntelData.hpp"
 #include "Printing.hpp"

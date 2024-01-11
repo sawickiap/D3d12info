@@ -38,7 +38,9 @@ The project is open source under MIT license. See file [LICENSE.txt](LICENSE.txt
 
 # Building
 
-The project uses Cmake. It is intended to be built using Microsoft Visual Studio 2022. The source code depends on:
+The project uses Cmake. It is intended to be built using Microsoft Visual Studio 2022.
+Before trying to build make sure to initialize sumbodules as they have required dependencies.
+The source code depends on:
 
 - C++ standard library, including some of the latest C++20 features
 - WinAPI from Windows 10 with some reasonably new Windows SDK, including Direct3D 12
@@ -48,15 +50,15 @@ It uses following thirt-party libraries:
 - **[DirectX 12 Agility SDK](https://devblogs.microsoft.com/directx/directx12agility/)** - latest API to Direct3D, by Microsoft.
   - Embedded in directory: Src\ThirdParty\microsoft.direct3d.d3d12.*
 - **[RapidJSON](https://rapidjson.org/)** - a fast JSON parser/generator, by Tencent. License: MIT.
-  - Embedded in directory: Src\ThirdParty\rapidjson
+  - Linked via submodule.
 - **[AMD GPU Services](https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK)** - custom vendor extensions to graphics APIs by AMD.
-  - Linked externally.
-  - Optional, controlled by Cmake variable `AGS_DIRECTORY`.
+  - Linked via submodule.
+  - Optional, controlled by Cmake variable `ENABLE_AGS` - on by default.
 - **[NVAPI](https://developer.nvidia.com/nvapi)** - custom vendor extensions to graphics APIs by Nvidia.
-  - Linked externally.
+  - Linked via submodule.
   - Optional, controlled by Cmake variable `NVAPI_DIRECTORY`.
 - **[Intel GPU Detect](https://github.com/GameTechDev/gpudetect)** - custom vendor extensions to graphics APIs by Intel. License: Apache 2.0.
-  - Embedded in directory: Src\ThirdParty\intel_gpudetect, also copied to file: Src\IntelData.cpp.
+  - Linked via submodule.
   - Optional, controlled by Cmake variable `ENABLE_INTEL_GPUDETECT` - on by default.
 - **[Vulkan SDK](https://www.lunarg.com/vulkan-sdk/)**
   - Linked externally. Cmake automatically detects Vulkan SDK path.
