@@ -56,7 +56,7 @@ It uses following thirt-party libraries:
   - Optional, controlled by Cmake variable `ENABLE_AGS` - on by default.
 - **[NVAPI](https://developer.nvidia.com/nvapi)** - custom vendor extensions to graphics APIs by Nvidia.
   - Linked via submodule.
-  - Optional, controlled by Cmake variable `NVAPI_DIRECTORY`.
+  - Optional, controlled by Cmake variable `ENABLE_NVAPI` - on by default.
 - **[Intel GPU Detect](https://github.com/GameTechDev/gpudetect)** - custom vendor extensions to graphics APIs by Intel. License: Apache 2.0.
   - Linked via submodule.
   - Optional, controlled by Cmake variable `ENABLE_INTEL_GPUDETECT` - on by default.
