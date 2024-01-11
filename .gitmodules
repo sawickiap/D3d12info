@@ -1,0 +1,12 @@
+[submodule "Src/ThirdParty/gpudetect"]
+	path = Src/ThirdParty/gpudetect
+	url = https://github.com/GameTechDev/gpudetect.git
+[submodule "Src/ThirdParty/rapidjson"]
+	path = Src/ThirdParty/rapidjson
+	url = https://github.com/Tencent/rapidjson.git
+[submodule "Src/ThirdParty/nvapi"]
+	path = Src/ThirdParty/nvapi
+	url = https://github.com/NVIDIA/nvapi.git
+[submodule "Src/ThirdParty/AGS_SDK"]
+	path = Src/ThirdParty/AGS_SDK
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK.git

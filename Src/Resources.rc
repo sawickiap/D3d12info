@@ -8,4 +8,4 @@ License: MIT
 For more information, see files README.md, LICENSE.txt.
 */
 
-INTEL_GPUDETECT_INTELGFX_CFG TEXT_FILE "ThirdParty\intel_gpudetect\IntelGfx.cfg"
+INTEL_GPUDETECT_INTELGFX_CFG TEXT_FILE "ThirdParty\gpudetect\IntelGfx.cfg"
