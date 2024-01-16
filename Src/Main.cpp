@@ -1814,6 +1814,8 @@ int wmain3(int argc, wchar_t** argv)
         wprintf(L"%.*s", (int)json.length(), json.data());
     }
 
+    fflush(stdout);
+    fflush(stderr);
     return programResult;
 }
 
@@ -1826,11 +1828,15 @@ int wmain2(int argc, wchar_t** argv)
     catch(const std::exception& ex)
     {
         fwprintf(stderr, L"ERROR: %hs\n", ex.what());
+        fflush(stdout);
+        fflush(stderr);
         return PROGRAM_EXIT_ERROR_EXCEPTION;
     }
     catch(...)
     {
         fwprintf(stderr, L"UNKNOWN ERROR.\n");
+        fflush(stdout);
+        fflush(stderr);
         return PROGRAM_EXIT_ERROR_EXCEPTION;
     }
 }
@@ -1844,6 +1850,8 @@ int wmain(int argc, wchar_t** argv)
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
         fwprintf(stderr, L"STRUCTURED EXCEPTION: 0x%08X.\n", GetExceptionCode());
+        fflush(stdout);
+        fflush(stderr);
         return PROGRAM_EXIT_ERROR_SEH_EXCEPTION;
     }
 }
