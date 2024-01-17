@@ -562,6 +562,8 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
 	assert(m_Initialized);
 
     NvPhysicalGpuHandle gpu = {};
+    // This will always fail on non Nvidia GPUs
+    // so NVAPI can't be forced to run on non Nvidia GPU
     if(!FindPhysicalGpu(adapterLuid, gpu))
         return;
 
