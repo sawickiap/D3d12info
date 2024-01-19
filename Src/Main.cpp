@@ -1179,18 +1179,19 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
 {
     ComPtr<ID3D12Device> device;
 
-#if USE_AGS
     DXGI_ADAPTER_DESC desc = {};
-    if(SUCCEEDED(adapter1->GetDesc(&desc)))
+    // On fail desc will be empty
+    // So code that depends on VendorId will receive 0x0
+    adapter1->GetDesc(&desc);
+
+#if USE_AGS
+    bool useAGS = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_AMD;
+    if(useAGS && ags && ags->IsInitialized())
     {
-        bool useAGS = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_AMD;
-        if(useAGS && ags && ags->IsInitialized())
-        {
-            ComPtr<IDXGIAdapter> adapter;
-            if (SUCCEEDED(adapter1->QueryInterface(IID_PPV_ARGS(&adapter))))
-                device = ags->CreateDeviceAndPrintData(adapter.Get(),
-                                                       MIN_FEATURE_LEVEL);
-        }
+        ComPtr<IDXGIAdapter> adapter;
+        if (SUCCEEDED(adapter1->QueryInterface(IID_PPV_ARGS(&adapter))))
+            device = ags->CreateDeviceAndPrintData(adapter.Get(),
+                                                    MIN_FEATURE_LEVEL);
     }
 #endif
 
@@ -1301,6 +1302,7 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     PrintDescriptorSizes(device.Get());
 
 #if USE_NVAPI
+    bool useNVAPI = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_NVIDIA;
     if(nvAPI && nvAPI->IsInitialized())
         nvAPI->PrintD3d12DeviceData(device.Get());
 #endif
@@ -1309,7 +1311,7 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         PrintFormatInformation(device.Get());
 
 #if USE_AGS
-    if(ags && ags->IsInitialized())
+    if(useAGS && ags && ags->IsInitialized())
         ags->DestroyDevice(std::move(device));
 #endif
 
@@ -1407,13 +1409,15 @@ static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter, NvAPI_Init
     if(SUCCEEDED(adapter->GetDesc(&desc)))
     {
 #if USE_NVAPI
-        if(nvApi && nvApi->IsInitialized())
+        bool useNVAPI = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_NVIDIA;
+        if(useNVAPI && nvApi && nvApi->IsInitialized())
         {
             nvApi->PrintPhysicalGpuData(desc.AdapterLuid);
         }
 #endif
 #if USE_AGS
-        if(ags && ags->IsInitialized())
+        bool useAGS = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_AMD;
+        if(useAGS && ags && ags->IsInitialized())
         {
             AGS_Initialize_RAII::DeviceId deviceId = {
                 .vendorId = (int)desc.VendorId,
@@ -1482,7 +1486,7 @@ int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags, Vulk
 #endif
 #if USE_AGS
         bool useAGS = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_AMD;
-        if(useAGS && ags && ags->IsInitialized() && desc.VendorId == VENDOR_ID_AMD)
+        if(useAGS && ags && ags->IsInitialized())
         {
             AGS_Initialize_RAII::DeviceId deviceId = {
                 .vendorId = (int)desc.VendorId,
