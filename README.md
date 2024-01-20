@@ -29,7 +29,7 @@ Options:
   -f --Formats          Include information about DXGI format capabilities.
   -e --Enums            Include information about all known enums and their values.
   --PureD3D12           Extract information only from D3D12 and no other sources.
-  --ForceVendorSpecific Tries to query info via Vendor specific APIs, even in case when vendor doesn't match.
+  --ForceVendorAPI      Tries to query info via vendor-specific APIs, even in case when vendor doesn't match.
   --WARP                Use WARP adapter.
 ```
 

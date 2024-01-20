@@ -83,7 +83,7 @@ static bool g_SkipSoftwareAdapter = true;
 static bool g_PrintFormats = false;
 static bool g_PrintEnums = false;
 static bool g_PureD3D12 = false;
-static bool g_ForceVendorSpecific = false;
+static bool g_ForceVendorAPI = false;
 static bool g_WARP = false;
 
 static wstring LuidToStr(LUID value)
@@ -1185,7 +1185,7 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     adapter1->GetDesc(&desc);
 
 #if USE_AGS
-    bool useAGS = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_AMD;
+    bool useAGS = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_AMD;
     if(useAGS && ags && ags->IsInitialized())
     {
         ComPtr<IDXGIAdapter> adapter;
@@ -1302,7 +1302,7 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     PrintDescriptorSizes(device.Get());
 
 #if USE_NVAPI
-    bool useNVAPI = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_NVIDIA;
+    bool useNVAPI = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_NVIDIA;
     if(nvAPI && nvAPI->IsInitialized())
         nvAPI->PrintD3d12DeviceData(device.Get());
 #endif
@@ -1385,7 +1385,7 @@ static void PrintCommandLineSyntax()
     wprintf(L"  -f --Formats          Include information about DXGI format capabilities.\n");
     wprintf(L"  -e --Enums            Include information about all known enums and their values.\n");
     wprintf(L"  --PureD3D12           Extract information only from D3D12 and no other sources.\n");
-    wprintf(L"  --ForceVendorSpecific Tries to query info via Vendor specific APIs, even in case when vendor doesn't match.\n");
+    wprintf(L"  --ForceVendorAPI      Tries to query info via vendor-specific APIs, even in case when vendor doesn't match.\n");
     wprintf(L"  --WARP                Use WARP adapter.\n");
 }
 
@@ -1409,14 +1409,14 @@ static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter, NvAPI_Init
     if(SUCCEEDED(adapter->GetDesc(&desc)))
     {
 #if USE_NVAPI
-        bool useNVAPI = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_NVIDIA;
+        bool useNVAPI = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_NVIDIA;
         if(useNVAPI && nvApi && nvApi->IsInitialized())
         {
             nvApi->PrintPhysicalGpuData(desc.AdapterLuid);
         }
 #endif
 #if USE_AGS
-        bool useAGS = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_AMD;
+        bool useAGS = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_AMD;
         if(useAGS && ags && ags->IsInitialized())
         {
             AGS_Initialize_RAII::DeviceId deviceId = {
@@ -1478,14 +1478,14 @@ int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags, Vulk
     if(SUCCEEDED(adapter1->GetDesc(&desc)))
     {
 #if USE_NVAPI
-        bool useNVAPI = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_NVIDIA;
+        bool useNVAPI = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_NVIDIA;
         if(useNVAPI && nvApi && nvApi->IsInitialized())
         {
             nvApi->PrintPhysicalGpuData(desc.AdapterLuid);
         }
 #endif
 #if USE_AGS
-        bool useAGS = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_AMD;
+        bool useAGS = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_AMD;
         if(useAGS && ags && ags->IsInitialized())
         {
             AGS_Initialize_RAII::DeviceId deviceId = {
@@ -1500,7 +1500,7 @@ int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags, Vulk
             vk->PrintData(desc);
 #endif
 #if USE_INTEL_GPUDETECT
-        bool useGPUDetect = g_ForceVendorSpecific || desc.VendorId == VENDOR_ID_INTEL;
+        bool useGPUDetect = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_INTEL;
         if(useGPUDetect && !g_PureD3D12)
         {
             ComPtr<IDXGIAdapter> adapter;
@@ -1623,7 +1623,7 @@ int wmain3(int argc, wchar_t** argv)
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,                 L"Enums",               false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,                 L'e',                   false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_PURE_D3D12,            L"PureD3D12",           false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORCE_VENDOR_SPECIFIC, L"ForceVendorSpecific", false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORCE_VENDOR_SPECIFIC, L"ForceVendorAPI",      false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_WARP,                  L"WARP",                false);
 
     CmdLineParser::RESULT cmdLineResult;
@@ -1716,7 +1716,7 @@ int wmain3(int argc, wchar_t** argv)
                     PrintCommandLineSyntax();
                     return PROGRAM_EXIT_ERROR_COMMAND_LINE;
                 }
-                g_ForceVendorSpecific = true;
+                g_ForceVendorAPI = true;
                 break;
             case CMD_LINE_OPT_WARP:
                 if(cmdLineParser.IsOptEncountered(CMD_LINE_OPT_LIST) ||
