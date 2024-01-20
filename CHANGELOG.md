@@ -1,3 +1,13 @@
+# Version 3.1.0 (2024-01-20)
+
+Changes:
+
+- Changed default behavior to query vendor-specific APIs only if `VendorID` matches. Added command-line parameter `--ForceVendorAPI` to force the old behavior of always querying them if possible. (Developed by @Devaniti as #15)
+- Added stderr/stdout flush before program exit. (Developed by @Devaniti as #14)
+- Changed Git repository and Cmake script to pull third-party libraries (RapidJSON, AGS, NVAPI, Intel GPU Detect) as Git submodules. (Developed by @Devaniti as #13)
+
+Compiled with DirectX 12 Agility SDK 1.611.0 ("D3d12info.exe") / 1.711.3-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R535-developer, Intel GPU Detect from 2023-07-18 (all same as previous version).
+
 # Version 3.0.0 (2024-01-10)
 
 Changes:
