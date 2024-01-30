@@ -9,9 +9,18 @@ Inspired by `vulkaninfo` - a similar tool that prints all the information about 
 An alternative for D3D12 is a GUI program "DirectX Caps Viewer", which is part of Windows SDK and can be found in path like:
 `c:\Program Files (x86)\Windows Kits\10\bin\*\x64\dxcapsviewer.exe`.
 
+# GUI and online database
+
+- Online database of GPU capabilities:
+  - **https://d3d12infodb.boolka.dev/**
+- GUI application that can display the capabilities of the current GPU and submit them to the database:
+  - **https://github.com/Devaniti/D3d12infoGUI/releases**
+
+*(These projects are managed by [\@Devaniti](https://github.com/Devaniti))*
+
 # Download
 
-To download an archive with compiled binary, go to **[Releases](https://github.com/sawickiap/D3d12info/releases)**. This is a portable program - it doesn't need installation.
+To download an archive with compiled binary of this console app, go to **[Releases](https://github.com/sawickiap/D3d12info/releases)**. This is a portable program - it doesn't need installation.
 
 Version history can be found in file [CHANGELOG.md](CHANGELOG.md).
 
