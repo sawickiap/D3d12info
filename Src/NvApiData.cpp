@@ -198,6 +198,8 @@ ENUM_BEGIN(NvAPI_Status)
     ENUM_ITEM(NVAPI_INVALID_PC                            )
     ENUM_ITEM(NVAPI_LAUNCH_FAILED                         )
     ENUM_ITEM(NVAPI_NOT_PERMITTED                         )
+    ENUM_ITEM(NVAPI_CALLBACK_ALREADY_REGISTERED           )
+    ENUM_ITEM(NVAPI_CALLBACK_NOT_FOUND                    )
 ENUM_END(NvAPI_Status)
 
 ENUM_BEGIN(NV_SYSTEM_TYPE)
@@ -365,6 +367,21 @@ ENUM_BEGIN(NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAPS)
     ENUM_ITEM(NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAP_NONE)
     ENUM_ITEM(NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAP_STANDARD)
 ENUM_END(NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAPS)
+
+ENUM_BEGIN(NVAPI_NVLINK_CAPS)
+    ENUM_ITEM(NVAPI_NVLINK_CAPS_SUPPORTED)
+    ENUM_ITEM(NVAPI_NVLINK_CAPS_P2P_SUPPORTED)
+    ENUM_ITEM(NVAPI_NVLINK_CAPS_SYSMEM_ACCESS)
+    ENUM_ITEM(NVAPI_NVLINK_CAPS_P2P_ATOMICS)
+    ENUM_ITEM(NVAPI_NVLINK_CAPS_SYSMEM_ATOMICS)
+    ENUM_ITEM(NVAPI_NVLINK_CAPS_PEX_TUNNELING)
+    ENUM_ITEM(NVAPI_NVLINK_CAPS_SLI_BRIDGE)
+    ENUM_ITEM(NVAPI_NVLINK_CAPS_SLI_BRIDGE_SENSABLE)
+    ENUM_ITEM(NVAPI_NVLINK_CAPS_POWER_STATE_L0)
+    ENUM_ITEM(NVAPI_NVLINK_CAPS_POWER_STATE_L1)
+    ENUM_ITEM(NVAPI_NVLINK_CAPS_POWER_STATE_L2)
+    ENUM_ITEM(NVAPI_NVLINK_CAPS_POWER_STATE_L3)
+ENUM_END(NVAPI_NVLINK_CAPS)
 
 static NvU32 g_LogicalGpuCount = 0;
 static NvLogicalGpuHandle g_LogicalGpuHandles[NVAPI_MAX_LOGICAL_GPUS];
@@ -683,6 +700,25 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
         NvU32 busWidth = 0;
         if(NvAPI_GPU_GetRamBusWidth(gpu, &busWidth) == NVAPI_OK)
             Print_uint32(L"NvAPI_GPU_GetRamBusWidth", busWidth);
+    }
+
+    {
+        NV_GPU_INFO gpuInfo = {NV_GPU_INFO_VER};
+        if(NvAPI_GPU_GetGPUInfo(gpu, &gpuInfo) == NVAPI_OK)
+        {
+            Print_BOOL(L"NvAPI_GPU_GetGPUInfo - NV_GPU_INFO::bIsExternalGpu", gpuInfo.bIsExternalGpu);
+            Print_uint32(L"NvAPI_GPU_GetGPUInfo - NV_GPU_INFO::rayTracingCores", gpuInfo.rayTracingCores);
+            Print_uint32(L"NvAPI_GPU_GetGPUInfo - NV_GPU_INFO::tensorCores", gpuInfo.tensorCores);
+        }
+    }
+
+    {
+        NV_GPU_GSP_INFO gspInfo = {NV_GPU_GSP_INFO_VER};
+        if(NvAPI_GPU_GetGspFeatures(gpu, &gspInfo) == NVAPI_OK)
+        {
+            PrintHexBytes(L"NvAPI_GPU_GetGspFeatures - NV_GPU_GSP_INFO::firmwareVersion",
+                gspInfo.firmwareVersion, NVAPI_GPU_MAX_BUILD_VERSION_LENGTH);
+        }
     }
 }
 
