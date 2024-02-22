@@ -63,13 +63,25 @@ inline const wchar_t* FindEnumItemName(uint32_t value, const EnumItem* items)
 // Other enums
 
 static const EnumItem Enum_VendorId[] = {
-	{ L"AMD",      0x1002 },
-	{ L"ImgTec",   0x1010 },
-	{ L"NVIDIA",   0x10DE },
-	{ L"ARM",      0x13B5 },
-	{ L"Qualcomm", 0x5143 },
-	{ L"Intel",    0x8086 },
+	// PCI IDs
+	{ L"AMD/ATI",   0x1002 },
+	{ L"AMD",		0x1022 },
+	{ L"NVIDIA",	0x10de },
 	{ L"Microsoft", 0x1414 },
+	{ L"Parallels",	0x1ab8 },
+	{ L"Qualcomm",	0x5143 },
+	{ L"Intel",		0x8086 },
+	// ACPI IDs
+	{ L"Parallels", 0x344C5250 }, // "PRL4"
+	{ L"NVIDIA", 0x4144564E	},    // "NVDA"
+	{ L"Intel", 0x43544E49 },     // "INTC"
+	{ L"Intel", 0x4C544E49 },     // "INTL"
+	{ L"AMD", 0x49444D41 },       // "AMDI"
+	{ L"Intel", 0x49504341 },     // "ACPI"
+	{ L"Qualcomm", 0x4D4F4351 },  // "QCOM"
+	{ L"Microsoft", 0x5446534D }, // "MSFT"
+	{ L"Microsoft", 0x5748534D }, // "MSHW"
+	{ L"Microsoft", 0x5941534D }, // "MSAY"
 	{ NULL, UINT32_MAX } };
 static EnumRegistration g_Enum_VendorId_Registration(L"VendorId", Enum_VendorId);
 
