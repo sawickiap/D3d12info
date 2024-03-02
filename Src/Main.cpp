@@ -712,7 +712,7 @@ static void PrintEnumsData()
 static void PrintAdapterDescMembers(const DXGI_ADAPTER_DESC& desc)
 {
     Print_string(L"Description", desc.Description);
-    PrintEnum(L"VendorId", desc.VendorId, Enum_VendorId);
+    PrintVendorId(L"VendorId", desc.VendorId);
     Print_hex32(L"DeviceId", desc.DeviceId);
     Print_hex32(L"SubSysId", desc.SubSysId);
     Print_hex32(L"Revision", desc.Revision);

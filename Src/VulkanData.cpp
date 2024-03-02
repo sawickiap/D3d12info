@@ -200,7 +200,7 @@ void Vulkan_Initialize_RAII::PrintData(const DXGI_ADAPTER_DESC& adapterDesc)
 		Print_string(L"apiVersion", std::format(L"{}.{}.{}",
 			VK_API_VERSION_MAJOR(props.apiVersion), VK_API_VERSION_MINOR(props.apiVersion), VK_API_VERSION_PATCH(props.apiVersion)).c_str());
 		Print_uint32(L"driverVersion", props.driverVersion);
-		Print_hex32(L"vendorID", props.vendorID);
+		PrintVendorId(L"vendorID", props.vendorID);
 		Print_hex32(L"deviceID", props.deviceID);
 		PrintEnum(L"deviceType", props.deviceType, Enum_VkPhysicalDeviceType);
 		Print_string(L"deviceName", StrToWstr(props.deviceName, CP_UTF8).c_str());

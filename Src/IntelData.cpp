@@ -1995,7 +1995,7 @@ void PrintAdapterData(IDXGIAdapter* adapter)
 		return;
 
 	ScopedStructRegion region(L"Intel GPUDetect::GPUData");
-	PrintEnum(L"VendorId", gpuData.vendorID, Enum_VendorId);
+	PrintVendorId(L"VendorId", gpuData.vendorID);
 	Print_hex32(L"deviceID", gpuData.deviceID);
 	Print_BOOL(L"isUMAArchitecture", gpuData.isUMAArchitecture ? TRUE : FALSE);
 	Print_size(L"videoMemory", gpuData.videoMemory);

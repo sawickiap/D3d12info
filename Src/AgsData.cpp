@@ -126,7 +126,7 @@ void AGS_Initialize_RAII::PrintAgsDeviceData(const DeviceId& id)
 	PrintEnum(L"asicFamily", device.asicFamily, Enum_AGSDeviceInfo_AsicFamily);
 	Print_BOOL(L"isAPU", device.isAPU);
 	Print_BOOL(L"isExternal", device.isExternal);
-	Print_hex32(L"vendorId", (uint32_t)device.vendorId);
+	PrintVendorId(L"vendorId", (uint32_t)device.vendorId);
 	Print_hex32(L"deviceId", (uint32_t)device.deviceId);
 	Print_hex32(L"revisionId", (uint32_t)device.revisionId);
 	Print_int32(L"numCUs", device.numCUs);

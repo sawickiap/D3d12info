@@ -322,6 +322,37 @@ void PrintFormat(const wchar_t* name, const wchar_t* format, ...) {
     Print_string(name, buffer);
 }
 
+static bool DecodeVendorIdChars(wchar_t out[4], uint32_t value)
+{
+    for(uint32_t i = 0; i < 4; ++i)
+    {
+        const uint8_t charValue = (uint8_t)(value >> (i * 8));
+        if(charValue < 32 || charValue > 126)
+            return false;
+        out[i] = (wchar_t)charValue;
+    }
+    return true;
+}
+
+void PrintVendorId(const wchar_t* name, uint32_t value)
+{
+    wchar_t chars[5] = {};
+    if(!g_UseJson && DecodeVendorIdChars(chars, value))
+    {
+        PrintIndent();
+        PrintName(name);
+        const wchar_t* const enumItemName = FindEnumItemName(value, Enum_VendorId);
+        if(enumItemName != nullptr)
+            wprintf(L" = %s \"%s\" (0x%X)\n", enumItemName, chars, value);
+        else
+            wprintf(L" = \"%s\" 0x%X\n", chars, value);
+    }
+    else
+    {
+        PrintEnum(name, value, Enum_VendorId);
+    }
+}
+
 ScopedStructRegion::ScopedStructRegion(const wchar_t* name) 
 {
     PrintStructBegin(name);
