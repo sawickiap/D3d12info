@@ -322,7 +322,7 @@ void PrintFormat(const wchar_t* name, const wchar_t* format, ...) {
     Print_string(name, buffer);
 }
 
-static bool DecodeVendorIdChars(wchar_t out[4], uint32_t value)
+static bool DecodeAcpiIdChars(wchar_t out[4], uint32_t value)
 {
     for(uint32_t i = 0; i < 4; ++i)
     {
@@ -337,7 +337,7 @@ static bool DecodeVendorIdChars(wchar_t out[4], uint32_t value)
 void PrintVendorId(const wchar_t* name, uint32_t value)
 {
     wchar_t chars[5] = {};
-    if(!g_UseJson && DecodeVendorIdChars(chars, value))
+    if(!g_UseJson && value <= 0xFFFF && DecodeAcpiIdChars(chars, value))
     {
         PrintIndent();
         PrintName(name);
