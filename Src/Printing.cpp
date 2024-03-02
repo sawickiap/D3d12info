@@ -353,6 +353,22 @@ void PrintVendorId(const wchar_t* name, uint32_t value)
     }
 }
 
+void PrintSubsystemId(const wchar_t* name, uint32_t value)
+{
+    if(g_UseJson)
+        PrintEnum(name, value, Enum_SubsystemVendorId);
+    else
+    {
+        PrintIndent();
+        PrintName(name);
+        const wchar_t* enumItemName = FindEnumItemName(value & 0xFFFF, Enum_SubsystemVendorId);
+        if(enumItemName != nullptr)
+            wprintf(L" = %s (0x%X)\n", enumItemName, value);
+        else
+            wprintf(L" = 0x%X\n", value);
+    }
+}
+
 ScopedStructRegion::ScopedStructRegion(const wchar_t* name) 
 {
     PrintStructBegin(name);

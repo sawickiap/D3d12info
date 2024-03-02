@@ -598,7 +598,7 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
     if(NvAPI_GPU_GetPCIIdentifiers(gpu, &DeviceId, &SubSystemId, &RevisionId, &ExtDeviceId) == NVAPI_OK)
     {
         Print_hex32(L"NvAPI_GPU_GetPCIIdentifiers - pDeviceID", DeviceId);
-        Print_hex32(L"NvAPI_GPU_GetPCIIdentifiers - pSubSystemId", SubSystemId);
+        PrintSubsystemId(L"NvAPI_GPU_GetPCIIdentifiers - pSubSystemId", SubSystemId);
         Print_hex32(L"NvAPI_GPU_GetPCIIdentifiers - pRevisionId", RevisionId);
         Print_hex32(L"NvAPI_GPU_GetPCIIdentifiers - pExtDeviceId", ExtDeviceId);
     }

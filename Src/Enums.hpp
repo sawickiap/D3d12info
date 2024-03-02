@@ -85,6 +85,38 @@ static const EnumItem Enum_VendorId[] = {
 	{ NULL, UINT32_MAX } };
 static EnumRegistration g_Enum_VendorId_Registration(L"VendorId", Enum_VendorId);
 
+static const EnumItem Enum_SubsystemVendorId[] = {
+    { L"AMD/ATI",            0x1002 },
+    { L"AMD",                0x1022 },
+    { L"Acer",               0x1025 },
+    { L"Dell",               0x1028 },
+    { L"HP",                 0x103c },
+    { L"ASUSTeK",            0x1043 },
+    { L"Sony",               0x104d },
+    { L"Apple",              0x106b },
+    { L"Gateway",            0x107b },
+    { L"Diamond Multimedia", 0x106b },
+    { L"NVIDIA",             0x10de },
+    { L"Toshiba",            0x1179 },
+    { L"Microsoft",          0x1414 },
+    { L"Gigabyte",           0x1458 },
+    { L"MSI",                0x1462 },
+    { L"PowerColor",         0x148c },
+    { L"VisionTek",          0x1545 },
+    { L"Palit",              0x1569 },
+    { L"XFX",                0x1682 },
+    { L"Jetway",             0x16f3 },
+    { L"Lenovo",             0x17aa },
+    { L"HIS",                0x17af },
+    { L"GeCube",             0x18bc },
+    { L"Club 3D",            0x196d },
+    { L"Parallels",          0x1ab8 },
+    { L"Sapphire",           0x1da2 },
+    { L"Qualcomm",           0x5143 },
+    { L"Intel",              0x8086 },
+	{ NULL, UINT32_MAX } };
+static EnumRegistration g_Enum_SubsystemVendorId_Registration(L"SubsystemVendorId", Enum_SubsystemVendorId);
+
 ////////////////////////////////////////////////////////////////////////////////
 // WinAPI enums
 

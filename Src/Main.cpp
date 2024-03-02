@@ -714,7 +714,7 @@ static void PrintAdapterDescMembers(const DXGI_ADAPTER_DESC& desc)
     Print_string(L"Description", desc.Description);
     PrintVendorId(L"VendorId", desc.VendorId);
     Print_hex32(L"DeviceId", desc.DeviceId);
-    Print_hex32(L"SubSysId", desc.SubSysId);
+    PrintSubsystemId(L"SubSysId", desc.SubSysId);
     Print_hex32(L"Revision", desc.Revision);
     Print_size(L"DedicatedVideoMemory", desc.DedicatedVideoMemory);
     Print_size(L"DedicatedSystemMemory", desc.DedicatedSystemMemory);
