@@ -515,6 +515,15 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
     }
 
     {
+        NvU32 threadCount = 0;
+        if(NvAPI_D3D12_GetOptimalThreadCountForMesh(device, &threadCount) == NVAPI_OK)
+        {
+            ScopedStructRegion region(L"NvAPI_D3D12_GetOptimalThreadCountForMesh");
+            Print_uint32(L"pThreadCount", (uint32_t)threadCount);
+        }
+    }
+
+    {
         ScopedStructRegion region(L"NvAPI_D3D12_GetRaytracingCaps");
         NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS threadReorderingCaps = {};
         if(NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_THREAD_REORDERING,
