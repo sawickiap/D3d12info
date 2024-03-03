@@ -1,3 +1,12 @@
+# Version 3.2.0 (2024-03-03)
+
+Changes:
+
+- Updated NVAPI to version R550. Added information returned by: `NvAPI_GPU_GetGPUInfo` / `NV_GPU_INFO`, `NvAPI_GPU_GetGspFeatures` / `NV_GPU_GSP_INFO`, `NvAPI_D3D12_GetOptimalThreadCountForMesh`.
+- Improved decoding of `VendorId` and `SubSystemId`. (Thanks @Devaniti !)
+
+Compiled with DirectX 12 Agility SDK 1.611.0 ("D3d12info.exe") / 1.711.3-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R550, Intel GPU Detect from 2023-07-18.
+
 # Version 3.1.0 (2024-01-20)
 
 Changes:
