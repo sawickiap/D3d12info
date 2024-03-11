@@ -1,3 +1,13 @@
+# Version 3.3.0 (2024-03-11)
+
+Changes:
+
+- Updated Agility SDK to version 1.613.0. Added `D3D12_FEATURE_DATA_D3D12_OPTIONS21` (#18 - thanks @oscarbg).
+- Improved decoding of `NV_GPU_ARCH_INFO::implementation_id` (thanks @Devaniti).
+- Updated subsystem vendor id list (#17 - thanks @Devaniti).
+
+Compiled with DirectX 12 Agility SDK 1.613.0 ("D3d12info.exe") / 1.711.3-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R550, Intel GPU Detect from 2023-07-18.
+
 # Version 3.2.0 (2024-03-03)
 
 Changes:
