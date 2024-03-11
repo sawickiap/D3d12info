@@ -393,6 +393,17 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS20(const D3D12_FEATURE_DATA_D3
 #endif
 }
 
+#ifndef USE_PREVIEW_AGILITY_SDK
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(const D3D12_FEATURE_DATA_D3D12_OPTIONS21& o)
+{
+    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS21");
+    PrintEnum(L"WorkGraphsTier", o.WorkGraphsTier, Enum_D3D12_WORK_GRAPHS_TIER);
+    PrintEnum(L"ExecuteIndirectTier", o.ExecuteIndirectTier, Enum_D3D12_EXECUTE_INDIRECT_TIER);
+    Print_BOOL(L"SampleCmpGradientAndBiasSupported", o.SampleCmpGradientAndBiasSupported);
+    Print_BOOL(L"ExtendedCommandInfoSupported", o.ExtendedCommandInfoSupported);
+}
+#endif // #ifndef USE_PREVIEW_AGILITY_SDK
+
 static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXISTING_HEAPS& existingHeaps)
 {
     ScopedStructRegion region(L"D3D12_FEATURE_DATA_EXISTING_HEAPS");
@@ -1048,6 +1059,12 @@ static void PrintDeviceOptions(ID3D12Device* device)
     if (D3D12_FEATURE_DATA_D3D12_OPTIONS20 options20 = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS20, &options20, sizeof(options20))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS20(options20);
+
+#ifndef USE_PREVIEW_AGILITY_SDK
+    if (D3D12_FEATURE_DATA_D3D12_OPTIONS21 options21 = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS21, &options21, sizeof(options21))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(options21);
+#endif
 }
 
 #ifdef USE_PREVIEW_AGILITY_SDK
