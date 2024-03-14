@@ -83,6 +83,11 @@ static bool g_SkipSoftwareAdapter = true;
 static bool g_PrintFormats = false;
 static bool g_PrintEnums = false;
 static bool g_PureD3D12 = false;
+#ifdef USE_PREVIEW_AGILITY_SDK
+static bool g_EnableExperimental = true;
+#else
+static bool g_EnableExperimental = false;
+#endif
 static bool g_ForceVendorAPI = false;
 static bool g_WARP = false;
 
@@ -638,7 +643,7 @@ static void PrintSystemMemoryInfo()
 
 static void EnableExperimentalFeatures()
 {
-    if(g_D3D12EnableExperimentalFeatures == nullptr)
+    if(g_D3D12EnableExperimentalFeatures == nullptr || !g_EnableExperimental)
         return;
 
 #ifdef USE_PREVIEW_AGILITY_SDK
@@ -659,7 +664,7 @@ static void EnableExperimentalFeatures()
         L"D3D12TiledResourceTier4" };
 #endif // #ifdef USE_PREVIEW_AGILITY_SDK
     constexpr size_t FEATURE_COUNT = _countof(FEATURE_UUIDS);
-    uint32_t featureBitMask = 0b111;
+    uint32_t featureBitMask = (1 << FEATURE_COUNT) - 1;
 
     void* configStructs[FEATURE_COUNT] = {};
     UINT configStructSizes[FEATURE_COUNT] = {};
@@ -1392,18 +1397,23 @@ static void UnloadLibraries()
 static void PrintCommandLineSyntax()
 {
     wprintf(L"Options:\n");
-    wprintf(L"  -v --Version          Only print program version information.\n");
-    wprintf(L"  -h --Help             Only print this help (command line syntax).\n");
-    wprintf(L"  -l --List             Only print the list of all adapters.\n");
-    wprintf(L"  -a --Adapter=<Index>  Print details of adapter at specified index.\n");
-    wprintf(L"  --AllNonSoftware      Print details of all (except WARP and Software) adapters (default behavior).\n");
-    wprintf(L"  --AllAdapters         Print details of all (except WARP) adapters.\n");
-    wprintf(L"  -j --JSON             Print output in JSON format instead of human-friendly text.\n");
-    wprintf(L"  -f --Formats          Include information about DXGI format capabilities.\n");
-    wprintf(L"  -e --Enums            Include information about all known enums and their values.\n");
-    wprintf(L"  --PureD3D12           Extract information only from D3D12 and no other sources.\n");
-    wprintf(L"  --ForceVendorAPI      Tries to query info via vendor-specific APIs, even in case when vendor doesn't match.\n");
-    wprintf(L"  --WARP                Use WARP adapter.\n");
+    wprintf(L"  -v --Version                  Only print program version information.\n");
+    wprintf(L"  -h --Help                     Only print this help (command line syntax).\n");
+    wprintf(L"  -l --List                     Only print the list of all adapters.\n");
+    wprintf(L"  -a --Adapter=<Index>          Print details of adapter at specified index.\n");
+    wprintf(L"  --AllNonSoftware              Print details of all (except WARP and Software) adapters (default behavior).\n");
+    wprintf(L"  --AllAdapters                 Print details of all (except WARP) adapters.\n");
+    wprintf(L"  -j --JSON                     Print output in JSON format instead of human-friendly text.\n");
+    wprintf(L"  -f --Formats                  Include information about DXGI format capabilities.\n");
+    wprintf(L"  -e --Enums                    Include information about all known enums and their values.\n");
+    wprintf(L"  --PureD3D12                   Extract information only from D3D12 and no other sources.\n");
+#ifdef USE_PREVIEW_AGILITY_SDK
+    wprintf(L"  --EnableExperimental=<ON/OFF> Whether to enable experimental features before querying device capabilities. Default is ON (OFF for D3d12info and ON for D3d12info_preview).\n");
+#else
+    wprintf(L"  --EnableExperimental=<ON/OFF> Whether to enable experimental features before querying device capabilities. Default is OFF (OFF for D3d12info and ON for D3d12info_preview).\n");
+#endif
+    wprintf(L"  --ForceVendorAPI              Tries to query info via vendor-specific APIs, even in case when vendor doesn't match.\n");
+    wprintf(L"  --WARP                        Use WARP adapter.\n");
 }
 
 static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
@@ -1619,6 +1629,7 @@ int wmain3(int argc, wchar_t** argv)
         CMD_LINE_OPT_FORMATS,
         CMD_LINE_OPT_ENUMS,
         CMD_LINE_OPT_PURE_D3D12,
+        CMD_LINE_OPT_ENABLE_EXPERIMENTAL,
         CMD_LINE_OPT_FORCE_VENDOR_SPECIFIC,
         CMD_LINE_OPT_WARP,
     };
@@ -1640,6 +1651,7 @@ int wmain3(int argc, wchar_t** argv)
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,                 L"Enums",               false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,                 L'e',                   false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_PURE_D3D12,            L"PureD3D12",           false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENABLE_EXPERIMENTAL,   L"EnableExperimental",  true);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORCE_VENDOR_SPECIFIC, L"ForceVendorAPI",      false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_WARP,                  L"WARP",                false);
 
@@ -1726,6 +1738,14 @@ int wmain3(int argc, wchar_t** argv)
                     return PROGRAM_EXIT_ERROR_COMMAND_LINE;
                 }
                 g_PureD3D12 = true;
+                break;
+            case CMD_LINE_OPT_ENABLE_EXPERIMENTAL:
+                if (cmdLineParser.GetParameter() != L"ON" && cmdLineParser.GetParameter() != L"OFF")
+                {
+                    PrintCommandLineSyntax();
+                    return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+                }
+                g_EnableExperimental = cmdLineParser.GetParameter() == L"ON";
                 break;
             case CMD_LINE_OPT_FORCE_VENDOR_SPECIFIC:
                 if (cmdLineParser.IsOptEncountered(CMD_LINE_OPT_PURE_D3D12))
