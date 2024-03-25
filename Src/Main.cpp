@@ -1397,23 +1397,23 @@ static void UnloadLibraries()
 static void PrintCommandLineSyntax()
 {
     wprintf(L"Options:\n");
-    wprintf(L"  -v --Version                  Only print program version information.\n");
-    wprintf(L"  -h --Help                     Only print this help (command line syntax).\n");
-    wprintf(L"  -l --List                     Only print the list of all adapters.\n");
-    wprintf(L"  -a --Adapter=<Index>          Print details of adapter at specified index.\n");
-    wprintf(L"  --AllNonSoftware              Print details of all (except WARP and Software) adapters (default behavior).\n");
-    wprintf(L"  --AllAdapters                 Print details of all (except WARP) adapters.\n");
-    wprintf(L"  -j --JSON                     Print output in JSON format instead of human-friendly text.\n");
-    wprintf(L"  -f --Formats                  Include information about DXGI format capabilities.\n");
-    wprintf(L"  -e --Enums                    Include information about all known enums and their values.\n");
-    wprintf(L"  --PureD3D12                   Extract information only from D3D12 and no other sources.\n");
+    wprintf(L"  -v --Version                     Only print program version information.\n");
+    wprintf(L"  -h --Help                        Only print this help (command line syntax).\n");
+    wprintf(L"  -l --List                        Only print the list of all adapters.\n");
+    wprintf(L"  -a --Adapter=<Index>             Print details of adapter at specified index.\n");
+    wprintf(L"  --AllNonSoftware                 Print details of all (except WARP and Software) adapters (default behavior).\n");
+    wprintf(L"  --AllAdapters                    Print details of all (except WARP) adapters.\n");
+    wprintf(L"  -j --JSON                        Print output in JSON format instead of human-friendly text.\n");
+    wprintf(L"  -f --Formats                     Include information about DXGI format capabilities.\n");
+    wprintf(L"  -e --Enums                       Include information about all known enums and their values.\n");
+    wprintf(L"  --PureD3D12                      Extract information only from D3D12 and no other sources.\n");
 #ifdef USE_PREVIEW_AGILITY_SDK
-    wprintf(L"  --EnableExperimental=<ON/OFF> Whether to enable experimental features before querying device capabilities. Default is ON (OFF for D3d12info and ON for D3d12info_preview).\n");
+    wprintf(L"  -x --EnableExperimental=<on/off> Whether to enable experimental features before querying device capabilities. Default is on (off for D3d12info and on for D3d12info_preview).\n");
 #else
-    wprintf(L"  --EnableExperimental=<ON/OFF> Whether to enable experimental features before querying device capabilities. Default is OFF (OFF for D3d12info and ON for D3d12info_preview).\n");
+    wprintf(L"  -x --EnableExperimental=<on/off> Whether to enable experimental features before querying device capabilities. Default is off (off for D3d12info and on for D3d12info_preview).\n");
 #endif
-    wprintf(L"  --ForceVendorAPI              Tries to query info via vendor-specific APIs, even in case when vendor doesn't match.\n");
-    wprintf(L"  --WARP                        Use WARP adapter.\n");
+    wprintf(L"  --ForceVendorAPI                 Tries to query info via vendor-specific APIs, even in case when vendor doesn't match.\n");
+    wprintf(L"  --WARP                           Use WARP adapter.\n");
 }
 
 static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
@@ -1652,6 +1652,7 @@ int wmain3(int argc, wchar_t** argv)
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,                 L'e',                   false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_PURE_D3D12,            L"PureD3D12",           false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENABLE_EXPERIMENTAL,   L"EnableExperimental",  true);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENABLE_EXPERIMENTAL,   L'x',                   true);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORCE_VENDOR_SPECIFIC, L"ForceVendorAPI",      false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_WARP,                  L"WARP",                false);
 
@@ -1740,12 +1741,17 @@ int wmain3(int argc, wchar_t** argv)
                 g_PureD3D12 = true;
                 break;
             case CMD_LINE_OPT_ENABLE_EXPERIMENTAL:
-                if (cmdLineParser.GetParameter() != L"ON" && cmdLineParser.GetParameter() != L"OFF")
                 {
-                    PrintCommandLineSyntax();
-                    return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+                    std::wstring param = cmdLineParser.GetParameter();
+                    bool isOn = ::wcsicmp(param.c_str(), L"on") == 0;
+                    bool isOff = ::wcsicmp(param.c_str(), L"off") == 0;
+                    if (!isOn && !isOff)
+                    {
+                        PrintCommandLineSyntax();
+                        return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+                    }
+                    g_EnableExperimental = isOn;
                 }
-                g_EnableExperimental = cmdLineParser.GetParameter() == L"ON";
                 break;
             case CMD_LINE_OPT_FORCE_VENDOR_SPECIFIC:
                 if (cmdLineParser.IsOptEncountered(CMD_LINE_OPT_PURE_D3D12))

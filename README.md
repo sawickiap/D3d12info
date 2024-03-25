@@ -28,19 +28,19 @@ Version history can be found in file [CHANGELOG.md](CHANGELOG.md).
 
 ```
 Options:
-  -v --Version                  Only print program version information.
-  -h --Help                     Only print this help (command line syntax).
-  -l --List                     Only print the list of all adapters.
-  -a --Adapter=<Index>          Print details of adapter at specified index.
-  --AllNonSoftware              Print details of all (except WARP and Software) adapters (default behavior).
-  --AllAdapters                 Print details of all (except WARP) adapters.
-  -j --JSON                     Print output in JSON format instead of human-friendly text.
-  -f --Formats                  Include information about DXGI format capabilities.
-  -e --Enums                    Include information about all known enums and their values.
-  --PureD3D12                   Extract information only from D3D12 and no other sources.
-  --EnableExperimental=<ON/OFF> Whether to enable experimental features before querying device capabilities. Default is OFF for D3d12info and ON for D3d12info_preview.
-  --ForceVendorAPI              Tries to query info via vendor-specific APIs, even in case when vendor doesn't match.
-  --WARP                        Use WARP adapter.
+  -v --Version                     Only print program version information.
+  -h --Help                        Only print this help (command line syntax).
+  -l --List                        Only print the list of all adapters.
+  -a --Adapter=<Index>             Print details of adapter at specified index.
+  --AllNonSoftware                 Print details of all (except WARP and Software) adapters (default behavior).
+  --AllAdapters                    Print details of all (except WARP) adapters.
+  -j --JSON                        Print output in JSON format instead of human-friendly text.
+  -f --Formats                     Include information about DXGI format capabilities.
+  -e --Enums                       Include information about all known enums and their values.
+  --PureD3D12                      Extract information only from D3D12 and no other sources.
+  -x --EnableExperimental=<on/off> Whether to enable experimental features before querying device capabilities. Default is off for D3d12info and on for D3d12info_preview.
+  --ForceVendorAPI                 Tries to query info via vendor-specific APIs, even in case when vendor doesn't match.
+  --WARP                           Use WARP adapter.
 ```
 
 # License
