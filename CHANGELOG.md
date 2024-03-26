@@ -1,3 +1,12 @@
+# Version 3.4.0 (2024-03-26)
+
+Changes:
+
+- Added command-line parameter `-x` / `--EnableExperimental=<on/off>` to control if `D3D12EnableExperimentalFeatures` function should be called, which is now on in "D3d12info_preview.exe" but off in "D3d12info.exe" by default. (Developed by @Devaniti as #19)
+- Updated Agility SDK to version 1.613.1. No new data to fetch.
+
+Compiled with DirectX 12 Agility SDK 1.613.1 ("D3d12info.exe") / 1.711.3-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R550, Intel GPU Detect from 2023-07-18.
+
 # Version 3.3.0 (2024-03-11)
 
 Changes:
