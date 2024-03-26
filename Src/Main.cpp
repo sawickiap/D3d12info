@@ -1743,8 +1743,8 @@ int wmain3(int argc, wchar_t** argv)
             case CMD_LINE_OPT_ENABLE_EXPERIMENTAL:
                 {
                     std::wstring param = cmdLineParser.GetParameter();
-                    bool isOn = ::wcsicmp(param.c_str(), L"on") == 0;
-                    bool isOff = ::wcsicmp(param.c_str(), L"off") == 0;
+                    bool isOn = ::_wcsicmp(param.c_str(), L"on") == 0;
+                    bool isOff = ::_wcsicmp(param.c_str(), L"off") == 0;
                     if (!isOn && !isOff)
                     {
                         PrintCommandLineSyntax();
