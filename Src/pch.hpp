@@ -33,6 +33,8 @@ For more information, see files README.md, LICENSE.txt.
 #include <exception>
 #include <format>
 #include <stdexcept>
+#include <algorithm>
+#include <cwctype>
 
 #include <cstdint>
 #include <cassert>
