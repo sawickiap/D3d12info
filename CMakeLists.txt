@@ -76,6 +76,10 @@ function(add_my_executable USE_PREVIEW_AGILITY_SDK)
     endif()
 
     add_executable(${EXE_NAME} ${CPP_FILES} ${HPP_FILES})
+
+    # Change Visual C++ runtime library to get rid of dependency on Visual C++ Redistributable
+    set_property(TARGET ${EXE_NAME} PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     
     target_compile_options(${EXE_NAME} PRIVATE /W4 /wd4100 /wd4189)
     target_compile_definitions(${EXE_NAME} PRIVATE UNICODE _UNICODE)
