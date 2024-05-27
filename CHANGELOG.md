@@ -1,3 +1,11 @@
+# Version 3.5.1 (2024-05-27)
+
+Changes:
+
+- Changed project options to use Runtime Library = Multi-threaded (not "DLL") version so the executables no longer need .dll files from Visual C++ Redistributable libraries installed in the system to work. (Developed by @Devaniti as #21)
+
+Compiled with DirectX 12 Agility SDK 1.614.0 ("D3d12info.exe") / 1.711.3-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R550, Intel GPU Detect from 2023-07-18 (all same as previous version).
+
 # Version 3.5.0 (2024-05-17)
 
 Changes:
