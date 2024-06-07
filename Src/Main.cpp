@@ -225,14 +225,6 @@ static void Print_D3D12_FEATURE_CROSS_NODE(const D3D12_FEATURE_DATA_CROSS_NODE& 
     Print_BOOL(L"AtomicShaderInstructions", crossNode.AtomicShaderInstructions);
 }
 
-#ifdef USE_PREVIEW_AGILITY_SDK
-static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(const D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL& o)
-{
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL");
-    PrintEnum(L"WorkGraphsTier", o.WorkGraphsTier, Enum_D3D12_WORK_GRAPHS_TIER);
-}
-
-#else // #ifdef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_PREDICATION(const D3D12_FEATURE_DATA_PREDICATION& o)
 {
     ScopedStructRegion region(L"D3D12_FEATURE_DATA_PREDICATION");
@@ -244,8 +236,6 @@ static void Print_D3D12_FEATURE_HARDWARE_COPY(const D3D12_FEATURE_DATA_HARDWARE_
     ScopedStructRegion region(L"D3D12_FEATURE_DATA_HARDWARE_COPY");
     Print_BOOL(L"Supported", o.Supported);
 }
-
-#endif // #ifdef USE_PREVIEW_AGILITY_SDK
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(const D3D12_FEATURE_DATA_D3D12_OPTIONS3& options3)
 {
@@ -393,12 +383,9 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS20(const D3D12_FEATURE_DATA_D3
 {
     ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS20");
     Print_BOOL(L"ComputeOnlyWriteWatchSupported", o.ComputeOnlyWriteWatchSupported);
-#ifndef USE_PREVIEW_AGILITY_SDK
     PrintEnum(L"RecreateAtTier", o.RecreateAtTier, Enum_D3D12_RECREATE_AT_TIER);
-#endif
 }
 
-#ifndef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(const D3D12_FEATURE_DATA_D3D12_OPTIONS21& o)
 {
     ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS21");
@@ -407,7 +394,6 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(const D3D12_FEATURE_DATA_D3
     Print_BOOL(L"SampleCmpGradientAndBiasSupported", o.SampleCmpGradientAndBiasSupported);
     Print_BOOL(L"ExtendedCommandInfoSupported", o.ExtendedCommandInfoSupported);
 }
-#endif // #ifndef USE_PREVIEW_AGILITY_SDK
 
 static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXISTING_HEAPS& existingHeaps)
 {
@@ -649,12 +635,10 @@ static void EnableExperimentalFeatures()
 #ifdef USE_PREVIEW_AGILITY_SDK
     static const UUID FEATURE_UUIDS[] = {
         D3D12ExperimentalShaderModels,
-        D3D12TiledResourceTier4,
-        D3D12StateObjectsExperiment };
+        D3D12TiledResourceTier4 };
     static const wchar_t* FEATURE_NAMES[] = {
         L"D3D12ExperimentalShaderModels",
-        L"D3D12TiledResourceTier4",
-        L"D3D12StateObjectsExperiment" };
+        L"D3D12TiledResourceTier4" };
 #else
     static const UUID FEATURE_UUIDS[] = {
         D3D12ExperimentalShaderModels,
@@ -1065,91 +1049,10 @@ static void PrintDeviceOptions(ID3D12Device* device)
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS20, &options20, sizeof(options20))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS20(options20);
 
-#ifndef USE_PREVIEW_AGILITY_SDK
     if (D3D12_FEATURE_DATA_D3D12_OPTIONS21 options21 = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS21, &options21, sizeof(options21))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(options21);
-#endif
 }
-
-#ifdef USE_PREVIEW_AGILITY_SDK
-static void PrintWaveMMA(ID3D12Device* device)
-{
-    bool started = false;
-
-    D3D12_FEATURE_DATA_WAVE_MMA data = {};
-    for(uint32_t inputDataTypeIndex = 0; Enum_D3D12_WAVE_MMA_INPUT_DATATYPE[inputDataTypeIndex].m_Name != nullptr;
-        ++inputDataTypeIndex)
-    {
-        data.InputDataType = (D3D12_WAVE_MMA_INPUT_DATATYPE)Enum_D3D12_WAVE_MMA_INPUT_DATATYPE[inputDataTypeIndex].m_Value;
-        for(uint32_t mIndex = 0; Enum_D3D12_WAVE_MMA_DIMENSION[mIndex].m_Name != nullptr; ++mIndex)
-        {
-            data.M = (D3D12_WAVE_MMA_DIMENSION)Enum_D3D12_WAVE_MMA_DIMENSION[mIndex].m_Value;
-            for(uint32_t nIndex = 0; Enum_D3D12_WAVE_MMA_DIMENSION[nIndex].m_Name != nullptr; ++nIndex)
-            {
-                data.N = (D3D12_WAVE_MMA_DIMENSION)Enum_D3D12_WAVE_MMA_DIMENSION[nIndex].m_Value;
-                if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_WAVE_MMA, &data, sizeof(data))) &&
-                    data.Supported)
-                {
-                    if(!started)
-                    {
-                        if(g_UseJson)
-                        {
-                            Json::WriteString(L"D3D12_FEATURE_DATA_WAVE_MMA");
-                            Json::BeginArray();
-                        }
-                        else
-                            PrintHeader(L"D3D12_FEATURE_DATA_WAVE_MMA", 1);
-                        started = true;
-                    }
-
-                    if(g_UseJson)
-                    {
-                        // Object as array element.
-                        Json::BeginObject();
-                        
-                        Json::WriteNameAndNumber(L"InputDataType", (uint32_t)data.InputDataType);
-                        Json::WriteNameAndNumber(L"M", data.M);
-                        Json::WriteNameAndNumber(L"N", data.N);
-                        Json::WriteNameAndBool(L"Supported", true);
-                        Json::WriteNameAndNumber(L"K", data.K);
-                        Json::WriteNameAndNumber(L"AccumDataTypes", (uint32_t)data.AccumDataTypes);
-                        Json::WriteNameAndNumber(L"RequiredWaveLaneCountMin", data.RequiredWaveLaneCountMin);
-                        Json::WriteNameAndNumber(L"RequiredWaveLaneCountMax", data.RequiredWaveLaneCountMax);
-
-                        Json::EndObject();
-                    }
-                    else
-                    {
-                        PrintIndent();
-                        wprintf(L"InputDataType = %s, M = %s, N = %s:\n",
-                            Enum_D3D12_WAVE_MMA_INPUT_DATATYPE[inputDataTypeIndex].m_Name,
-                            Enum_D3D12_WAVE_MMA_DIMENSION[mIndex].m_Name,
-                            Enum_D3D12_WAVE_MMA_DIMENSION[nIndex].m_Name);
-                        ++g_Indent;
-
-                        Print_BOOL(L"Supported", TRUE);
-                        Print_uint32(L"K", data.K);
-                        PrintFlags(L"AccumDataTypes", data.AccumDataTypes, Enum_D3D12_WAVE_MMA_ACCUM_DATATYPE);
-                        Print_uint32(L"RequiredWaveLaneCountMin", data.RequiredWaveLaneCountMin);
-                        Print_uint32(L"RequiredWaveLaneCountMax", data.RequiredWaveLaneCountMax);
-
-                        --g_Indent;
-                    }
-                }
-            }
-        }
-    }
-
-    if(started)
-    {
-        if(g_UseJson)
-            Json::EndArray();
-        else
-            PrintEmptyLine();
-    }
-}
-#endif // #ifdef USE_PREVIEW_AGILITY_SDK
 
 static void PrintDescriptorSizes(ID3D12Device* device)
 {
@@ -1299,12 +1202,6 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_CROSS_NODE, &crossNode, sizeof(crossNode))))
         Print_D3D12_FEATURE_CROSS_NODE(crossNode);
 
-#ifdef USE_PREVIEW_AGILITY_SDK
-    if(D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL experimental = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL, &experimental, sizeof(experimental))))
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(experimental);
-
-#else
     if(D3D12_FEATURE_DATA_PREDICATION predication = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_PREDICATION, &predication, sizeof(predication))))
         Print_D3D12_FEATURE_PREDICATION(predication);
@@ -1313,13 +1210,7 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_HARDWARE_COPY, &hardwareCopy, sizeof(hardwareCopy))))
         Print_D3D12_FEATURE_HARDWARE_COPY(hardwareCopy);
 
-#endif
-
     PrintDeviceOptions(device.Get());
-
-#ifdef USE_PREVIEW_AGILITY_SDK
-    PrintWaveMMA(device.Get());
-#endif
 
     PrintDescriptorSizes(device.Get());
 
