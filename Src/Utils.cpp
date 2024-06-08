@@ -46,6 +46,14 @@ wstring StrToWstr(const char* str, uint32_t codePage)
     return wstring{buf.data(), buf.size()};
 }
 
+wstring GuidToStr(const GUID& guid)
+{
+	wchar_t str[39] = {};
+	int r = StringFromGUID2(guid, str, (int)_countof(str));
+	assert(r > 0);
+	return {str};
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // class CmdLineParser
 

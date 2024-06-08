@@ -81,6 +81,7 @@ static bool g_ListAdapters = false;
 static bool g_ShowAllAdapters = true;
 static bool g_SkipSoftwareAdapter = true;
 static bool g_PrintFormats = false;
+static bool g_PrintMetaCommands = false;
 static bool g_PrintEnums = false;
 static bool g_PureD3D12 = false;
 #ifdef USE_PREVIEW_AGILITY_SDK
@@ -1067,6 +1068,139 @@ static void PrintDescriptorSizes(ID3D12Device* device)
         device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
 }
 
+static void PrintMetaCommand(ID3D12Device5* device5, UINT index, const D3D12_META_COMMAND_DESC& desc)
+{
+    if(g_UseJson)
+    {
+        Json::BeginObject();
+    }
+    else
+    {
+        PrintIndent();
+        wprintf(L"MetaCommand %u:\n", index);
+        ++g_Indent;
+    }
+
+    Print_string(L"Id", GuidToStr(desc.Id).c_str());
+    Print_string(L"Name", desc.Name);
+    PrintFlags(L"InitializationDirtyState", desc.InitializationDirtyState, Enum_D3D12_GRAPHICS_STATES);
+    PrintFlags(L"ExecutionDirtyState", desc.ExecutionDirtyState, Enum_D3D12_GRAPHICS_STATES);
+
+    for(UINT stageIndex = 0; stageIndex < 3; ++stageIndex)
+    {
+        UINT totalStructureSizeInBytes = 0;
+        UINT paramCount = 0;
+        HRESULT hr = device5->EnumerateMetaCommandParameters(desc.Id,
+            (D3D12_META_COMMAND_PARAMETER_STAGE)stageIndex,
+            &totalStructureSizeInBytes, &paramCount, nullptr);
+        if(FAILED(hr))
+            continue;
+        
+        if(g_UseJson)
+        {
+            Json::WriteString(Enum_D3D12_META_COMMAND_PARAMETER_STAGE[stageIndex].m_Name);
+            Json::BeginObject();
+            Print_uint32(L"TotalStructureSizeInBytes", totalStructureSizeInBytes);
+        }
+        else
+        {
+            PrintIndent();
+            wprintf(L"%s: TotalStructureSizeInBytes=%u\n",
+                Enum_D3D12_META_COMMAND_PARAMETER_STAGE[stageIndex].m_Name,
+                totalStructureSizeInBytes);
+            ++g_Indent;
+        }
+        
+        if(paramCount > 0)
+        {
+            std::vector<D3D12_META_COMMAND_PARAMETER_DESC> paramDescs(paramCount);
+            hr = device5->EnumerateMetaCommandParameters(desc.Id,
+                (D3D12_META_COMMAND_PARAMETER_STAGE)stageIndex,
+                nullptr, &paramCount, paramDescs.data());
+            if(SUCCEEDED(hr))
+            {
+                if(g_UseJson)
+                {
+                    Json::WriteString(L"Parameters");
+                    Json::BeginArray();
+                }
+
+                for(UINT paramIndex = 0; paramIndex < paramCount; ++paramIndex)
+                {
+                    const auto& paramDesc = paramDescs[paramIndex];
+
+                    if(g_UseJson)
+                        Json::BeginObject();
+                    else
+                    {
+                        PrintIndent();
+                        wprintf(L"Parameter %u:\n", paramIndex);
+                        ++g_Indent;
+                    }
+
+                    Print_string(L"Name", paramDesc.Name);
+                    PrintEnum(L"Type", paramDesc.Type, Enum_D3D12_META_COMMAND_PARAMETER_TYPE);
+                    PrintFlags(L"Flags", paramDesc.Flags, Enum_D3D12_META_COMMAND_PARAMETER_FLAGS);
+                    PrintFlags(L"RequiredResourceState", paramDesc.RequiredResourceState, Enum_D3D12_RESOURCE_STATES);
+                    Print_uint32(L"StructureOffset", paramDesc.StructureOffset);
+
+                    if(g_UseJson)
+                        Json::EndObject();
+                    else
+                        --g_Indent;
+                }
+
+                if(g_UseJson)
+                    Json::EndArray();
+            }
+        }
+        
+        if(g_UseJson)
+            Json::EndObject();
+        else
+            --g_Indent;
+    }
+
+    if(g_UseJson)
+        Json::EndObject();
+    else
+    {
+        --g_Indent;
+        PrintEmptyLine();
+    }
+}
+
+static void PrintMetaCommands(ID3D12Device5* device5)
+{
+    UINT num = 0;
+    if(FAILED(device5->EnumerateMetaCommands(&num, nullptr)))
+        return;
+    if(num == 0)
+        return;
+    std::vector<D3D12_META_COMMAND_DESC> descs(num);
+    if(FAILED(device5->EnumerateMetaCommands(&num, descs.data())))
+        return;
+    
+    if(g_UseJson)
+    {
+        Json::WriteString(L"EnumerateMetaCommands");
+        Json::BeginArray();
+    }
+    else
+    {
+        PrintHeader(L"EnumerateMetaCommands", 1);
+        ++g_Indent;
+    }
+
+    for(UINT i = 0; i < num; ++i)
+        PrintMetaCommand(device5, i, descs[i]);
+
+    if(g_UseJson)
+        Json::EndArray();
+    else
+        --g_Indent;
+}
+
 static void PrintCommandQueuePriorities(ID3D12Device* device)
 {
     D3D12_COMMAND_LIST_TYPE cmdListTypes[] = {
@@ -1216,6 +1350,13 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
 
     PrintDescriptorSizes(device.Get());
 
+    if(g_PrintMetaCommands)
+    {
+        ComPtr<ID3D12Device5> device5;
+        if(SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&device5))))
+            PrintMetaCommands(device5.Get());
+    }
+
 #if USE_NVAPI
     bool useNVAPI = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_NVIDIA;
     if(nvAPI && nvAPI->IsInitialized())
@@ -1298,6 +1439,7 @@ static void PrintCommandLineSyntax()
     wprintf(L"  --AllAdapters                    Print details of all (except WARP) adapters.\n");
     wprintf(L"  -j --JSON                        Print output in JSON format instead of human-friendly text.\n");
     wprintf(L"  -f --Formats                     Include information about DXGI format capabilities.\n");
+    wprintf(L"  --MetaCommands                   Include information about meta commands.\n");
     wprintf(L"  -e --Enums                       Include information about all known enums and their values.\n");
     wprintf(L"  --PureD3D12                      Extract information only from D3D12 and no other sources.\n");
 #ifdef USE_PREVIEW_AGILITY_SDK
@@ -1520,6 +1662,7 @@ int wmain3(int argc, wchar_t** argv)
         CMD_LINE_OPT_ALL_ADAPTERS,
         CMD_LINE_OPT_JSON,
         CMD_LINE_OPT_FORMATS,
+        CMD_LINE_OPT_META_COMMANDS,
         CMD_LINE_OPT_ENUMS,
         CMD_LINE_OPT_PURE_D3D12,
         CMD_LINE_OPT_ENABLE_EXPERIMENTAL,
@@ -1541,6 +1684,7 @@ int wmain3(int argc, wchar_t** argv)
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,                  L'j',                   false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS,               L"Formats",             false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS,               L'f',                   false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_META_COMMANDS,         L"MetaCommands",        false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,                 L"Enums",               false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,                 L'e',                   false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_PURE_D3D12,            L"PureD3D12",           false);
@@ -1621,6 +1765,9 @@ int wmain3(int argc, wchar_t** argv)
                 break;
             case CMD_LINE_OPT_FORMATS:
                 g_PrintFormats = true;
+                break;
+            case CMD_LINE_OPT_META_COMMANDS:
+                g_PrintMetaCommands = true;
                 break;
             case CMD_LINE_OPT_ENUMS:
                 g_PrintEnums = true;

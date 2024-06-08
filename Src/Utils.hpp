@@ -19,6 +19,8 @@ wstring SizeToStr(uint64_t size);
 wstring StrToWstr(const char* str, uint32_t codePage);
 string WstrToStr(const wchar_t* str, uint32_t codePage);
 
+wstring GuidToStr(const GUID& guid);
+
 class CmdLineParser
 {
 public:

@@ -24,6 +24,7 @@ For more information, see files README.md, LICENSE.txt.
 #include <dxgi1_6.h>
 
 #include <windows.h>
+#include <Objbase.h> // For StringFromGUID2
 #include <wrl/client.h> // for ComPtr
 
 #include <vector>
