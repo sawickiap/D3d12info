@@ -1,3 +1,14 @@
+# Version 3.6.0 (2024-06-08)
+
+Changes:
+
+- Updated Agility SDK to version 1.714.0-preview.
+  - Added information about the new DirectSR - available variants.
+  - Removed information that disappeared from the SDK: `D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL`, `D3D12_FEATURE_DATA_WAVE_MMA`.
+- Added information about meta commands and their parameters. Off by default, enabled with new command-line parameter: `--MetaCommands`.
+
+Compiled with DirectX 12 Agility SDK 1.614.0 ("D3d12info.exe") / 1.714.0-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R550, Intel GPU Detect from 2023-07-18.
+
 # Version 3.5.1 (2024-05-27)
 
 Changes:
