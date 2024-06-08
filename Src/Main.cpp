@@ -1301,7 +1301,7 @@ static void PrintDirectSR(ID3D12Device* device)
             }
             
             Print_string(L"VariantId", GuidToStr(desc.VariantId).c_str());
-            Print_string(L"VariantName", StrToWstr(desc.VariantName, CP_ACP).c_str());
+            Print_string(L"VariantName", StrToWstr(desc.VariantName, CP_UTF8).c_str());
             PrintFlags(L"Flags", desc.Flags, Enum_DSR_SUPERRES_VARIANT_FLAGS);
             PrintDirectSROptimizationRankings(desc.OptimizationRankings);
             PrintEnum(L"OptimalTargetFormat", desc.OptimalTargetFormat, Enum_DXGI_FORMAT);
