@@ -30,14 +30,22 @@ Following types of information are printed by the program:
 
 - List of available DXGI adapters (GPUs) available in the system and their parameters, e.g. video memory size.
   - Software and WARP adapters can also be used (off by default).
+- Direct3D 12 capabilities of the GPU, like `D3D12_FEATURE_DATA_D3D12_OPTIONS`, `D3D12_FEATURE_DATA_D3D12_OPTIONS2`, etc.
+- Capabilities of all the formats (off by default), e.g. whether `DXGI_FORMAT_R9G9B9E5_SHAREDEXP` can be used as a render target.
+- Available meta commands and their parameters (off by default).
 - Graphics driver version, fetched in a multitude of ways.
 - Basic information about the operating system, e.g. Windows version, system memory size.
-- Basic information fetched from Vulkan, focused on general GPU description and driver version: `VkPhysicalDeviceProperties`, `VkPhysicalDeviceIDProperties`, `VkPhysicalDeviceVulkan12Properties`.
-- On Nvidia GPUs, information fetched using their NVAPI library, ...
+- Basic information fetched from Vulkan, focused on general GPU description and driver version.
+- On AMD GPUs: Information fetched using their AGS library, e.g. more detailed parameters of the hardware and the availability of custom extensions like `userMarkers`, `appRegistration`, `shaderClock`.
+- On Nvidia GPUs: Information fetched using their NVAPI library, e.g. more detailed parameters of the hardware and the availability of custom extensions like `NVAPI_D3D12_RAYTRACING_CAPS_TYPE_THREAD_REORDERING`, `*OPACITY_MICROMAP`, `*DISPLACEMENT_MICROMAP`.
+- On Intel GPUs: Information fetched from their GPU Detect library, e.g. more detailed parameters of the hardware.
+
+Output is printed in a human-readable text format by default, but it can be switched to **JSON** format suitable for automated processing.
 
 Following types of information are **not supported** by the program:
 
-- DirectX Video
+- Listing outputs (monitors) connected to the GPU or their parameters.
+- DirectX Video.
 - More information fetched from Vulkan, like extensions, properties, or limits. For them, please use [Vulkan Hadware Database by Sascha Willems](https://vulkan.gpuinfo.org/) and its accompanying app.
 
 # Command-line syntax
