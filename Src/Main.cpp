@@ -1210,6 +1210,8 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_HARDWARE_COPY, &hardwareCopy, sizeof(hardwareCopy))))
         Print_D3D12_FEATURE_HARDWARE_COPY(hardwareCopy);
 
+    // TODO: D3D12_FEATURE_PLACED_RESOURCE_SUPPORT_INFO - What is this? How to query it? What structure to use?
+
     PrintDeviceOptions(device.Get());
 
     PrintDescriptorSizes(device.Get());
