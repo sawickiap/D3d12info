@@ -74,6 +74,7 @@ typedef HRESULT (WINAPI* PFN_D3D12_ENABLE_EXPERIMENTAL_FEATURES)(
 PFN_DXGI_CREATE_FACTORY1 g_CreateDXGIFactory1;
 PFN_D3D12_CREATE_DEVICE g_D3D12CreateDevice;
 PFN_D3D12_ENABLE_EXPERIMENTAL_FEATURES g_D3D12EnableExperimentalFeatures; // Optional, can be null.
+PFN_D3D12_GET_INTERFACE g_D3D12GetInterface;
 
 #endif // #if defined(AUTO_LINK_DX12)
 
@@ -1234,6 +1235,94 @@ static void PrintCommandQueuePriorities(ID3D12Device* device)
     Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(queuePrioritySupport);
 }
 
+#ifdef USE_PREVIEW_AGILITY_SDK
+static void PrintDirectSROptimizationRankings(const DSR_OPTIMIZATION_TYPE* optimizationRankings)
+{
+    constexpr size_t count = _countof(DSR_SUPERRES_VARIANT_DESC::OptimizationRankings);
+    if(g_UseJson)
+    {
+        Json::WriteString(L"OptimizationRankings");
+        Json::BeginArray();
+        ++g_Indent;
+        for(size_t i = 0; i < count; ++i)
+            Json::WriteNumber((uint32_t)optimizationRankings[i]);
+        Json::EndArray();
+    }
+    else
+    {
+        PrintIndent();
+        wprintf(L"OptimizationRankings:\n");
+        ++g_Indent;
+        for(size_t i = 0; i < count; ++i)
+        {
+            const DSR_OPTIMIZATION_TYPE optimizationType = optimizationRankings[i];
+            PrintIndent();
+            wprintf(L"%s\n", Enum_DSR_OPTIMIZATION_TYPE[optimizationType].m_Name);
+        }
+        --g_Indent;
+    }
+}
+
+static void PrintDirectSR(ID3D12Device* device)
+{
+    ComPtr<ID3D12DSRDeviceFactory> dsrDeviceFactory;
+    if(FAILED(g_D3D12GetInterface(CLSID_D3D12DSRDeviceFactory, IID_PPV_ARGS(&dsrDeviceFactory))))
+        return;
+    ComPtr<IDSRDevice> dsrDevice;
+    if(FAILED(dsrDeviceFactory->CreateDSRDevice(device, 0, IID_PPV_ARGS(&dsrDevice))))
+        return;
+    UINT numVariants = dsrDevice->GetNumSuperResVariants();
+    if(numVariants == 0)
+        return;
+
+    if(g_UseJson)
+    {
+        Json::WriteString(L"DirectSR");
+        Json::BeginArray();
+    }
+    else
+    {
+        PrintHeader(L"DirectSR", 1);
+        ++g_Indent;
+    }
+
+    for(UINT variantIndex = 0; variantIndex < numVariants; ++variantIndex)
+    {
+        DSR_SUPERRES_VARIANT_DESC desc = {};
+        if(SUCCEEDED(dsrDevice->GetSuperResVariantDesc(variantIndex, &desc)))
+        {
+            if(g_UseJson)
+                Json::BeginObject();
+            else
+            {
+                PrintIndent();
+                wprintf(L"Variant %u:\n", variantIndex);
+                ++g_Indent;
+            }
+            
+            Print_string(L"VariantId", GuidToStr(desc.VariantId).c_str());
+            Print_string(L"VariantName", StrToWstr(desc.VariantName, CP_ACP).c_str());
+            PrintFlags(L"Flags", desc.Flags, Enum_DSR_SUPERRES_VARIANT_FLAGS);
+            PrintDirectSROptimizationRankings(desc.OptimizationRankings);
+            PrintEnum(L"OptimalTargetFormat", desc.OptimalTargetFormat, Enum_DXGI_FORMAT);
+
+            if(g_UseJson)
+                Json::EndObject();
+            else
+            {
+                --g_Indent;
+                PrintEmptyLine();
+            }
+        }
+    }
+
+    if(g_UseJson)
+        Json::EndArray();
+    else
+        --g_Indent;
+}
+#endif // #ifdef USE_PREVIEW_AGILITY_SDK
+
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI, AGS_Initialize_RAII* ags)
 {
     ComPtr<ID3D12Device> device;
@@ -1357,6 +1446,10 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
             PrintMetaCommands(device5.Get());
     }
 
+#ifdef USE_PREVIEW_AGILITY_SDK
+    PrintDirectSR(device.Get());
+#endif
+
 #if USE_NVAPI
     bool useNVAPI = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_NVIDIA;
     if(nvAPI && nvAPI->IsInitialized())
@@ -1406,6 +1499,12 @@ static bool LoadLibraries()
 
     g_D3D12EnableExperimentalFeatures = reinterpret_cast<PFN_D3D12_ENABLE_EXPERIMENTAL_FEATURES>(::GetProcAddress(g_Dx12Library, "D3D12EnableExperimentalFeatures"));
     // Optional, null is accepted.
+
+    g_D3D12GetInterface = reinterpret_cast<PFN_D3D12_GET_INTERFACE>(::GetProcAddress(g_Dx12Library, "D3D12GetInterface"));
+    if (!g_D3D12GetInterface)
+    {
+        return false;
+    }
 
     return true;
 }

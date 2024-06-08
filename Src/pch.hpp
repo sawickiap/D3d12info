@@ -13,10 +13,14 @@ For more information, see files README.md, LICENSE.txt.
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
+// For constants like CLSID_D3D12DSRDeviceFactory to be initialized with a value,
+// to avoid linker error like "LNK2001: unresolved external symbol CLSID_D3D12DSRDeviceFactory".
+#define INITGUID
 
 // Agility SDK needs to be included before Windows 10 SDK - according to Microsoft.
 #ifdef USE_PREVIEW_AGILITY_SDK
 	#include "ThirdParty/microsoft.direct3d.d3d12.1.714.0-preview/build/native/include/d3d12.h"
+	#include "ThirdParty/microsoft.direct3d.d3d12.1.714.0-preview/build/native/include/directsr.h"
 #else
 	#include "ThirdParty/microsoft.direct3d.d3d12.1.614.0/build/native/include/d3d12.h"
 #endif
