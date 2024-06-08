@@ -1447,7 +1447,10 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     }
 
 #ifdef USE_PREVIEW_AGILITY_SDK
-    PrintDirectSR(device.Get());
+    if(!g_PureD3D12)
+    {
+        PrintDirectSR(device.Get());
+    }
 #endif
 
 #if USE_NVAPI
