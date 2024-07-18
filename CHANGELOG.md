@@ -1,3 +1,15 @@
+# Version 3.7.0 (2024-07-18)
+
+Changes:
+
+- Updated Agility SDK to version 1.715.0-preview. Added new information:
+  - Experiment `D3D12StateObjectsExperiment`, enum value `D3D12_WORK_GRAPHS_TIER_1_1` - for the new GPU work graph mesh nodes.
+  - Structure `D3D12_FEATURE_DATA_D3D12_OPTIONS22` with `TightAlignmentSupported`.
+  - Structure `D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE` with `Supported`.
+- Updated Agility SDK to version 1.614.1. No changes in reported information.
+
+Compiled with DirectX 12 Agility SDK 1.614.1 ("D3d12info.exe") / 1.715.0-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R550, Intel GPU Detect from 2023-07-18.
+
 # Version 3.6.0 (2024-06-08)
 
 Changes:

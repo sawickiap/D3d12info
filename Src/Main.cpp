@@ -239,6 +239,14 @@ static void Print_D3D12_FEATURE_HARDWARE_COPY(const D3D12_FEATURE_DATA_HARDWARE_
     Print_BOOL(L"Supported", o.Supported);
 }
 
+#ifdef USE_PREVIEW_AGILITY_SDK
+static void Print_D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE(const D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE& o)
+{
+    ScopedStructRegion region(L"D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE");
+    Print_BOOL(L"Supported", o.Supported);
+}
+#endif // #ifdef USE_PREVIEW_AGILITY_SDK
+
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(const D3D12_FEATURE_DATA_D3D12_OPTIONS3& options3)
 {
     ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3");
@@ -396,6 +404,14 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(const D3D12_FEATURE_DATA_D3
     Print_BOOL(L"SampleCmpGradientAndBiasSupported", o.SampleCmpGradientAndBiasSupported);
     Print_BOOL(L"ExtendedCommandInfoSupported", o.ExtendedCommandInfoSupported);
 }
+
+#ifdef USE_PREVIEW_AGILITY_SDK
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS22(const D3D12_FEATURE_DATA_D3D12_OPTIONS22& o)
+{
+    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS22");
+    Print_BOOL(L"TightAlignmentSupported", o.TightAlignmentSupported);
+}
+#endif // #ifdef USE_PREVIEW_AGILITY_SDK
 
 static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXISTING_HEAPS& existingHeaps)
 {
@@ -637,10 +653,12 @@ static void EnableExperimentalFeatures()
 #ifdef USE_PREVIEW_AGILITY_SDK
     static const UUID FEATURE_UUIDS[] = {
         D3D12ExperimentalShaderModels,
-        D3D12TiledResourceTier4 };
+        D3D12TiledResourceTier4,
+        D3D12StateObjectsExperiment };
     static const wchar_t* FEATURE_NAMES[] = {
         L"D3D12ExperimentalShaderModels",
-        L"D3D12TiledResourceTier4" };
+        L"D3D12TiledResourceTier4",
+        L"D3D12StateObjectsExperiment" };
 #else
     static const UUID FEATURE_UUIDS[] = {
         D3D12ExperimentalShaderModels,
@@ -1054,6 +1072,12 @@ static void PrintDeviceOptions(ID3D12Device* device)
     if (D3D12_FEATURE_DATA_D3D12_OPTIONS21 options21 = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS21, &options21, sizeof(options21))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(options21);
+
+#ifdef USE_PREVIEW_AGILITY_SDK
+    if (D3D12_FEATURE_DATA_D3D12_OPTIONS22 options22 = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS22, &options22, sizeof(options22))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS22(options22);
+#endif
 }
 
 static void PrintDescriptorSizes(ID3D12Device* device)
@@ -1432,6 +1456,15 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     if(D3D12_FEATURE_DATA_HARDWARE_COPY hardwareCopy = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_HARDWARE_COPY, &hardwareCopy, sizeof(hardwareCopy))))
         Print_D3D12_FEATURE_HARDWARE_COPY(hardwareCopy);
+
+#ifdef USE_PREVIEW_AGILITY_SDK
+    if(D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE appSpecificDriverState = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_APPLICATION_SPECIFIC_DRIVER_STATE, &appSpecificDriverState, sizeof(appSpecificDriverState))))
+        Print_D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE(appSpecificDriverState);
+
+    // TODO: In Agility SDK 1.715.0-preview how to query for D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL1?
+    // What is the corresponding structure?
+#endif
 
     // TODO: D3D12_FEATURE_PLACED_RESOURCE_SUPPORT_INFO - What is this? How to query it? What structure to use?
 
