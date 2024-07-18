@@ -50,6 +50,7 @@ Following types of information are **not supported** by the program:
 - Listing outputs (monitors) connected to the GPU or their parameters.
 - DirectX Video.
 - More information fetched from Vulkan, like extensions, properties, or limits. For them, please use [Vulkan Hadware Database by Sascha Willems](https://vulkan.gpuinfo.org/) and its accompanying app.
+- Information fetched from Windows Display Driver Model (WDDM) API.
 
 # Command-line syntax
 
