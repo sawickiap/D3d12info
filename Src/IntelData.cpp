@@ -1777,7 +1777,7 @@ const char * GetIntelGraphicsGenerationString( const IntelGraphicsGeneration gen
 		case INTEL_DGFX_ACM:   return "Xe High Performance Graphics";
 
 		case INTEL_GFX_GEN_UNKNOWN:
-		default:               return "Unkown";
+		default:               return "Unknown";
 	}
 }
 
