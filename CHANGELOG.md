@@ -1,3 +1,11 @@
+# Version 3.7.1 (2024-10-29)
+
+Changes:
+
+- Updated Agility SDK to version 1.715.1-preview, which updated the default upscaler from AMD FidelityFX Super Resolution (FSR) 2.2 to 3.1.
+
+Compiled with DirectX 12 Agility SDK 1.614.1 ("D3d12info.exe") / 1.715.1-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R550, Intel GPU Detect from 2023-07-18.
+
 # Version 3.7.0 (2024-07-18)
 
 Changes:
