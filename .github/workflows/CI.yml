@@ -1,0 +1,25 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-2022
+    steps:
+    - name: Sync
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+        
+    - name: Configure
+      shell: pwsh
+      run: cmake -S . -B build
+      
+    - name: Build Debug
+      shell: pwsh
+      run: cmake --build build --config Debug
+      
+    - name: Build Release
+      shell: pwsh
+      run: cmake --build build --config Release
