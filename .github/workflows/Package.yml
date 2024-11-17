@@ -42,8 +42,8 @@ jobs:
         trusted-signing-account-name: dmytro-bulatov-sign
         certificate-profile-name: dmytro-bulatov
         files: |
-          ./build/Release/D3d12info.exe
-          ./build/Release/D3d12info_preview.exe
+          ${{ github.workspace }}/build/Release/D3d12info.exe
+          ${{ github.workspace }}/build/Release/D3d12info_preview.exe
         file-digest: SHA256
         timestamp-rfc3161: http://timestamp.acs.microsoft.com
         timestamp-digest: SHA256
@@ -72,5 +72,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: D3d12info
-        path: |
-          ./package/
+        path: ./package/
+        compression-level: 9
