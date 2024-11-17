@@ -100,6 +100,6 @@ It uses following thirt-party libraries:
 - **[Intel GPU Detect](https://github.com/GameTechDev/gpudetect)** - custom vendor extensions to graphics APIs by Intel. License: Apache 2.0.
   - Linked via submodule.
   - Optional, controlled by Cmake variable `ENABLE_INTEL_GPUDETECT` - on by default.
-- **[Vulkan SDK](https://www.lunarg.com/vulkan-sdk/)**
-  - Linked externally. Cmake automatically detects Vulkan SDK path.
+- **[Vulkan Headers](https://github.com/KhronosGroup/Vulkan-Headers)**
+  - Linked via submodule.
   - Optional, controlled by Cmake variable `ENABLE_VULKAN` - on by default.
