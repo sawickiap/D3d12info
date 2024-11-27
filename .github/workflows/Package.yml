@@ -1,0 +1,76 @@
+name: Package
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  package:
+    name: Package
+    runs-on: windows-2022
+    environment: production
+    steps:
+    - name: Azure login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Sync
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+        
+    - name: Configure
+      shell: pwsh
+      run: cmake -S . -B build
+      
+    - name: Build Release
+      shell: pwsh
+      run: cmake --build build --config Release
+
+    - name: Sign with Trusted Signing
+      uses: azure/trusted-signing-action@v0.5.0
+      with:
+        endpoint: https://eus.codesigning.azure.net/
+        trusted-signing-account-name: dmytro-bulatov-sign
+        certificate-profile-name: dmytro-bulatov
+        files: |
+          ${{ github.workspace }}/build/Release/D3d12info.exe
+          ${{ github.workspace }}/build/Release/D3d12info_preview.exe
+        file-digest: SHA256
+        timestamp-rfc3161: http://timestamp.acs.microsoft.com
+        timestamp-digest: SHA256
+        exclude-environment-credential: true
+        exclude-workload-identity-credential: true
+        exclude-managed-identity-credential: true
+        exclude-shared-token-cache-credential: true
+        exclude-visual-studio-credential: true
+        exclude-visual-studio-code-credential: true
+        exclude-azure-cli-credential: false
+        exclude-azure-powershell-credential: true
+        exclude-azure-developer-cli-credential: true
+        exclude-interactive-browser-credential: true
+
+    - name: Prepare Package
+      shell: pwsh
+      run: |
+        $PackagePath = "./package/D3d12info"
+        New-Item -ItemType Directory -Path $PackagePath
+        Copy-Item -Path "./build/Release/*" -Destination $PackagePath -Recurse -Exclude *.lib, *.exp
+        Copy-Item -Path "./LICENSE.txt" -Destination $PackagePath
+        Copy-Item -Path "./CHANGELOG.md" -Destination $PackagePath
+        Copy-Item -Path "./D3d12info on GitHub.url" -Destination $PackagePath
+      
+    - name: Upload Package
+      uses: actions/upload-artifact@v4
+      with:
+        name: D3d12info
+        path: ./package/
+        compression-level: 9

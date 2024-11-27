@@ -10,3 +10,6 @@
 [submodule "Src/ThirdParty/AGS_SDK"]
 	path = Src/ThirdParty/AGS_SDK
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK.git
+[submodule "Src/ThirdParty/Vulkan-Headers"]
+	path = Src/ThirdParty/Vulkan-Headers
+	url = https://github.com/KhronosGroup/Vulkan-Headers.git
