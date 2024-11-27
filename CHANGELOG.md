@@ -1,3 +1,11 @@
+# Version 3.7.2 (2024-11-27)
+
+Changes:
+
+- Added digital signing of the executables, which will hopefully reduce security warnings shown by Windows when launching them. (Developed by @Devaniti as #24)
+
+Compiled with DirectX 12 Agility SDK 1.614.1 ("D3d12info.exe") / 1.715.1-preview ("D3d12info_preview.exe"), AMD AGS 6.2.0, NVAPI R550, Intel GPU Detect from 2023-07-18 (all same as previous version).
+
 # Version 3.7.1 (2024-10-29)
 
 Changes:
