@@ -896,24 +896,27 @@ static void PrintFormatInformation(ID3D12Device* device)
     for(size_t formatIndex = 0; Enum_DXGI_FORMAT[formatIndex].m_Name != nullptr; ++formatIndex)
     {
         const DXGI_FORMAT format = (DXGI_FORMAT)Enum_DXGI_FORMAT[formatIndex].m_Value;
+        const wchar_t* name = Enum_DXGI_FORMAT[formatIndex].m_Name;
+
         formatSupport.Format = format;
+
         const FormatSupportResult formatSupportResult = CheckFormatSupport(device, formatSupport);
         if(formatSupportResult == FormatSupportResult::Crashed)
         {
             fwprintf(stderr, L"ERROR: ID3D12Device::CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, %s) crashed.\n",
-                Enum_DXGI_FORMAT[formatIndex].m_Name);
+                name);
             break;
         }
 
         if(g_UseJson)
         {
-            Json::WriteString(std::format(L"{}", formatIndex));
+            Json::WriteString(std::format(L"{}", (size_t)format));
             Json::BeginObject();
         }
         else
         {
             PrintIndent();
-            wprintf(L"%s:\n", Enum_DXGI_FORMAT[formatIndex].m_Name);
+            wprintf(L"%s:\n", name);
             ++g_Indent;
         }
 
@@ -921,9 +924,7 @@ static void PrintFormatInformation(ID3D12Device* device)
         {
             PrintFlags(L"Support1", formatSupport.Support1, Enum_D3D12_FORMAT_SUPPORT1);
             PrintFlags(L"Support2", formatSupport.Support2, Enum_D3D12_FORMAT_SUPPORT2);
-        }
-
-        {
+            
             if(g_UseJson)
             {
                 Json::WriteString(L"MultisampleQualityLevels");
