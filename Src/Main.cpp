@@ -405,11 +405,17 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(const D3D12_FEATURE_DATA_D3
     Print_BOOL(L"ExtendedCommandInfoSupported", o.ExtendedCommandInfoSupported);
 }
 
-#ifdef USE_PREVIEW_AGILITY_SDK
-static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS22(const D3D12_FEATURE_DATA_D3D12_OPTIONS22& o)
+static void Print_D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED(const D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS22");
-    Print_BOOL(L"TightAlignmentSupported", o.TightAlignmentSupported);
+    ScopedStructRegion region(L"D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED");
+    Print_BOOL(L"Supported", o.Supported);
+}
+
+#ifdef USE_PREVIEW_AGILITY_SDK
+static void Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(const D3D12_FEATURE_DATA_TIGHT_ALIGNMENT& o)
+{
+    ScopedStructRegion region(L"D3D12_FEATURE_DATA_TIGHT_ALIGNMENT");
+    PrintEnum(L"SupportTier", o.SupportTier, Enum_D3D12_TIGHT_ALIGNMENT_TIER);
 }
 #endif // #ifdef USE_PREVIEW_AGILITY_SDK
 
@@ -1074,10 +1080,14 @@ static void PrintDeviceOptions(ID3D12Device* device)
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS21, &options21, sizeof(options21))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(options21);
 
+    if (D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED bytecodeBypassHashSupported = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_BYTECODE_BYPASS_HASH_SUPPORTED, &bytecodeBypassHashSupported, sizeof(bytecodeBypassHashSupported))))
+        Print_D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED(bytecodeBypassHashSupported);
+
 #ifdef USE_PREVIEW_AGILITY_SDK
-    if (D3D12_FEATURE_DATA_D3D12_OPTIONS22 options22 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS22, &options22, sizeof(options22))))
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS22(options22);
+    if (D3D12_FEATURE_DATA_TIGHT_ALIGNMENT tightAlignment = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &tightAlignment, sizeof(tightAlignment))))
+        Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(tightAlignment);
 #endif
 }
 
