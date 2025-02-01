@@ -31,6 +31,18 @@ else()
     message(STATUS "AMD AGS library not used.")
 endif()
 
+option(ENABLE_AMD_DEVICE_INFO "Enables usage of AMD device_info library." ON)
+if(ENABLE_AMD_DEVICE_INFO)
+    if(EXISTS "${PROJECT_SOURCE_DIR}/Src/ThirdParty/AMD_device_info/DeviceInfo.h")
+        message(STATUS "AMD device_info library used.")
+    else()
+        message(STATUS "AMD device_info library not found. This is likely due to missing submodule. Please initialize submodules or set ENABLE_AMD_DEVICE_INFO to OFF.")
+        set(ENABLE_AMD_DEVICE_INFO OFF)
+    endif()
+else()
+    message(STATUS "AMD device_info library not used.")
+endif()
+
 option(ENABLE_NVAPI "Enables usage of NVAPI library." ON)
 if(ENABLE_NVAPI)
     if(EXISTS "${PROJECT_SOURCE_DIR}/Src/ThirdParty/nvapi/nvapi.h")
@@ -110,6 +122,15 @@ function(add_my_executable USE_PREVIEW_AGILITY_SDK)
         target_link_libraries(${EXE_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/Src/ThirdParty/AGS_SDK/ags_lib/lib/amd_ags_x64.lib")
         add_custom_command(TARGET ${EXE_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/Src/ThirdParty/AGS_SDK/ags_lib/lib/amd_ags_x64.dll" "$<TARGET_FILE_DIR:${EXE_NAME}>/")
+    endif()
+
+    if(ENABLE_AMD_DEVICE_INFO)
+        target_compile_definitions(${EXE_NAME} PRIVATE USE_AMD_DEVICE_INFO=1)
+        set(AMD_DEVICE_INFO_SOURCE_FILES
+            "Src/ThirdParty/AMD_device_info/DeviceInfo.cpp"
+            "Src/ThirdParty/AMD_device_info/DeviceInfo.h")
+        target_sources(${EXE_NAME} PRIVATE ${AMD_DEVICE_INFO_SOURCE_FILES})
+        source_group("ThirdParty/AMD_device_info" FILES ${AMD_DEVICE_INFO_SOURCE_FILES})
     endif()
 
     if(ENABLE_NVAPI)

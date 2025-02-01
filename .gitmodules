@@ -13,3 +13,6 @@
 [submodule "Src/ThirdParty/Vulkan-Headers"]
 	path = Src/ThirdParty/Vulkan-Headers
 	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+[submodule "Src/ThirdParty/AMD_device_info"]
+	path = Src/ThirdParty/AMD_device_info
+	url = https://github.com/GPUOpen-Tools/device_info.git

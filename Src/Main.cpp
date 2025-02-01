@@ -2,13 +2,14 @@
 This file is part of D3d12info project:
 https://github.com/sawickiap/D3d12info
 
-Copyright (c) 2018-2024 Adam Sawicki, https://asawicki.info
+Copyright (c) 2018-2025 Adam Sawicki, https://asawicki.info
 License: MIT
 
 For more information, see files README.md, LICENSE.txt.
 */
 #include "NvApiData.hpp"
 #include "AgsData.hpp"
+#include "AmdDeviceInfoData.hpp"
 #include "IntelData.hpp"
 #include "VulkanData.hpp"
 #include "Utils.hpp"
@@ -1597,8 +1598,9 @@ static void PrintCommandLineSyntax()
     wprintf(L"  --WARP                           Use WARP adapter.\n");
 }
 
-static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
-    Vulkan_Initialize_RAII* vk)
+static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter,
+    NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
+    AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk)
 {
     if(g_UseJson)
     {
@@ -1634,6 +1636,14 @@ static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter, NvAPI_Init
             ags->PrintAgsDeviceData(deviceId);
         }
 #endif
+#if USE_AMD_DEVICE_INFO
+        bool useAmdDeviceInfo = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_AMD;
+        if (useAmdDeviceInfo && amdDeviceInfo)
+        {
+            AmdDeviceInfo_Initialize_RAII::DeviceId deviceId = { desc.DeviceId, desc.Revision };
+            amdDeviceInfo->PrintDeviceData(deviceId);
+        }
+#endif
 #if USE_VULKAN
         if(vk && vk->IsInitialized())
             vk->PrintData(desc);
@@ -1645,7 +1655,7 @@ static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter, NvAPI_Init
 }
 
 static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
-    Vulkan_Initialize_RAII* vk)
+    AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk)
 {
     ComPtr<IDXGIAdapter> adapter;
     if(!g_WARP)
@@ -1653,7 +1663,7 @@ static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvA
         UINT adapterIndex = 0;
         while(dxgiFactory->EnumAdapters(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND)
         {
-            ListAdapter(adapterIndex, adapter.Get(), nvApi, ags, vk);
+            ListAdapter(adapterIndex, adapter.Get(), nvApi, ags, amdDeviceInfo, vk);
             adapter.Reset();
             ++adapterIndex;
         }
@@ -1661,11 +1671,13 @@ static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvA
     else
     {
         CHECK_HR(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&adapter)));
-        ListAdapter(0, adapter.Get(), nvApi, ags, vk);
+        ListAdapter(0, adapter.Get(), nvApi, ags, amdDeviceInfo, vk);
     }
 }
 
-int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags, Vulkan_Initialize_RAII* vk, uint32_t& adapterIndex, ComPtr<IDXGIAdapter1>& adapter1)
+int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
+    AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk,
+    uint32_t& adapterIndex, ComPtr<IDXGIAdapter1>& adapter1)
 {
     int programResult = PROGRAM_EXIT_SUCCESS;
 
@@ -1703,6 +1715,14 @@ int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags, Vulk
             ags->PrintAgsDeviceData(deviceId);
         }
 #endif
+#if USE_AMD_DEVICE_INFO
+        bool useAmdDeviceInfo = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_AMD;
+        if (useAmdDeviceInfo && amdDeviceInfo)
+        {
+            AmdDeviceInfo_Initialize_RAII::DeviceId deviceId = { desc.DeviceId, desc.Revision };
+            amdDeviceInfo->PrintDeviceData(deviceId);
+        }
+#endif
 #if USE_VULKAN
         if(vk && vk->IsInitialized())
             vk->PrintData(desc);
@@ -1727,7 +1747,7 @@ int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags, Vulk
 }
 
 static int InspectAllAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
-    Vulkan_Initialize_RAII* vk)
+    AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk)
 {
     uint32_t adapterIndex = 0;
     bool anyInspected = false;
@@ -1745,7 +1765,7 @@ static int InspectAllAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII
             }
         }
 
-        int result = InspectAdapter(nvApi, ags, vk, adapterIndex, adapter1);
+        int result = InspectAdapter(nvApi, ags, amdDeviceInfo, vk, adapterIndex, adapter1);
         anyInspected = true; 
         if(result != PROGRAM_EXIT_SUCCESS)
             return result;
@@ -1760,7 +1780,7 @@ static int InspectAllAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII
 
 // adapterIndex == UINT_MAX means first non-software and non-remote adapter.
 static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
-    Vulkan_Initialize_RAII* vk, uint32_t adapterIndex)
+    AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk, uint32_t adapterIndex)
 {
     ComPtr<IDXGIAdapter1> adapter1;
     if(g_WARP)
@@ -1786,7 +1806,7 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
 
     if(adapter1)
     {
-        return InspectAdapter(nvApi, ags, vk, adapterIndex, adapter1);
+        return InspectAdapter(nvApi, ags, amdDeviceInfo, vk, adapterIndex, adapter1);
     }
 
     throw std::runtime_error("No valid adapter chosen to show D3D12 device details.");
@@ -1990,6 +2010,12 @@ int wmain3(int argc, wchar_t** argv)
         agsObjPtr = std::make_unique<AGS_Initialize_RAII>();
 #endif
 
+    std::unique_ptr<AmdDeviceInfo_Initialize_RAII> amdDeviceInfoObjPtr;
+#if USE_AMD_DEVICE_INFO
+    if (!g_PureD3D12)
+        amdDeviceInfoObjPtr = std::make_unique<AmdDeviceInfo_Initialize_RAII>();
+#endif
+
     std::unique_ptr<Vulkan_Initialize_RAII> vkObjPtr;
 #if USE_VULKAN
     if(!g_PureD3D12)
@@ -2053,15 +2079,15 @@ int wmain3(int argc, wchar_t** argv)
         }
 
         if(g_ListAdapters)
-            ListAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get());
+            ListAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(), vkObjPtr.get());
         else
         {
             if(g_WARP)
-                InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get(), UINT32_MAX);
+                InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(), vkObjPtr.get(), UINT32_MAX);
             else if(!g_ShowAllAdapters)
-                InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get(), adapterIndex);
+                InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(), vkObjPtr.get(), adapterIndex);
             else
-                InspectAllAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), vkObjPtr.get());
+                InspectAllAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(), vkObjPtr.get());
         }
 
         if(g_UseJson)

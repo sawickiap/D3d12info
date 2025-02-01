@@ -39,7 +39,7 @@ Following types of information are printed by the program:
 - Graphics driver version, fetched in a multitude of ways.
 - Basic information about the operating system, e.g. Windows version, system memory size.
 - Basic information fetched from Vulkan, focused on general GPU description and driver version.
-- On AMD GPUs: Information fetched using their AGS library, e.g. more detailed parameters of the hardware and the availability of custom extensions like `userMarkers`, `appRegistration`, `shaderClock`.
+- On AMD GPUs: Information fetched using their AGS library and device_info library, e.g. more detailed parameters of the hardware and the availability of custom extensions like `userMarkers`, `appRegistration`, `shaderClock`.
 - On Nvidia GPUs: Information fetched using their NVAPI library, e.g. more detailed parameters of the hardware and the availability of custom extensions like `NVAPI_D3D12_RAYTRACING_CAPS_TYPE_THREAD_REORDERING`, `*OPACITY_MICROMAP`, `*DISPLACEMENT_MICROMAP`.
 - On Intel GPUs: Information fetched from their GPU Detect library, e.g. more detailed parameters of the hardware.
 
@@ -94,6 +94,9 @@ It uses following thirt-party libraries:
 - **[AMD GPU Services](https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK)** - custom vendor extensions to graphics APIs by AMD.
   - Linked via submodule.
   - Optional, controlled by Cmake variable `ENABLE_AGS` - on by default.
+- **[AMD device_info](https://github.com/GPUOpen-Tools/device_info)** - a library with a list of AMD GPUs. License: MIT.
+  - Linked via submodule.
+  - Optional, controlled by Cmake variable `ENABLE_AMD_DEVICE_INFO` - on by default.
 - **[NVAPI](https://developer.nvidia.com/nvapi)** - custom vendor extensions to graphics APIs by Nvidia.
   - Linked via submodule.
   - Optional, controlled by Cmake variable `ENABLE_NVAPI` - on by default.
