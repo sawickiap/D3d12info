@@ -499,6 +499,9 @@ static void PrintHeader_Json()
 #if USE_AGS
         AGS_Initialize_RAII::PrintStaticParams();
 #endif
+#if USE_AMD_DEVICE_INFO
+        AmdDeviceInfo_Initialize_RAII::PrintStaticParams();
+#endif
 #if USE_VULKAN
         Vulkan_Initialize_RAII::PrintStaticParams();
 #endif
@@ -536,6 +539,9 @@ static void PrintGeneralData()
 #endif
 #if USE_AGS
         AGS_Initialize_RAII::PrintStaticParams();
+#endif
+#if USE_AMD_DEVICE_INFO
+        AmdDeviceInfo_Initialize_RAII::PrintStaticParams();
 #endif
 #if USE_VULKAN
         Vulkan_Initialize_RAII::PrintStaticParams();

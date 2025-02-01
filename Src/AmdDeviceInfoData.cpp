@@ -21,6 +21,9 @@ For more information, see files README.md, LICENSE.txt.
 
 #include "ThirdParty/AMD_device_info/DeviceInfo.h"
 
+// Don't forget to update to the date of the last commit when grabbing a new version!
+static const wchar_t* AMD_DEVICE_INFO_COMPILED_VERSION = L"2024-09-24";
+
 ENUM_BEGIN(GDT_HW_ASIC_TYPE)
 	ENUM_ITEM(GDT_ASIC_TYPE_NONE)
 	ENUM_ITEM(GDT_TAHITI_PRO)
@@ -110,6 +113,11 @@ static const GDT_GfxCardInfo* FindCardInfo(const AmdDeviceInfo_Initialize_RAII::
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC
+
+void AmdDeviceInfo_Initialize_RAII::PrintStaticParams()
+{
+    Print_string(L"AMD device_info compiled version", AMD_DEVICE_INFO_COMPILED_VERSION);
+}
 
 void AmdDeviceInfo_Initialize_RAII::PrintDeviceData(const DeviceId& id)
 {

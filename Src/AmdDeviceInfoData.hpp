@@ -15,6 +15,10 @@ For more information, see files README.md, LICENSE.txt.
 class AmdDeviceInfo_Initialize_RAII
 {
 public:
+    // Prints parameters related to AMD's library itself, regardless of selected adapter.
+    static void PrintStaticParams();
+
+
 	struct DeviceId
 	{
 		uint32_t deviceId, revisionId;
