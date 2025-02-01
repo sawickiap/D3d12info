@@ -4,7 +4,7 @@ Changes:
 
 - Updated Agility SDK to version 1.615.0 / 1.716.0-preview. Updated information printed:
   - Added `D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED`.
-  - Preview only: removed `D3D12_FEATURE_DATA_D3D12_OPTIONS22`, added `Enum_D3D12_TIGHT_ALIGNMENT_TIER`.
+  - Preview only: removed `D3D12_FEATURE_DATA_D3D12_OPTIONS22`, added `D3D12_TIGHT_ALIGNMENT_TIER`.
 - Added usage of [AMD device_info](https://github.com/GPUOpen-Tools/device_info) library, which contains an up-to-date list of AMD GPUs and their capabilities. Added printing of its structures `GDT_GfxCardInfo`, `GDT_DeviceInfo`.
 
 Compiled with DirectX 12 Agility SDK 1.615.0 ("D3d12info.exe") / 1.716.0-preview ("D3d12info\_preview.exe"), AMD AGS 6.2.0, AMD device\_info from 2024-09-24 (commit hash `7379d082f1d8d64c9d1168b84b7f6b2a9702c82f`), NVAPI R550, Intel GPU Detect from 2023-07-18 (commit hash `dd962c44acdad4ea21632e0bd144ab139e8ad8eb`).
