@@ -107,6 +107,9 @@ void AGS_Initialize_RAII::PrintData()
 {
 	assert(m_Initialized);
 
+	if(IsStrEmpty(g_GpuInfo.driverVersion) && IsStrEmpty(g_GpuInfo.radeonSoftwareVersion))
+		return;
+
 	ScopedStructRegion region(L"AGSGPUInfo");
 	Print_string(L"driverVersion", StrToWstr(g_GpuInfo.driverVersion, CP_ACP).c_str());
 	Print_string(L"radeonSoftwareVersion", StrToWstr(g_GpuInfo.radeonSoftwareVersion, CP_ACP).c_str());

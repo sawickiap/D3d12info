@@ -14,6 +14,9 @@ extern const char* const PROGRAM_NAME_ANSI;
 extern const wchar_t* const PROGRAM_VERSION;
 extern const uint32_t PROGRAM_VERSION_NUMBER;
 
+inline bool IsStrEmpty(const char* str) { return str == nullptr || *str == '\0'; }
+inline bool IsStrEmpty(const wchar_t* str) { return str == nullptr || *str == L'\0'; }
+
 wstring SizeToStr(uint64_t size);
 // As codePage use e.g. CP_ACP (native Windows), CP_UTF8.
 wstring StrToWstr(const char* str, uint32_t codePage);
