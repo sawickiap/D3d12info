@@ -1,3 +1,18 @@
+# Version 3.9.0 (2025-02-08)
+
+Changes:
+
+- Updated NVAPI from version R550 to R570. Added printing of new information:
+  - New ray tracing capabilities:
+    - `NVAPI_D3D12_RAYTRACING_CAPS_TYPE_CLUSTER_OPERATIONS`
+    - `NVAPI_D3D12_RAYTRACING_CAPS_TYPE_PARTITIONED_TLAS`
+    - `NVAPI_D3D12_RAYTRACING_CAPS_TYPE_SPHERES`
+    - `NVAPI_D3D12_RAYTRACING_CAPS_TYPE_LINEAR_SWEPT_SPHERES`
+  - `NvAPI_D3D12_GetPhysicalDeviceCooperativeVectorProperties` - array of `NVAPI_COOPERATIVE_VECTOR_PROPERTIES` for different data types.
+  - `adapterType` of type `NV_ADAPTER_TYPE`.
+
+Compiled with DirectX 12 Agility SDK 1.615.0 ("D3d12info.exe") / 1.716.0-preview ("D3d12info\_preview.exe"), AMD AGS 6.2.0, AMD device\_info from 2024-09-24 (commit hash `7379d082f1d8d64c9d1168b84b7f6b2a9702c82f`), NVAPI R570, Intel GPU Detect from 2023-07-18 (commit hash `dd962c44acdad4ea21632e0bd144ab139e8ad8eb`).
+
 # Version 3.8.0 (2025-02-01)
 
 Changes:
