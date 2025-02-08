@@ -595,7 +595,10 @@ static void PrintCooperativeVectorProperties(const std::vector<NVAPI_COOPERATIVE
     if (g_UseJson)
         Json::EndArray();
     else
+    {
         --g_Indent;
+        PrintEmptyLine();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
