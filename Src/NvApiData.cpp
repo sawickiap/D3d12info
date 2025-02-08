@@ -10,6 +10,7 @@ For more information, see files README.md, LICENSE.txt.
 #include "NvApiData.hpp"
 #include "Printing.hpp"
 #include "Enums.hpp"
+#include "Json.hpp"
 #include "Utils.hpp"
 
 // Macro set by Cmake.
@@ -433,6 +434,25 @@ ENUM_BEGIN(NV_ADAPTER_TYPE)
     ENUM_ITEM(NV_ADAPTER_TYPE_TCC)
 ENUM_END(NV_ADAPTER_TYPE)
 
+ENUM_BEGIN(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_FLOAT16)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_FLOAT32)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_FLOAT64)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_SINT8)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_SINT16)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_SINT32)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_SINT64)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_UINT8)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_UINT16)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_UINT32)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_UINT64)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_SINT8_PACKED)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_UINT8_PACKED)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_FLOAT_E4M3)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_FLOAT_E5M2)
+    ENUM_ITEM(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE_INVALID)
+ENUM_END(NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE)
+
 /*
 NVAPI has a hierarchy: logical devices contain physical devices. We only need
 the NvPhysicalGpuHandle (and, in some cases, ID3D12Device) to query for
@@ -523,6 +543,59 @@ static bool FindPhysicalGpuAdapterType(NvPhysicalGpuHandle physicalGpuHandle, NV
         }
     }
     return false;
+}
+
+static void PrintCooperativeVectorProperty(size_t index, const NVAPI_COOPERATIVE_VECTOR_PROPERTIES& props)
+{
+    if (g_UseJson)
+    {
+        Json::BeginObject();
+    }
+    else
+    {
+        PrintIndent();
+        wprintf(L"NVAPI_COOPERATIVE_VECTOR_PROPERTIES %zu:\n", index);
+        ++g_Indent;
+    }
+
+    Print_hex32(L"version", props.version);
+    PrintEnum(L"inputType", props.inputType, Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
+    PrintEnum(L"inputInterpretation", props.inputInterpretation, Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
+    PrintEnum(L"matrixInterpretation", props.matrixInterpretation, Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
+    PrintEnum(L"biasInterpretation", props.biasInterpretation, Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
+    PrintEnum(L"resultType", props.resultType, Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
+    Print_BOOL(L"transpose", props.transpose);
+
+    if (g_UseJson)
+        Json::EndObject();
+    else
+    {
+        --g_Indent;
+    }
+}
+
+static void PrintCooperativeVectorProperties(const std::vector<NVAPI_COOPERATIVE_VECTOR_PROPERTIES>& props)
+{
+    if (g_UseJson)
+    {
+        Json::WriteString(L"NvAPI_D3D12_GetPhysicalDeviceCooperativeVectorProperties");
+        Json::BeginArray();
+    }
+    else
+    {
+        PrintHeader(L"NvAPI_D3D12_GetPhysicalDeviceCooperativeVectorProperties", 1);
+        ++g_Indent;
+    }
+
+    for(size_t i = 0; i < props.size(); ++i)
+    {
+        PrintCooperativeVectorProperty(i, props[i]);
+    }
+
+    if (g_UseJson)
+        Json::EndArray();
+    else
+        --g_Indent;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -703,6 +776,17 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
         {
             ScopedStructRegion region(L"NvAPI_D3D12_GetNeedsAppFPBlendClamping");
             Print_BOOL(L"pAppClampNeeded", appClampNeeded);
+        }
+    }
+
+    if(NvU32 count = 0;
+        NvAPI_D3D12_GetPhysicalDeviceCooperativeVectorProperties(device, &count, nullptr) == NVAPI_OK &&
+        count > 0)
+    {
+        if(std::vector<NVAPI_COOPERATIVE_VECTOR_PROPERTIES> props(count);
+            NvAPI_D3D12_GetPhysicalDeviceCooperativeVectorProperties(device, &count, props.data()) == NVAPI_OK)
+        {
+            PrintCooperativeVectorProperties(props);
         }
     }
 }
