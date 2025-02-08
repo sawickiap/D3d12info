@@ -426,10 +426,38 @@ ENUM_BEGIN(NVAPI_NVLINK_CAPS)
     ENUM_ITEM(NVAPI_NVLINK_CAPS_POWER_STATE_L3)
 ENUM_END(NVAPI_NVLINK_CAPS)
 
+ENUM_BEGIN(NV_ADAPTER_TYPE)
+    ENUM_ITEM(NV_ADAPTER_TYPE_UNKNOWN)
+    ENUM_ITEM(NV_ADAPTER_TYPE_WDDM)
+    ENUM_ITEM(NV_ADAPTER_TYPE_MCDM)
+    ENUM_ITEM(NV_ADAPTER_TYPE_TCC)
+ENUM_END(NV_ADAPTER_TYPE)
+
+/*
+NVAPI has a hierarchy: logical devices contain physical devices. We only need
+the NvPhysicalGpuHandle (and, in some cases, ID3D12Device) to query for
+capabilities, not logical device.
+
+There are two ways to query the list of devices:
+
+1. NvAPI_EnumLogicalGPUs, NvAPI_GPU_GetLogicalGpuInfo
+   struct NV_LOGICAL_GPU_DATA
+
+   It queries for the list of logical devices, each having a list of physical devices.
+   It allows correlating with device LUID. We need it, so we primarily use this method.
+
+2. NvAPI_SYS_GetLogicalGPUs, NvAPI_SYS_GetPhysicalGPUs
+   struct NV_LOGICAL_GPUS, NV_LOGICAL_GPU_HANDLE_DATA, NV_PHYSICAL_GPUS, NV_PHYSICAL_GPU_HANDLE_DATA
+
+   It has an advantage of returning NV_ADAPTER_TYPE. We use this method as ancillary
+   to just fetch this enum.
+*/
+
 static NvU32 g_LogicalGpuCount = 0;
 static NvLogicalGpuHandle g_LogicalGpuHandles[NVAPI_MAX_LOGICAL_GPUS];
 static NV_LOGICAL_GPU_DATA g_LogicalGpuData[NVAPI_MAX_LOGICAL_GPUS];
 static LUID g_LogicalGpuLuids[NVAPI_MAX_LOGICAL_GPUS];
+static NV_PHYSICAL_GPUS g_PhysicalGpus;
 
 static wstring NvShortStringToStr(NvAPI_ShortString str)
 {
@@ -449,6 +477,13 @@ static void LoadGpus()
             .pOSAdapterId = &g_LogicalGpuLuids[i]};
         NvAPI_Status status = NvAPI_GPU_GetLogicalGpuInfo(g_LogicalGpuHandles[i], &g_LogicalGpuData[i]);
         assert(status == NVAPI_OK);
+    }
+
+    // Success in fetching this structure is optional.
+    g_PhysicalGpus.version = NV_PHYSICAL_GPUS_VER;
+    if (NvAPI_SYS_GetPhysicalGPUs(&g_PhysicalGpus) != NVAPI_OK)
+    {
+        ZeroMemory(&g_PhysicalGpus, sizeof g_PhysicalGpus);
     }
 }
 
@@ -473,6 +508,19 @@ static bool FindPhysicalGpu(const LUID& adapterLuid, NvPhysicalGpuHandle& outGpu
     {
         outGpu = g_LogicalGpuData[foundIndex].physicalGpuHandles[0];
         return true;
+    }
+    return false;
+}
+
+static bool FindPhysicalGpuAdapterType(NvPhysicalGpuHandle physicalGpuHandle, NV_ADAPTER_TYPE& outAdapterType)
+{
+    for(size_t i = 0; i < g_PhysicalGpus.gpuHandleCount; ++i)
+    {
+        if(g_PhysicalGpus.gpuHandleData[i].hPhysicalGpu == physicalGpuHandle)
+        {
+            outAdapterType = g_PhysicalGpus.gpuHandleData[i].adapterType;
+            return true;
+        }
     }
     return false;
 }
@@ -689,6 +737,11 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
         return;
 
     ScopedStructRegion region(L"NvPhysicalGpuHandle");
+
+    if(NV_ADAPTER_TYPE adapterType; FindPhysicalGpuAdapterType(gpu, adapterType))
+    {
+        PrintEnum(L"adapterType", (uint32_t)adapterType, Enum_NV_ADAPTER_TYPE);
+    }
 
     NV_SYSTEM_TYPE systemType = {};
     if(NvAPI_GPU_GetSystemType(gpu, &systemType) == NVAPI_OK)
