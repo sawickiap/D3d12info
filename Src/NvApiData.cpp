@@ -348,7 +348,7 @@ static const EnumItem Enum_NV_ARCH_plus_IMPLEMENTATION_ID[] = {
     { L"NV_GPU_ARCH_IMPLEMENTATION_AD103", 0x00000193 },
     { L"NV_GPU_ARCH_IMPLEMENTATION_AD104", 0x00000194 },
 
-    { L"NV_GPU_ARCH_IMPLEMENTATION_GB202", 0x00000182 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_GB202", 0x000001B2 },
 	{ NULL, UINT32_MAX } };
 static EnumRegistration g_Enum_NV_ARCH_plus_IMPLEMENTATION_ID(L"NV_ARCH_plus_IMPLEMENTATION_ID", Enum_NV_ARCH_plus_IMPLEMENTATION_ID);
 
@@ -827,7 +827,7 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
 
     if(NV_ADAPTER_TYPE adapterType; FindPhysicalGpuAdapterType(gpu, adapterType))
     {
-        PrintEnum(L"adapterType", (uint32_t)adapterType, Enum_NV_ADAPTER_TYPE);
+        PrintFlags(L"adapterType", (uint32_t)adapterType, Enum_NV_ADAPTER_TYPE);
     }
 
     NV_SYSTEM_TYPE systemType = {};
