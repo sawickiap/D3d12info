@@ -10,8 +10,39 @@ cmake_minimum_required(VERSION 3.17)
 
 project(D3d12info LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
-file(GLOB CPP_FILES "Src/*.cpp")
-file(GLOB HPP_FILES "Src/*.hpp")
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(CPP_FILES
+    Src/AgsData.cpp
+    Src/AmdDeviceInfoData.cpp
+    Src/IntelData.cpp
+    Src/Main.cpp
+    Src/NvApiData.cpp
+    Src/Printer.cpp
+    Src/Resources.rc
+    Src/Utils.cpp
+    Src/VulkanData.cpp
+    Src/ReportFormatter/ConsoleReportFormatter.cpp
+    Src/ReportFormatter/JSONReportFormatter.cpp
+    Src/ReportFormatter/ReportFormatter.cpp
+)
+
+set(HPP_FILES
+    Src/AgsData.hpp
+    Src/AmdDeviceInfoData.hpp
+    Src/Enums.hpp
+    Src/IntelData.hpp
+    Src/NvApiData.hpp
+    Src/pch.hpp
+    Src/Printer.hpp
+    Src/Utils.hpp
+    Src/VulkanData.hpp
+    Src/ReportFormatter/ConsoleReportFormatter.hpp
+    Src/ReportFormatter/JSONReportFormatter.hpp
+    Src/ReportFormatter/ReportFormatter.hpp
+)
+
 set(RAPIDJSON_NATVIS_FILE "Src/ThirdParty/rapidjson/contrib/natvis/rapidjson.natvis")
 set(INTEL_GPUDETECT_CFG_FILE "Src/ThirdParty/gpudetect/IntelGfx.cfg")
 
@@ -82,6 +113,7 @@ function(add_my_executable USE_PREVIEW_AGILITY_SDK)
     endif()
 
     add_executable(${EXE_NAME} ${CPP_FILES} ${HPP_FILES})
+    target_include_directories(${EXE_NAME} PRIVATE Src)
 
     # Change Visual C++ runtime library to get rid of dependency on Visual C++ Redistributable
     set_property(TARGET ${EXE_NAME} PROPERTY

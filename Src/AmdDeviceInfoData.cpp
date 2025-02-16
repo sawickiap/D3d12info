@@ -8,10 +8,9 @@ License: MIT
 For more information, see files README.md, LICENSE.txt.
 */
 #include "AmdDeviceInfoData.hpp"
-#include "Printing.hpp"
 #include "Utils.hpp"
-#include "Json.hpp"
 #include "Enums.hpp"
+#include "ReportFormatter/ReportFormatter.hpp"
 
 // Macro set by Cmake.
 #if USE_AMD_DEVICE_INFO
@@ -116,7 +115,7 @@ static const GDT_GfxCardInfo* FindCardInfo(const AmdDeviceInfo_Initialize_RAII::
 
 void AmdDeviceInfo_Initialize_RAII::PrintStaticParams()
 {
-    Print_string(L"AMD device_info compiled version", AMD_DEVICE_INFO_COMPILED_VERSION);
+    ReportFormatter::GetInstance().AddFieldString(L"AMD device_info compiled version", AMD_DEVICE_INFO_COMPILED_VERSION);
 }
 
 void AmdDeviceInfo_Initialize_RAII::PrintDeviceData(const DeviceId& id)
@@ -126,12 +125,12 @@ void AmdDeviceInfo_Initialize_RAII::PrintDeviceData(const DeviceId& id)
 		return;
 
 	{
-		ScopedStructRegion region{L"AMD GDT_GfxCardInfo"};
-		PrintEnum(L"asicType", cardInfo->m_asicType, Enum_GDT_HW_ASIC_TYPE);
-		PrintEnum(L"generation", cardInfo->m_generation, Enum_GDT_HW_GENERATION);
-		Print_BOOL(L"APU", cardInfo->m_bAPU ? TRUE : FALSE);
-		Print_string(L"CALName", StrToWstr(cardInfo->m_szCALName, CP_UTF8).c_str());
-        Print_string(L"MarketingName", StrToWstr(cardInfo->m_szMarketingName, CP_UTF8).c_str());
+		ReportScopeObject region{L"AMD GDT_GfxCardInfo"};
+		ReportFormatter::GetInstance().AddFieldEnum(L"asicType", cardInfo->m_asicType, Enum_GDT_HW_ASIC_TYPE);
+		ReportFormatter::GetInstance().AddFieldEnum(L"generation", cardInfo->m_generation, Enum_GDT_HW_GENERATION);
+		ReportFormatter::GetInstance().AddFieldBool(L"APU", cardInfo->m_bAPU ? TRUE : FALSE);
+		ReportFormatter::GetInstance().AddFieldString(L"CALName", StrToWstr(cardInfo->m_szCALName, CP_UTF8).c_str());
+        ReportFormatter::GetInstance().AddFieldString(L"MarketingName", StrToWstr(cardInfo->m_szMarketingName, CP_UTF8).c_str());
 	}
 
 	if(cardInfo->m_asicType >= 0 && cardInfo->m_asicType < gs_deviceInfoSize)
@@ -139,16 +138,16 @@ void AmdDeviceInfo_Initialize_RAII::PrintDeviceData(const DeviceId& id)
 		const GDT_DeviceInfo& devInfo = gs_deviceInfo[cardInfo->m_asicType];
 		if(devInfo.m_deviceInfoValid)
 		{
-			ScopedStructRegion region(L"AMD GDT_DeviceInfo");
-			Print_uint64(L"NumShaderEngines", devInfo.m_nNumShaderEngines); // Number of shader engines.
-			Print_uint64(L"MaxWavePerSIMD", devInfo.m_nMaxWavePerSIMD); // Number of wave slots per SIMD.
-			Print_uint64(L"ClocksPrim", devInfo.m_suClocksPrim); // Number of clocks it takes to process a primitive.
-			Print_uint64(L"NumSQMaxCounters", devInfo.m_nNumSQMaxCounters); // Max number of SQ counters.
-			Print_uint64(L"NumPrimPipes", devInfo.m_nNumPrimPipes); // Number of primitive pipes.
-			Print_uint64(L"WaveSize", devInfo.m_nWaveSize); // Wavefront size.
-			Print_uint64(L"NumSHPerSE", devInfo.m_nNumSHPerSE); // Number of shader array per Shader Engine.
-			Print_uint64(L"NumCUPerSH", devInfo.m_nNumCUPerSH); // Number of compute unit per Shader Array.
-			Print_uint64(L"NumSIMDPerCU", devInfo.m_nNumSIMDPerCU); // Number of SIMDs per Compute unit.
+			ReportScopeObject region(L"AMD GDT_DeviceInfo");
+			ReportFormatter::GetInstance().AddFieldUint64(L"NumShaderEngines", devInfo.m_nNumShaderEngines); // Number of shader engines.
+			ReportFormatter::GetInstance().AddFieldUint64(L"MaxWavePerSIMD", devInfo.m_nMaxWavePerSIMD); // Number of wave slots per SIMD.
+			ReportFormatter::GetInstance().AddFieldUint64(L"ClocksPrim", devInfo.m_suClocksPrim); // Number of clocks it takes to process a primitive.
+			ReportFormatter::GetInstance().AddFieldUint64(L"NumSQMaxCounters", devInfo.m_nNumSQMaxCounters); // Max number of SQ counters.
+			ReportFormatter::GetInstance().AddFieldUint64(L"NumPrimPipes", devInfo.m_nNumPrimPipes); // Number of primitive pipes.
+			ReportFormatter::GetInstance().AddFieldUint64(L"WaveSize", devInfo.m_nWaveSize); // Wavefront size.
+			ReportFormatter::GetInstance().AddFieldUint64(L"NumSHPerSE", devInfo.m_nNumSHPerSE); // Number of shader array per Shader Engine.
+			ReportFormatter::GetInstance().AddFieldUint64(L"NumCUPerSH", devInfo.m_nNumCUPerSH); // Number of compute unit per Shader Array.
+			ReportFormatter::GetInstance().AddFieldUint64(L"NumSIMDPerCU", devInfo.m_nNumSIMDPerCU); // Number of SIMDs per Compute unit.
 		}
 	}
 }

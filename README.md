@@ -60,9 +60,12 @@ Options:
   -h --Help                        Only print this help (command line syntax).
   -l --List                        Only print the list of all adapters.
   -a --Adapter=<Index>             Print details of adapter at specified index.
-  --AllNonSoftware                 Print details of all (except WARP and Software) adapters (default behavior).
-  --AllAdapters                    Print details of all (except WARP) adapters.
+  --AllNonSoftware                 Print details of all (except Software) adapters (default behavior).
+  --AllAdapters                    Print details of all adapters.
   -j --JSON                        Print output in JSON format instead of human-friendly text.
+  --JSONPrettyPrint                Print JSON in human friendly form. (default behavior)
+  --JSONNoPrettyPrint              Print JSON in minimal size form.
+  -o --OutputToFile=<FilePath>     Output to specified file.
   -f --Formats                     Include information about DXGI format capabilities.
   --MetaCommands                   Include information about meta commands.
   -e --Enums                       Include information about all known enums and their values.

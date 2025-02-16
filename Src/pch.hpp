@@ -40,6 +40,7 @@ For more information, see files README.md, LICENSE.txt.
 #include <stdexcept>
 #include <algorithm>
 #include <cwctype>
+#include <numeric>
 
 #include <cstdint>
 #include <cassert>

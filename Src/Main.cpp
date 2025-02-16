@@ -14,8 +14,8 @@ For more information, see files README.md, LICENSE.txt.
 #include "VulkanData.hpp"
 #include "Utils.hpp"
 #include "Enums.hpp"
-#include "Json.hpp"
-#include "Printing.hpp"
+#include "Printer.hpp"
+#include "ReportFormatter/ReportFormatter.hpp"
 
 // For Direct3D 12 Agility SDK
 extern "C"
@@ -79,9 +79,16 @@ PFN_D3D12_GET_INTERFACE g_D3D12GetInterface;
 
 #endif // #if defined(AUTO_LINK_DX12)
 
+// Command line flags
+static bool g_ShowVersionAndQuit = false;
+static bool g_ShowCommandLineSyntaxAndQuit = false;
+static bool g_ShowCommandLineSyntaxAndFail = false;
 static bool g_ListAdapters = false;
 static bool g_ShowAllAdapters = true;
 static bool g_SkipSoftwareAdapter = true;
+static bool g_UseJsonOutput = false;
+static bool g_UseJsonPrettyPrint = true;
+static bool g_OutputToFile = false;
 static bool g_PrintFormats = false;
 static bool g_PrintMetaCommands = false;
 static bool g_PrintEnums = false;
@@ -93,6 +100,10 @@ static bool g_EnableExperimental = false;
 #endif
 static bool g_ForceVendorAPI = false;
 static bool g_WARP = false;
+static std::wstring g_OutputFilePath;
+
+// Derived flags
+static bool g_PrintAdaptersAsArray = true;
 
 static wstring LuidToStr(LUID value)
 {
@@ -103,334 +114,327 @@ static wstring LuidToStr(LUID value)
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(const D3D12_FEATURE_DATA_D3D12_OPTIONS& options)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS");
-    Print_BOOL(  L"DoublePrecisionFloatShaderOps", options.DoublePrecisionFloatShaderOps);
-    Print_BOOL(  L"OutputMergerLogicOp", options.OutputMergerLogicOp);
-    PrintEnum(   L"MinPrecisionSupport", options.MinPrecisionSupport, Enum_D3D12_SHADER_MIN_PRECISION_SUPPORT);
-    PrintEnum(   L"TiledResourcesTier", options.TiledResourcesTier, Enum_D3D12_TILED_RESOURCES_TIER);
-    PrintEnum(   L"ResourceBindingTier", options.ResourceBindingTier, Enum_D3D12_RESOURCE_BINDING_TIER);
-    Print_BOOL(  L"PSSpecifiedStencilRefSupported", options.PSSpecifiedStencilRefSupported);
-    Print_BOOL(  L"TypedUAVLoadAdditionalFormats", options.TypedUAVLoadAdditionalFormats);
-    Print_BOOL(  L"ROVsSupported", options.ROVsSupported);
-    PrintEnum(   L"ConservativeRasterizationTier", options.ConservativeRasterizationTier, Enum_D3D12_CONSERVATIVE_RASTERIZATION_TIER);
-    Print_uint32(L"MaxGPUVirtualAddressBitsPerResource", options.MaxGPUVirtualAddressBitsPerResource);
-    Print_BOOL(  L"StandardSwizzle64KBSupported", options.StandardSwizzle64KBSupported);
-    PrintEnum(   L"CrossNodeSharingTier", options.CrossNodeSharingTier, Enum_D3D12_CROSS_NODE_SHARING_TIER);
-    Print_BOOL(  L"CrossAdapterRowMajorTextureSupported", options.CrossAdapterRowMajorTextureSupported);
-    Print_BOOL(  L"VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation", options.VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation);
-    PrintEnum(   L"ResourceHeapTier", options.ResourceHeapTier, Enum_D3D12_RESOURCE_HEAP_TIER);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS");
+    ReportFormatter::GetInstance().AddFieldBool(L"DoublePrecisionFloatShaderOps", options.DoublePrecisionFloatShaderOps);
+    ReportFormatter::GetInstance().AddFieldBool(L"OutputMergerLogicOp", options.OutputMergerLogicOp);
+    ReportFormatter::GetInstance().AddFieldEnum(L"MinPrecisionSupport", options.MinPrecisionSupport, Enum_D3D12_SHADER_MIN_PRECISION_SUPPORT);
+    ReportFormatter::GetInstance().AddFieldEnum(L"TiledResourcesTier", options.TiledResourcesTier, Enum_D3D12_TILED_RESOURCES_TIER);
+    ReportFormatter::GetInstance().AddFieldEnum(L"ResourceBindingTier", options.ResourceBindingTier, Enum_D3D12_RESOURCE_BINDING_TIER);
+    ReportFormatter::GetInstance().AddFieldBool(L"PSSpecifiedStencilRefSupported", options.PSSpecifiedStencilRefSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"TypedUAVLoadAdditionalFormats", options.TypedUAVLoadAdditionalFormats);
+    ReportFormatter::GetInstance().AddFieldBool(L"ROVsSupported", options.ROVsSupported);
+    ReportFormatter::GetInstance().AddFieldEnum(L"ConservativeRasterizationTier", options.ConservativeRasterizationTier, Enum_D3D12_CONSERVATIVE_RASTERIZATION_TIER);
+    ReportFormatter::GetInstance().AddFieldUint32(L"MaxGPUVirtualAddressBitsPerResource", options.MaxGPUVirtualAddressBitsPerResource);
+    ReportFormatter::GetInstance().AddFieldBool(L"StandardSwizzle64KBSupported", options.StandardSwizzle64KBSupported);
+    ReportFormatter::GetInstance().AddFieldEnum(L"CrossNodeSharingTier", options.CrossNodeSharingTier, Enum_D3D12_CROSS_NODE_SHARING_TIER);
+    ReportFormatter::GetInstance().AddFieldBool(L"CrossAdapterRowMajorTextureSupported", options.CrossAdapterRowMajorTextureSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation", options.VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation);
+    ReportFormatter::GetInstance().AddFieldEnum(L"ResourceHeapTier", options.ResourceHeapTier, Enum_D3D12_RESOURCE_HEAP_TIER);
 }
 
 static void Print_D3D12_FEATURE_DATA_ARCHITECTURE(const D3D12_FEATURE_DATA_ARCHITECTURE& architecture)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_ARCHITECTURE");
-    Print_uint32(L"NodeIndex", architecture.NodeIndex);
-    Print_BOOL  (L"TileBasedRenderer", architecture.TileBasedRenderer);
-    Print_BOOL  (L"UMA", architecture.UMA);
-    Print_BOOL  (L"CacheCoherentUMA", architecture.CacheCoherentUMA);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_ARCHITECTURE");
+    ReportFormatter::GetInstance().AddFieldUint32(L"NodeIndex", architecture.NodeIndex);
+    ReportFormatter::GetInstance().AddFieldBool(L"TileBasedRenderer", architecture.TileBasedRenderer);
+    ReportFormatter::GetInstance().AddFieldBool(L"UMA", architecture.UMA);
+    ReportFormatter::GetInstance().AddFieldBool(L"CacheCoherentUMA", architecture.CacheCoherentUMA);
 }
 
 static void Print_D3D12_FEATURE_DATA_ARCHITECTURE1(const D3D12_FEATURE_DATA_ARCHITECTURE1& architecture1)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_ARCHITECTURE1");
-    Print_uint32(L"NodeIndex", architecture1.NodeIndex);
-    Print_BOOL  (L"TileBasedRenderer", architecture1.TileBasedRenderer);
-    Print_BOOL  (L"UMA", architecture1.UMA);
-    Print_BOOL  (L"CacheCoherentUMA", architecture1.CacheCoherentUMA);
-    Print_BOOL  (L"IsolatedMMU", architecture1.IsolatedMMU);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_ARCHITECTURE1");
+    ReportFormatter::GetInstance().AddFieldUint32(L"NodeIndex", architecture1.NodeIndex);
+    ReportFormatter::GetInstance().AddFieldBool(L"TileBasedRenderer", architecture1.TileBasedRenderer);
+    ReportFormatter::GetInstance().AddFieldBool(L"UMA", architecture1.UMA);
+    ReportFormatter::GetInstance().AddFieldBool(L"CacheCoherentUMA", architecture1.CacheCoherentUMA);
+    ReportFormatter::GetInstance().AddFieldBool(L"IsolatedMMU", architecture1.IsolatedMMU);
 }
 
 static void Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(const D3D12_FEATURE_DATA_FEATURE_LEVELS& featureLevels)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_FEATURE_LEVELS");
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_FEATURE_LEVELS");
 
-#if 0 // TODO Is this an output parameter or not? How to correctly query and print it???
-    Print_uint32(L"NumFeatureLevels", featureLevels.NumFeatureLevels);
-    BeginArray();
-    for(uint32_t i = 0; i < featureLevels.NumFeatureLevels; ++i)
-    {
-        PrintEnum(L"pFeatureLevelsRequested", featureLevels.pFeatureLevelsRequested[i], Enum_D3D_FEATURE_LEVEL);
-        StepArray();
-    }
-    EndArray();
-#endif
-    PrintEnum(L"MaxSupportedFeatureLevel", featureLevels.MaxSupportedFeatureLevel, Enum_D3D_FEATURE_LEVEL);
+    // NumFeatureLevels and pFeatureLevelsRequested are IN parameters
+    // They let the app to specify what enum values does the app expect
+    // So same API can be used when new feature levels are added in the future
+    // No need to print those IN parameters here
+    ReportFormatter::GetInstance().AddFieldEnum(L"MaxSupportedFeatureLevel", featureLevels.MaxSupportedFeatureLevel, Enum_D3D_FEATURE_LEVEL);
 }
 
 static void Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(const D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT& virtualAddressSupport)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT");
-    Print_uint32(L"MaxGPUVirtualAddressBitsPerResource", virtualAddressSupport.MaxGPUVirtualAddressBitsPerResource);
-    Print_uint32(L"MaxGPUVirtualAddressBitsPerProcess", virtualAddressSupport.MaxGPUVirtualAddressBitsPerProcess);
-    
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT");
+    ReportFormatter::GetInstance().AddFieldUint32(L"MaxGPUVirtualAddressBitsPerResource", virtualAddressSupport.MaxGPUVirtualAddressBitsPerResource);
+    ReportFormatter::GetInstance().AddFieldUint32(L"MaxGPUVirtualAddressBitsPerProcess", virtualAddressSupport.MaxGPUVirtualAddressBitsPerProcess);
 }
 
 static void Print_D3D12_FEATURE_DATA_SHADER_MODEL(const D3D12_FEATURE_DATA_SHADER_MODEL& shaderModel)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_SHADER_MODEL");
-    PrintEnum(L"HighestShaderModel", shaderModel.HighestShaderModel, Enum_D3D_SHADER_MODEL);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_SHADER_MODEL");
+    ReportFormatter::GetInstance().AddFieldEnum(L"HighestShaderModel", shaderModel.HighestShaderModel, Enum_D3D_SHADER_MODEL);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(const D3D12_FEATURE_DATA_D3D12_OPTIONS1& options1)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS1");
-    Print_BOOL  (L"WaveOps", options1.WaveOps);
-    Print_uint32(L"WaveLaneCountMin", options1.WaveLaneCountMin);
-    Print_uint32(L"WaveLaneCountMax", options1.WaveLaneCountMax);
-    Print_uint32(L"TotalLaneCount", options1.TotalLaneCount);
-    Print_BOOL  (L"ExpandedComputeResourceStates", options1.ExpandedComputeResourceStates);
-    Print_BOOL  (L"Int64ShaderOps", options1.Int64ShaderOps);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS1");
+    ReportFormatter::GetInstance().AddFieldBool(L"WaveOps", options1.WaveOps);
+    ReportFormatter::GetInstance().AddFieldUint32(L"WaveLaneCountMin", options1.WaveLaneCountMin);
+    ReportFormatter::GetInstance().AddFieldUint32(L"WaveLaneCountMax", options1.WaveLaneCountMax);
+    ReportFormatter::GetInstance().AddFieldUint32(L"TotalLaneCount", options1.TotalLaneCount);
+    ReportFormatter::GetInstance().AddFieldBool(L"ExpandedComputeResourceStates", options1.ExpandedComputeResourceStates);
+    ReportFormatter::GetInstance().AddFieldBool(L"Int64ShaderOps", options1.Int64ShaderOps);
 }
 
 static void Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(const D3D12_FEATURE_DATA_ROOT_SIGNATURE& rootSignature)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_ROOT_SIGNATURE");
-    PrintEnum(L"HighestVersion", rootSignature.HighestVersion, Enum_D3D_ROOT_SIGNATURE_VERSION);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_ROOT_SIGNATURE");
+    ReportFormatter::GetInstance().AddFieldEnum(L"HighestVersion", rootSignature.HighestVersion, Enum_D3D_ROOT_SIGNATURE_VERSION);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(const D3D12_FEATURE_DATA_D3D12_OPTIONS2& options2)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS2");
-    Print_BOOL(L"DepthBoundsTestSupported", options2.DepthBoundsTestSupported);
-    PrintEnum (L"ProgrammableSamplePositionsTier", options2.ProgrammableSamplePositionsTier, Enum_D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS2");
+    ReportFormatter::GetInstance().AddFieldBool(L"DepthBoundsTestSupported", options2.DepthBoundsTestSupported);
+    ReportFormatter::GetInstance().AddFieldEnum(L"ProgrammableSamplePositionsTier", options2.ProgrammableSamplePositionsTier, Enum_D3D12_PROGRAMMABLE_SAMPLE_POSITIONS_TIER);
 }
 
 static void Print_D3D12_FEATURE_DATA_SHADER_CACHE(const D3D12_FEATURE_DATA_SHADER_CACHE& shaderCache)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_SHADER_CACHE");
-    PrintFlags(L"SupportFlags", shaderCache.SupportFlags, Enum_D3D12_SHADER_CACHE_SUPPORT_FLAGS);    
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_SHADER_CACHE");
+    ReportFormatter::GetInstance().AddFieldFlags(L"SupportFlags", shaderCache.SupportFlags, Enum_D3D12_SHADER_CACHE_SUPPORT_FLAGS);
 }
 
 static void Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(const std::array<bool, 9>& commandQueuePriority)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY");
-    Print_BOOL(L"TYPE_DIRECT.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[0]);
-    Print_BOOL(L"TYPE_DIRECT.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[1]);
-    Print_BOOL(L"TYPE_DIRECT.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[2]);
-    Print_BOOL(L"TYPE_COMPUTE.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[3]);
-    Print_BOOL(L"TYPE_COMPUTE.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[4]);
-    Print_BOOL(L"TYPE_COMPUTE.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[5]);
-    Print_BOOL(L"TYPE_COPY.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[6]);
-    Print_BOOL(L"TYPE_COPY.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[7]);
-    Print_BOOL(L"TYPE_COPY.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[8]);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY");
+    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_DIRECT.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[0]);
+    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_DIRECT.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[1]);
+    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_DIRECT.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[2]);
+    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_COMPUTE.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[3]);
+    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_COMPUTE.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[4]);
+    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_COMPUTE.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[5]);
+    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_COPY.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[6]);
+    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_COPY.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[7]);
+    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_COPY.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[8]);
 }
 
 static void Print_D3D12_FEATURE_DATA_SERIALIZATION(const D3D12_FEATURE_DATA_SERIALIZATION& serialization)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_SERIALIZATION");
-    PrintEnum(L"HeapSerializationTier", serialization.HeapSerializationTier, Enum_D3D12_HEAP_SERIALIZATION_TIER);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_SERIALIZATION");
+    ReportFormatter::GetInstance().AddFieldEnum(L"HeapSerializationTier", serialization.HeapSerializationTier, Enum_D3D12_HEAP_SERIALIZATION_TIER);
 }
 
 static void Print_D3D12_FEATURE_CROSS_NODE(const D3D12_FEATURE_DATA_CROSS_NODE& crossNode)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_CROSS_NODE");
-    PrintEnum(L"SharingTier", crossNode.SharingTier, Enum_D3D12_CROSS_NODE_SHARING_TIER);
-    Print_BOOL(L"AtomicShaderInstructions", crossNode.AtomicShaderInstructions);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_CROSS_NODE");
+    ReportFormatter::GetInstance().AddFieldEnum(L"SharingTier", crossNode.SharingTier, Enum_D3D12_CROSS_NODE_SHARING_TIER);
+    ReportFormatter::GetInstance().AddFieldBool(L"AtomicShaderInstructions", crossNode.AtomicShaderInstructions);
 }
 
 static void Print_D3D12_FEATURE_PREDICATION(const D3D12_FEATURE_DATA_PREDICATION& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_PREDICATION");
-    Print_BOOL(L"Supported", o.Supported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_PREDICATION");
+    ReportFormatter::GetInstance().AddFieldBool(L"Supported", o.Supported);
 }
 
 static void Print_D3D12_FEATURE_HARDWARE_COPY(const D3D12_FEATURE_DATA_HARDWARE_COPY& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_HARDWARE_COPY");
-    Print_BOOL(L"Supported", o.Supported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_HARDWARE_COPY");
+    ReportFormatter::GetInstance().AddFieldBool(L"Supported", o.Supported);
 }
 
 #ifdef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE(const D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE");
-    Print_BOOL(L"Supported", o.Supported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE");
+    ReportFormatter::GetInstance().AddFieldBool(L"Supported", o.Supported);
 }
 #endif // #ifdef USE_PREVIEW_AGILITY_SDK
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(const D3D12_FEATURE_DATA_D3D12_OPTIONS3& options3)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3");
-    Print_BOOL(L"CopyQueueTimestampQueriesSupported", options3.CopyQueueTimestampQueriesSupported);
-    Print_BOOL(L"CastingFullyTypedFormatSupported", options3.CastingFullyTypedFormatSupported);
-    PrintFlags(L"WriteBufferImmediateSupportFlags", options3.WriteBufferImmediateSupportFlags, Enum_D3D12_COMMAND_LIST_SUPPORT_FLAGS);
-    PrintEnum (L"ViewInstancingTier", options3.ViewInstancingTier, Enum_D3D12_VIEW_INSTANCING_TIER);
-    Print_BOOL(L"BarycentricsSupported", options3.BarycentricsSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3");
+    ReportFormatter::GetInstance().AddFieldBool(L"CopyQueueTimestampQueriesSupported", options3.CopyQueueTimestampQueriesSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"CastingFullyTypedFormatSupported", options3.CastingFullyTypedFormatSupported);
+    ReportFormatter::GetInstance().AddFieldFlags(L"WriteBufferImmediateSupportFlags", options3.WriteBufferImmediateSupportFlags, Enum_D3D12_COMMAND_LIST_SUPPORT_FLAGS);
+    ReportFormatter::GetInstance().AddFieldEnum(L"ViewInstancingTier", options3.ViewInstancingTier, Enum_D3D12_VIEW_INSTANCING_TIER);
+    ReportFormatter::GetInstance().AddFieldBool(L"BarycentricsSupported", options3.BarycentricsSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS4(const D3D12_FEATURE_DATA_D3D12_OPTIONS4& options4)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS4");
-    Print_BOOL(L"MSAA64KBAlignedTextureSupported", options4.MSAA64KBAlignedTextureSupported);
-    PrintEnum(L"SharedResourceCompatibilityTier", options4.SharedResourceCompatibilityTier, Enum_D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER);
-    Print_BOOL(L"Native16BitShaderOpsSupported", options4.Native16BitShaderOpsSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS4");
+    ReportFormatter::GetInstance().AddFieldBool(L"MSAA64KBAlignedTextureSupported", options4.MSAA64KBAlignedTextureSupported);
+    ReportFormatter::GetInstance().AddFieldEnum(L"SharedResourceCompatibilityTier", options4.SharedResourceCompatibilityTier, Enum_D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER);
+    ReportFormatter::GetInstance().AddFieldBool(L"Native16BitShaderOpsSupported", options4.Native16BitShaderOpsSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS5(const D3D12_FEATURE_DATA_D3D12_OPTIONS5& options5)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS5");
-    Print_BOOL(L"SRVOnlyTiledResourceTier3", options5.SRVOnlyTiledResourceTier3);
-    PrintEnum(L"RenderPassesTier", options5.RenderPassesTier, Enum_D3D12_RENDER_PASS_TIER);
-    PrintEnum(L"RaytracingTier", options5.RaytracingTier, Enum_D3D12_RAYTRACING_TIER);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS5");
+    ReportFormatter::GetInstance().AddFieldBool(L"SRVOnlyTiledResourceTier3", options5.SRVOnlyTiledResourceTier3);
+    ReportFormatter::GetInstance().AddFieldEnum(L"RenderPassesTier", options5.RenderPassesTier, Enum_D3D12_RENDER_PASS_TIER);
+    ReportFormatter::GetInstance().AddFieldEnum(L"RaytracingTier", options5.RaytracingTier, Enum_D3D12_RAYTRACING_TIER);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS6(const D3D12_FEATURE_DATA_D3D12_OPTIONS6& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS6");
-    Print_BOOL(L"AdditionalShadingRatesSupported", o.AdditionalShadingRatesSupported);
-    Print_BOOL(L"PerPrimitiveShadingRateSupportedWithViewportIndexing", o.PerPrimitiveShadingRateSupportedWithViewportIndexing);
-    PrintEnum(L"VariableShadingRateTier", o.VariableShadingRateTier, Enum_D3D12_VARIABLE_SHADING_RATE_TIER);
-    Print_uint32(L"ShadingRateImageTileSize", o.ShadingRateImageTileSize);
-    Print_BOOL(L"BackgroundProcessingSupported", o.BackgroundProcessingSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS6");
+    ReportFormatter::GetInstance().AddFieldBool(L"AdditionalShadingRatesSupported", o.AdditionalShadingRatesSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"PerPrimitiveShadingRateSupportedWithViewportIndexing", o.PerPrimitiveShadingRateSupportedWithViewportIndexing);
+    ReportFormatter::GetInstance().AddFieldEnum(L"VariableShadingRateTier", o.VariableShadingRateTier, Enum_D3D12_VARIABLE_SHADING_RATE_TIER);
+    ReportFormatter::GetInstance().AddFieldUint32(L"ShadingRateImageTileSize", o.ShadingRateImageTileSize);
+    ReportFormatter::GetInstance().AddFieldBool(L"BackgroundProcessingSupported", o.BackgroundProcessingSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS7(const D3D12_FEATURE_DATA_D3D12_OPTIONS7& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS7");
-    PrintEnum(L"MeshShaderTier", o.MeshShaderTier, Enum_D3D12_MESH_SHADER_TIER);
-    PrintEnum(L"SamplerFeedbackTier", o.SamplerFeedbackTier, Enum_D3D12_SAMPLER_FEEDBACK_TIER);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS7");
+    ReportFormatter::GetInstance().AddFieldEnum(L"MeshShaderTier", o.MeshShaderTier, Enum_D3D12_MESH_SHADER_TIER);
+    ReportFormatter::GetInstance().AddFieldEnum(L"SamplerFeedbackTier", o.SamplerFeedbackTier, Enum_D3D12_SAMPLER_FEEDBACK_TIER);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS8(const D3D12_FEATURE_DATA_D3D12_OPTIONS8& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS8");
-    Print_BOOL(L"UnalignedBlockTexturesSupported", o.UnalignedBlockTexturesSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS8");
+    ReportFormatter::GetInstance().AddFieldBool(L"UnalignedBlockTexturesSupported", o.UnalignedBlockTexturesSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(const D3D12_FEATURE_DATA_D3D12_OPTIONS9& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS9");
-    Print_BOOL(L"MeshShaderPipelineStatsSupported", o.MeshShaderPipelineStatsSupported);
-    Print_BOOL(L"MeshShaderSupportsFullRangeRenderTargetArrayIndex", o.MeshShaderSupportsFullRangeRenderTargetArrayIndex);
-    Print_BOOL(L"AtomicInt64OnTypedResourceSupported", o.AtomicInt64OnTypedResourceSupported);
-    Print_BOOL(L"AtomicInt64OnGroupSharedSupported", o.AtomicInt64OnGroupSharedSupported);
-    Print_BOOL(L"DerivativesInMeshAndAmplificationShadersSupported", o.DerivativesInMeshAndAmplificationShadersSupported);
-    PrintEnum(L"WaveMMATier", o.WaveMMATier, Enum_D3D12_WAVE_MMA_TIER);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS9");
+    ReportFormatter::GetInstance().AddFieldBool(L"MeshShaderPipelineStatsSupported", o.MeshShaderPipelineStatsSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"MeshShaderSupportsFullRangeRenderTargetArrayIndex", o.MeshShaderSupportsFullRangeRenderTargetArrayIndex);
+    ReportFormatter::GetInstance().AddFieldBool(L"AtomicInt64OnTypedResourceSupported", o.AtomicInt64OnTypedResourceSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"AtomicInt64OnGroupSharedSupported", o.AtomicInt64OnGroupSharedSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"DerivativesInMeshAndAmplificationShadersSupported", o.DerivativesInMeshAndAmplificationShadersSupported);
+    ReportFormatter::GetInstance().AddFieldEnum(L"WaveMMATier", o.WaveMMATier, Enum_D3D12_WAVE_MMA_TIER);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS10(const D3D12_FEATURE_DATA_D3D12_OPTIONS10& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS10");
-    Print_BOOL(L"VariableRateShadingSumCombinerSupported", o.VariableRateShadingSumCombinerSupported);
-    Print_BOOL(L"MeshShaderPerPrimitiveShadingRateSupported", o.MeshShaderPerPrimitiveShadingRateSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS10");
+    ReportFormatter::GetInstance().AddFieldBool(L"VariableRateShadingSumCombinerSupported", o.VariableRateShadingSumCombinerSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"MeshShaderPerPrimitiveShadingRateSupported", o.MeshShaderPerPrimitiveShadingRateSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS11(const D3D12_FEATURE_DATA_D3D12_OPTIONS11& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS11");
-    Print_BOOL(L"AtomicInt64OnDescriptorHeapResourceSupported", o.AtomicInt64OnDescriptorHeapResourceSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS11");
+    ReportFormatter::GetInstance().AddFieldBool(L"AtomicInt64OnDescriptorHeapResourceSupported", o.AtomicInt64OnDescriptorHeapResourceSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS12(const D3D12_FEATURE_DATA_D3D12_OPTIONS12& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS12");
-    PrintEnum(L"MSPrimitivesPipelineStatisticIncludesCulledPrimitives", o.MSPrimitivesPipelineStatisticIncludesCulledPrimitives, Enum_D3D12_TRI_STATE, true);
-    Print_BOOL(L"EnhancedBarriersSupported", o.EnhancedBarriersSupported);
-    Print_BOOL(L"RelaxedFormatCastingSupported", o.RelaxedFormatCastingSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS12");
+    ReportFormatter::GetInstance().AddFieldEnumSigned(L"MSPrimitivesPipelineStatisticIncludesCulledPrimitives", o.MSPrimitivesPipelineStatisticIncludesCulledPrimitives, Enum_D3D12_TRI_STATE);
+    ReportFormatter::GetInstance().AddFieldBool(L"EnhancedBarriersSupported", o.EnhancedBarriersSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"RelaxedFormatCastingSupported", o.RelaxedFormatCastingSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS13(const D3D12_FEATURE_DATA_D3D12_OPTIONS13& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS13");
-    Print_BOOL(L"UnrestrictedBufferTextureCopyPitchSupported", o.UnrestrictedBufferTextureCopyPitchSupported);
-    Print_BOOL(L"UnrestrictedVertexElementAlignmentSupported", o.UnrestrictedVertexElementAlignmentSupported);
-    Print_BOOL(L"InvertedViewportHeightFlipsYSupported", o.InvertedViewportHeightFlipsYSupported);
-    Print_BOOL(L"InvertedViewportDepthFlipsZSupported", o.InvertedViewportDepthFlipsZSupported);
-    Print_BOOL(L"TextureCopyBetweenDimensionsSupported", o.TextureCopyBetweenDimensionsSupported);
-    Print_BOOL(L"AlphaBlendFactorSupported", o.AlphaBlendFactorSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS13");
+    ReportFormatter::GetInstance().AddFieldBool(L"UnrestrictedBufferTextureCopyPitchSupported", o.UnrestrictedBufferTextureCopyPitchSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"UnrestrictedVertexElementAlignmentSupported", o.UnrestrictedVertexElementAlignmentSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"InvertedViewportHeightFlipsYSupported", o.InvertedViewportHeightFlipsYSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"InvertedViewportDepthFlipsZSupported", o.InvertedViewportDepthFlipsZSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"TextureCopyBetweenDimensionsSupported", o.TextureCopyBetweenDimensionsSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"AlphaBlendFactorSupported", o.AlphaBlendFactorSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS14(const D3D12_FEATURE_DATA_D3D12_OPTIONS14& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS14");
-    Print_BOOL(L"AdvancedTextureOpsSupported", o.AdvancedTextureOpsSupported);
-    Print_BOOL(L"WriteableMSAATexturesSupported", o.WriteableMSAATexturesSupported);
-    Print_BOOL(L"IndependentFrontAndBackStencilRefMaskSupported", o.IndependentFrontAndBackStencilRefMaskSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS14");
+    ReportFormatter::GetInstance().AddFieldBool(L"AdvancedTextureOpsSupported", o.AdvancedTextureOpsSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"WriteableMSAATexturesSupported", o.WriteableMSAATexturesSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"IndependentFrontAndBackStencilRefMaskSupported", o.IndependentFrontAndBackStencilRefMaskSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS15(const D3D12_FEATURE_DATA_D3D12_OPTIONS15& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS15");
-    Print_BOOL(L"TriangleFanSupported", o.TriangleFanSupported);
-    Print_BOOL(L"DynamicIndexBufferStripCutSupported", o.DynamicIndexBufferStripCutSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS15");
+    ReportFormatter::GetInstance().AddFieldBool(L"TriangleFanSupported", o.TriangleFanSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"DynamicIndexBufferStripCutSupported", o.DynamicIndexBufferStripCutSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS16(const D3D12_FEATURE_DATA_D3D12_OPTIONS16& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS16");
-    Print_BOOL(L"DynamicDepthBiasSupported", o.DynamicDepthBiasSupported);
-    Print_BOOL(L"GPUUploadHeapSupported", o.GPUUploadHeapSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS16");
+    ReportFormatter::GetInstance().AddFieldBool(L"DynamicDepthBiasSupported", o.DynamicDepthBiasSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"GPUUploadHeapSupported", o.GPUUploadHeapSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS17(const D3D12_FEATURE_DATA_D3D12_OPTIONS17& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS17");
-    Print_BOOL(L"NonNormalizedCoordinateSamplersSupported", o.NonNormalizedCoordinateSamplersSupported);
-    Print_BOOL(L"ManualWriteTrackingResourceSupported", o.ManualWriteTrackingResourceSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS17");
+    ReportFormatter::GetInstance().AddFieldBool(L"NonNormalizedCoordinateSamplersSupported", o.NonNormalizedCoordinateSamplersSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"ManualWriteTrackingResourceSupported", o.ManualWriteTrackingResourceSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS18(const D3D12_FEATURE_DATA_D3D12_OPTIONS18& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS18");
-    Print_BOOL(L"RenderPassesValid", o.RenderPassesValid);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS18");
+    ReportFormatter::GetInstance().AddFieldBool(L"RenderPassesValid", o.RenderPassesValid);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS19(const D3D12_FEATURE_DATA_D3D12_OPTIONS19& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS19");
-    Print_BOOL(L"MismatchingOutputDimensionsSupported", o.MismatchingOutputDimensionsSupported);
-    Print_uint32(L"SupportedSampleCountsWithNoOutputs", o.SupportedSampleCountsWithNoOutputs);
-    Print_BOOL(L"PointSamplingAddressesNeverRoundUp", o.PointSamplingAddressesNeverRoundUp);
-    Print_BOOL(L"RasterizerDesc2Supported", o.RasterizerDesc2Supported);
-    Print_BOOL(L"NarrowQuadrilateralLinesSupported", o.NarrowQuadrilateralLinesSupported);
-    Print_BOOL(L"AnisoFilterWithPointMipSupported", o.AnisoFilterWithPointMipSupported);
-    Print_uint32(L"MaxSamplerDescriptorHeapSize", o.MaxSamplerDescriptorHeapSize);
-    Print_uint32(L"MaxSamplerDescriptorHeapSizeWithStaticSamplers", o.MaxSamplerDescriptorHeapSizeWithStaticSamplers);
-    Print_uint32(L"MaxViewDescriptorHeapSize", o.MaxViewDescriptorHeapSize);
-    Print_BOOL(L"ComputeOnlyCustomHeapSupported", o.ComputeOnlyCustomHeapSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS19");
+    ReportFormatter::GetInstance().AddFieldBool(L"MismatchingOutputDimensionsSupported", o.MismatchingOutputDimensionsSupported);
+    ReportFormatter::GetInstance().AddFieldUint32(L"SupportedSampleCountsWithNoOutputs", o.SupportedSampleCountsWithNoOutputs);
+    ReportFormatter::GetInstance().AddFieldBool(L"PointSamplingAddressesNeverRoundUp", o.PointSamplingAddressesNeverRoundUp);
+    ReportFormatter::GetInstance().AddFieldBool(L"RasterizerDesc2Supported", o.RasterizerDesc2Supported);
+    ReportFormatter::GetInstance().AddFieldBool(L"NarrowQuadrilateralLinesSupported", o.NarrowQuadrilateralLinesSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"AnisoFilterWithPointMipSupported", o.AnisoFilterWithPointMipSupported);
+    ReportFormatter::GetInstance().AddFieldUint32(L"MaxSamplerDescriptorHeapSize", o.MaxSamplerDescriptorHeapSize);
+    ReportFormatter::GetInstance().AddFieldUint32(L"MaxSamplerDescriptorHeapSizeWithStaticSamplers", o.MaxSamplerDescriptorHeapSizeWithStaticSamplers);
+    ReportFormatter::GetInstance().AddFieldUint32(L"MaxViewDescriptorHeapSize", o.MaxViewDescriptorHeapSize);
+    ReportFormatter::GetInstance().AddFieldBool(L"ComputeOnlyCustomHeapSupported", o.ComputeOnlyCustomHeapSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS20(const D3D12_FEATURE_DATA_D3D12_OPTIONS20& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS20");
-    Print_BOOL(L"ComputeOnlyWriteWatchSupported", o.ComputeOnlyWriteWatchSupported);
-    PrintEnum(L"RecreateAtTier", o.RecreateAtTier, Enum_D3D12_RECREATE_AT_TIER);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS20");
+    ReportFormatter::GetInstance().AddFieldBool(L"ComputeOnlyWriteWatchSupported", o.ComputeOnlyWriteWatchSupported);
+    ReportFormatter::GetInstance().AddFieldEnum(L"RecreateAtTier", o.RecreateAtTier, Enum_D3D12_RECREATE_AT_TIER);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(const D3D12_FEATURE_DATA_D3D12_OPTIONS21& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_D3D12_OPTIONS21");
-    PrintEnum(L"WorkGraphsTier", o.WorkGraphsTier, Enum_D3D12_WORK_GRAPHS_TIER);
-    PrintEnum(L"ExecuteIndirectTier", o.ExecuteIndirectTier, Enum_D3D12_EXECUTE_INDIRECT_TIER);
-    Print_BOOL(L"SampleCmpGradientAndBiasSupported", o.SampleCmpGradientAndBiasSupported);
-    Print_BOOL(L"ExtendedCommandInfoSupported", o.ExtendedCommandInfoSupported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS21");
+    ReportFormatter::GetInstance().AddFieldEnum(L"WorkGraphsTier", o.WorkGraphsTier, Enum_D3D12_WORK_GRAPHS_TIER);
+    ReportFormatter::GetInstance().AddFieldEnum(L"ExecuteIndirectTier", o.ExecuteIndirectTier, Enum_D3D12_EXECUTE_INDIRECT_TIER);
+    ReportFormatter::GetInstance().AddFieldBool(L"SampleCmpGradientAndBiasSupported", o.SampleCmpGradientAndBiasSupported);
+    ReportFormatter::GetInstance().AddFieldBool(L"ExtendedCommandInfoSupported", o.ExtendedCommandInfoSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED(const D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED");
-    Print_BOOL(L"Supported", o.Supported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED");
+    ReportFormatter::GetInstance().AddFieldBool(L"Supported", o.Supported);
 }
 
 #ifdef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(const D3D12_FEATURE_DATA_TIGHT_ALIGNMENT& o)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_TIGHT_ALIGNMENT");
-    PrintEnum(L"SupportTier", o.SupportTier, Enum_D3D12_TIGHT_ALIGNMENT_TIER);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_TIGHT_ALIGNMENT");
+    ReportFormatter::GetInstance().AddFieldEnum(L"SupportTier", o.SupportTier, Enum_D3D12_TIGHT_ALIGNMENT_TIER);
 }
 #endif // #ifdef USE_PREVIEW_AGILITY_SDK
 
 static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXISTING_HEAPS& existingHeaps)
 {
-    ScopedStructRegion region(L"D3D12_FEATURE_DATA_EXISTING_HEAPS");
-    Print_BOOL(L"Supported", existingHeaps.Supported);
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_EXISTING_HEAPS");
+    ReportFormatter::GetInstance().AddFieldBool(L"Supported", existingHeaps.Supported);
 }
 
 static void Print_DXGI_QUERY_VIDEO_MEMORY_INFO(const DXGI_QUERY_VIDEO_MEMORY_INFO& videoMemoryInfo)
 {
     // Not printing videoMemoryInfo.CurrentUsage, videoMemoryInfo.CurrentReservation.
-    Print_size(L"Budget", videoMemoryInfo.Budget);
-    Print_size(L"AvailableForReservation", videoMemoryInfo.AvailableForReservation);
+    ReportFormatter::GetInstance().AddFieldSize(L"Budget", videoMemoryInfo.Budget);
+    ReportFormatter::GetInstance().AddFieldSize(L"AvailableForReservation", videoMemoryInfo.AvailableForReservation);
 }
 
 static wstring MakeBuildDateTime()
@@ -462,74 +466,52 @@ static wstring MakeCurrentDate()
     return wstring{dateStr};
 }
 
-static void PrintHeader_Text()
+static void PrintVersionHeader()
 {
-    wprintf(L"============================\n");
-    wprintf(L"D3D12INFO %s\n", PROGRAM_VERSION);
-    wprintf(L"BuildDate: %s\n", MakeBuildDateTime().c_str());
-    wprintf(L"Configuration: %s, %s\n", CONFIG_STR, CONFIG_BIT_STR);
-    wprintf(L"============================\n");
-    PrintEmptyLine();
+#ifdef USE_PREVIEW_AGILITY_SDK
+    const wchar_t* const AGILITY_SDK_NOTE = L" (preview Agility SDK)";
+#else
+    const wchar_t* const AGILITY_SDK_NOTE = L"";
+#endif
+    Printer::PrintString(L"============================\n");
+    Printer::PrintFormat(L"D3D12INFO {}{}\n", std::make_wformat_args(PROGRAM_VERSION, AGILITY_SDK_NOTE));
+    Printer::PrintFormat(L"BuildDate: {}\n", std::make_wformat_args(MakeBuildDateTime()));
+    Printer::PrintFormat(L"Configuration: {}, {}\n", std::make_wformat_args(CONFIG_STR, CONFIG_BIT_STR));
+    Printer::PrintString(L"============================");
 }
 
-static void PrintHeader_Json()
+static void PrintVersionData()
 {
-    Json::WriteString(L"Header");
-    Json::BeginObject();
-
-    Json::WriteNameAndString(L"Program", L"D3d12info");
-    Json::WriteNameAndString(L"Version", PROGRAM_VERSION);
-    Json::WriteNameAndString(L"Build Date", MakeBuildDateTime());
-    Json::WriteNameAndString(L"Configuration", CONFIG_STR);
-    Json::WriteNameAndString(L"Configuration bits", CONFIG_BIT_STR);
-    Json::WriteNameAndString(L"Generated on", MakeCurrentDate().c_str());
-#ifdef USE_PREVIEW_AGILITY_SDK
-    Json::WriteNameAndBool(L"Using preview Agility SDK", true);
-    Json::WriteNameAndNumber(L"D3D12_PREVIEW_SDK_VERSION", uint32_t(D3D12SDKVersion));
-#else
-    Json::WriteNameAndBool(L"Using preview Agility SDK", false);
-    Json::WriteNameAndNumber(L"D3D12_SDK_VERSION", uint32_t(D3D12SDKVersion));
-#endif
-
-    if(!g_PureD3D12) 
+    if (IsOutputConsole())
     {
-#if USE_NVAPI
-        NvAPI_Inititalize_RAII::PrintStaticParams();
-#endif
-#if USE_AGS
-        AGS_Initialize_RAII::PrintStaticParams();
-#endif
-#if USE_AMD_DEVICE_INFO
-        AmdDeviceInfo_Initialize_RAII::PrintStaticParams();
-#endif
-#if USE_VULKAN
-        Vulkan_Initialize_RAII::PrintStaticParams();
-#endif
-#if USE_INTEL_GPUDETECT
-        IntelData::PrintStaticParams();
-#endif
+        PrintVersionHeader();
+        Printer::PrintNewLine();
+        Printer::PrintNewLine();
     }
 
-    Json::EndObject();
-}
+    ReportScopeObject scope(OutputSpecificString(L"General", L"Header"));
 
-static void PrintHeaderData()
-{
-    if(g_UseJson)
-        PrintHeader_Json();
-    else
-        PrintHeader_Text();
-}
-
-static void PrintGeneralData()
-{
-    PrintHeader(L"General", 0);
-    ++g_Indent;
-    Print_string(L"Current date", MakeCurrentDate().c_str());
+    if (IsOutputJson())
+    {
+        ReportFormatter::GetInstance().AddFieldString(L"Program", L"D3d12info");
+        ReportFormatter::GetInstance().AddFieldString(L"Version", PROGRAM_VERSION);
+        ReportFormatter::GetInstance().AddFieldString(L"Build Date", MakeBuildDateTime());
+        ReportFormatter::GetInstance().AddFieldString(L"Configuration", CONFIG_STR);
+        ReportFormatter::GetInstance().AddFieldString(L"Configuration bits", CONFIG_BIT_STR);
+    }
+    ReportFormatter::GetInstance().AddFieldString(L"Generated on", MakeCurrentDate().c_str());
 #ifdef USE_PREVIEW_AGILITY_SDK
-    Print_uint32(L"D3D12_PREVIEW_SDK_VERSION", uint32_t(D3D12SDKVersion));
+    if (IsOutputJson())
+    {
+        ReportFormatter::GetInstance().AddFieldBool(L"Using preview Agility SDK", true);
+    }
+    ReportFormatter::GetInstance().AddFieldUint32(L"D3D12_PREVIEW_SDK_VERSION", uint32_t(D3D12SDKVersion));
 #else
-    Print_uint32(L"D3D12_SDK_VERSION", uint32_t(D3D12SDKVersion));
+    if (IsOutputJson())
+    {
+        ReportFormatter::GetInstance().AddFieldBool(L"Using preview Agility SDK", false);
+    }
+    ReportFormatter::GetInstance().AddFieldUint32(L"D3D12_SDK_VERSION", uint32_t(D3D12SDKVersion));
 #endif
 
     if(!g_PureD3D12)
@@ -550,56 +532,31 @@ static void PrintGeneralData()
         IntelData::PrintStaticParams();
 #endif
     }
-    --g_Indent;
-    PrintEmptyLine();
 }
 
-static void PrintEnums_Json()
+static void PrintEnums()
 {
-    Json::WriteString(L"Enums");
-    Json::BeginObject();
+    ReportScopeObject scope(L"Enums");
 
     EnumCollection& enumCollection = EnumCollection::GetInstance();
     for(const auto it : enumCollection.m_Enums)
     {
-        Json::WriteString(it.first.data(), it.first.length());
-        Json::BeginObject();
+        ReportScopeObject scope2(std::wstring(it.first.data(), it.first.length()));
 
         for(const EnumItem* item = it.second; item->m_Name != nullptr; ++item)
         {
-            Json::WriteNameAndNumber(item->m_Name, item->m_Value);
+            ReportFormatter::GetInstance().AddFieldUint32(item->m_Name, item->m_Value);
         }
-
-        Json::EndObject();
-    }
-
-    Json::EndObject();
-}
-
-static void PrintEnums_Text()
-{
-    PrintHeader(L"Enums", 0);
-    PrintEmptyLine();
-
-    EnumCollection& enumCollection = EnumCollection::GetInstance();
-    for(const auto it : enumCollection.m_Enums)
-    {
-        PrintHeader(it.first.c_str(), 1);
-
-        for(const EnumItem* item = it.second; item->m_Name != nullptr; ++item)
-            Print_uint32(item->m_Name, item->m_Value);
-
-        PrintEmptyLine();
     }
 }
 
 static void PrintOsVersionInfo()
 {
-    ScopedStructRegion region(L"OS Info");
+    ReportScopeObject scope(L"OS Info");
     HMODULE m = GetModuleHandle(L"ntdll.dll");
     if(!m)
     {
-        Print_string(L"Windows version", L"Unknown");
+        ReportFormatter::GetInstance().AddFieldString(L"Windows version", L"Unknown");
         return;
     }
 
@@ -607,7 +564,7 @@ static void PrintOsVersionInfo()
     RtlGetVersionFunc RtlGetVersion = (RtlGetVersionFunc)GetProcAddress(m, "RtlGetVersion");
     if(!RtlGetVersion)
     {
-        Print_string(L"Windows version", L"Unknown");
+        ReportFormatter::GetInstance().AddFieldString(L"Windows version", L"Unknown");
         return;
     }
 
@@ -615,14 +572,14 @@ static void PrintOsVersionInfo()
     // Documentation says it always returns success.
     RtlGetVersion(&osVersionInfo);
 
-    PrintFormat(L"Windows version", L"%lu.%lu.%lu",
-                osVersionInfo.dwMajorVersion, osVersionInfo.dwMinorVersion,
-                osVersionInfo.dwBuildNumber);
+    ReportFormatter::GetInstance().AddFieldString(L"Windows version", std::format(L"{}.{}.{}",
+        osVersionInfo.dwMajorVersion, osVersionInfo.dwMinorVersion,
+        osVersionInfo.dwBuildNumber));
 }
 
 static void PrintDXGIFeatureInfo()
 {
-    ScopedStructRegion region(L"DXGI_FEATURE");
+    ReportScopeObject scope(L"DXGI_FEATURE");
     ComPtr<IDXGIFactory5> dxgiFactory = nullptr;
     HRESULT hr;
 #if defined(AUTO_LINK_DX12)
@@ -637,24 +594,24 @@ static void PrintDXGIFeatureInfo()
                                           &allowTearing, sizeof(allowTearing));
     if(SUCCEEDED(hr))
     {
-        Print_BOOL(L"DXGI_FEATURE_PRESENT_ALLOW_TEARING", allowTearing);
+        ReportFormatter::GetInstance().AddFieldBool(L"DXGI_FEATURE_PRESENT_ALLOW_TEARING", allowTearing);
     }
 }
 
 static void PrintSystemMemoryInfo()
 {
-    ScopedStructRegion region(L"System memory");
+    ReportScopeObject scope(L"System memory");
     
     if(uint64_t physicallyInstalledSystemMemory = 0;
         GetPhysicallyInstalledSystemMemory(&physicallyInstalledSystemMemory))
-        Print_sizeKilobytes(L"GetPhysicallyInstalledSystemMemory", physicallyInstalledSystemMemory);
+        ReportFormatter::GetInstance().AddFieldSizeKilobytes(L"GetPhysicallyInstalledSystemMemory", physicallyInstalledSystemMemory);
 
     if(MEMORYSTATUSEX memStatEx = {sizeof(MEMORYSTATUSEX)};
         GlobalMemoryStatusEx(&memStatEx))
     {
-        Print_size(L"MEMORYSTATUSEX::ullTotalPhys", memStatEx.ullTotalPhys);
-        Print_size(L"MEMORYSTATUSEX::ullTotalPageFile", memStatEx.ullTotalPageFile);
-        Print_size(L"MEMORYSTATUSEX::ullTotalVirtual", memStatEx.ullTotalVirtual);
+        ReportFormatter::GetInstance().AddFieldSize(L"MEMORYSTATUSEX::ullTotalPhys", memStatEx.ullTotalPhys);
+        ReportFormatter::GetInstance().AddFieldSize(L"MEMORYSTATUSEX::ullTotalPageFile", memStatEx.ullTotalPageFile);
+        ReportFormatter::GetInstance().AddFieldSize(L"MEMORYSTATUSEX::ullTotalVirtual", memStatEx.ullTotalVirtual);
     }
 }
 
@@ -703,92 +660,69 @@ static void EnableExperimentalFeatures()
 
     if(featureBitMask != 0) // Means enablement succeeded.
     {
-        if(g_UseJson)
+        std::vector<std::wstring> enabledFeatures;
+
+        for(size_t featureIndex = 0; featureIndex < FEATURE_COUNT; ++featureIndex)
         {
-            Json::WriteString(L"D3D12EnableExperimentalFeatures");
-            Json::BeginArray();
-            for(size_t featureIndex = 0; featureIndex < FEATURE_COUNT; ++featureIndex)
+            if((featureBitMask & (1u << featureIndex)) != 0)
             {
-                if((featureBitMask & (1u << featureIndex)) != 0)
-                    Json::WriteString(FEATURE_NAMES[featureIndex]);
+                enabledFeatures.push_back(FEATURE_NAMES[featureIndex]);
             }
-            Json::EndArray();
         }
-        else
-        {
-            PrintHeader(L"D3D12EnableExperimentalFeatures", 1);
-            ++g_Indent;
 
-            for(size_t featureIndex = 0; featureIndex < FEATURE_COUNT; ++featureIndex)
-            {
-                if((featureBitMask & (1u << featureIndex)) != 0)
-                {
-                    PrintIndent();
-                    wprintf(L"%s\n", FEATURE_NAMES[featureIndex]);
-                }
-            }
-
-            --g_Indent;
-            PrintEmptyLine();
-        }
-    }   
-}
-
-static void PrintEnumsData()
-{
-    if(g_UseJson)
-        PrintEnums_Json();
-    else
-        PrintEnums_Text();
+        std::wstring enabledFeaturesStr = std::accumulate(enabledFeatures.begin(), enabledFeatures.end(), std::wstring{},
+            [](const std::wstring& a, const std::wstring& b) { return a.empty() ? b : a + L"," + b; });
+        ReportFormatter::GetInstance().AddFieldString(L"D3D12EnableExperimentalFeatures", enabledFeaturesStr);
+    }
 }
 
 static void PrintAdapterDescMembers(const DXGI_ADAPTER_DESC& desc)
 {
-    Print_string(L"Description", desc.Description);
-    PrintVendorId(L"VendorId", desc.VendorId);
-    Print_hex32(L"DeviceId", desc.DeviceId);
-    PrintSubsystemId(L"SubSysId", desc.SubSysId);
-    Print_hex32(L"Revision", desc.Revision);
-    Print_size(L"DedicatedVideoMemory", desc.DedicatedVideoMemory);
-    Print_size(L"DedicatedSystemMemory", desc.DedicatedSystemMemory);
-    Print_size(L"SharedSystemMemory", desc.SharedSystemMemory);
-    Print_string(L"AdapterLuid", LuidToStr(desc.AdapterLuid).c_str());
+    ReportFormatter::GetInstance().AddFieldString(L"Description", desc.Description);
+    ReportFormatter::GetInstance().AddFieldVendorId(L"VendorId", desc.VendorId);
+    ReportFormatter::GetInstance().AddFieldHex32(L"DeviceId", desc.DeviceId);
+    ReportFormatter::GetInstance().AddFieldSubsystemId(L"SubSysId", desc.SubSysId);
+    ReportFormatter::GetInstance().AddFieldHex32(L"Revision", desc.Revision);
+    ReportFormatter::GetInstance().AddFieldSize(L"DedicatedVideoMemory", desc.DedicatedVideoMemory);
+    ReportFormatter::GetInstance().AddFieldSize(L"DedicatedSystemMemory", desc.DedicatedSystemMemory);
+    ReportFormatter::GetInstance().AddFieldSize(L"SharedSystemMemory", desc.SharedSystemMemory);
+    ReportFormatter::GetInstance().AddFieldString(L"AdapterLuid", LuidToStr(desc.AdapterLuid).c_str());
 }
 
 static void PrintAdapterDesc1Members(const DXGI_ADAPTER_DESC1& desc1)
 {
     PrintAdapterDescMembers((const DXGI_ADAPTER_DESC&)desc1);
-    PrintFlags(L"Flags", desc1.Flags, Enum_DXGI_ADAPTER_FLAG);
+    ReportFormatter::GetInstance().AddFieldFlags(L"Flags", desc1.Flags, Enum_DXGI_ADAPTER_FLAG);
 }
 
 static void PrintAdapterDesc2Members(const DXGI_ADAPTER_DESC2& desc2)
 {
     PrintAdapterDesc1Members((const DXGI_ADAPTER_DESC1&)desc2);
-    PrintEnum(L"GraphicsPreemptionGranularity", desc2.GraphicsPreemptionGranularity, Enum_DXGI_GRAPHICS_PREEMPTION_GRANULARITY);
-    PrintEnum(L"ComputePreemptionGranularity", desc2.ComputePreemptionGranularity, Enum_DXGI_COMPUTE_PREEMPTION_GRANULARITY);
+    ReportFormatter::GetInstance().AddFieldEnum(L"GraphicsPreemptionGranularity", desc2.GraphicsPreemptionGranularity, Enum_DXGI_GRAPHICS_PREEMPTION_GRANULARITY);
+    ReportFormatter::GetInstance().AddFieldEnum(L"ComputePreemptionGranularity", desc2.ComputePreemptionGranularity, Enum_DXGI_COMPUTE_PREEMPTION_GRANULARITY);
 }
 
 static void PrintAdapterDesc(const DXGI_ADAPTER_DESC& desc)
 {
-    ScopedStructRegion region(L"DXGI_ADAPTER_DESC");
+    ReportScopeObject scope(L"DXGI_ADAPTER_DESC");
     PrintAdapterDescMembers(desc);
 }
 
 static void PrintAdapterDesc1(const DXGI_ADAPTER_DESC1& desc1)
 {
-    ScopedStructRegion region(L"DXGI_ADAPTER_DESC1");
+    ReportScopeObject scope(L"DXGI_ADAPTER_DESC1");
     PrintAdapterDesc1Members(desc1);
 }
 
 static void PrintAdapterDesc2(const DXGI_ADAPTER_DESC2& desc2)
 {
-    ScopedStructRegion region(L"DXGI_ADAPTER_DESC2");
+    ReportScopeObject scope(L"DXGI_ADAPTER_DESC2");
     PrintAdapterDesc2Members(desc2);
 }
 
 static void PrintAdapterDesc3(const DXGI_ADAPTER_DESC3& desc3)
 {
-    ScopedStructRegion region(L"DXGI_ADAPTER_DESC3");
+    ReportScopeObject scope(L"DXGI_ADAPTER_DESC3");
     // Same members as DESC2. They only added new items to Flags.
     PrintAdapterDesc2Members((const DXGI_ADAPTER_DESC2&)desc3);
 }
@@ -839,7 +773,7 @@ static void PrintAdapterMemoryInfo(IDXGIAdapter* adapter)
                     assert(0);
                 }
                 {
-                    ScopedStructRegion region(structName);
+                    ReportScopeObject scope(structName);
                     Print_DXGI_QUERY_VIDEO_MEMORY_INFO(videoMemoryInfo);
                 }
             }
@@ -851,20 +785,8 @@ static void PrintAdapterInterfaceSupport(IDXGIAdapter* adapter)
 {
     if(LARGE_INTEGER i; SUCCEEDED(adapter->CheckInterfaceSupport(__uuidof(IDXGIDevice), &i)))
     {
-        ScopedStructRegion region(L"CheckInterfaceSupport");
-        if(g_UseJson)
-        {
-            Print_uint64(L"UMDVersion", i.QuadPart);
-        }
-        else
-        {
-            wstring s = std::format(L"{}.{}.{}.{}",
-                i.QuadPart >> 48,
-                (i.QuadPart >> 32) & 0xFFFF,
-                (i.QuadPart >> 16) & 0xFFFF,
-                i.QuadPart & 0xFFFF);
-            Print_string(L"UMDVersion", s.c_str());
-        }
+        ReportScopeObject scope(L"CheckInterfaceSupport");
+        ReportFormatter::GetInstance().AddFieldMicrosoftVersion(L"UMDVersion", i.QuadPart);
     }
 }
 
@@ -895,13 +817,7 @@ static FormatSupportResult CheckFormatSupport(ID3D12Device* device, D3D12_FEATUR
 
 static void PrintFormatInformation(ID3D12Device* device)
 {
-    if(g_UseJson)
-    {
-        Json::WriteString(L"Formats");
-        Json::BeginObject();
-    }
-    else
-        PrintHeader(L"Formats", 1);
+    ReportScopeObject scope(L"Formats");
 
     D3D12_FEATURE_DATA_FORMAT_SUPPORT formatSupport = {};
     D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS msQualityLevels = {};
@@ -916,85 +832,49 @@ static void PrintFormatInformation(ID3D12Device* device)
         const FormatSupportResult formatSupportResult = CheckFormatSupport(device, formatSupport);
         if(formatSupportResult == FormatSupportResult::Crashed)
         {
-            fwprintf(stderr, L"ERROR: ID3D12Device::CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, %s) crashed.\n",
-                name);
+            ErrorPrinter::PrintFormat(L"ERROR: ID3D12Device::CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, {}) crashed.\n", std::make_wformat_args(name));
             break;
         }
 
-        if(g_UseJson)
-        {
-            Json::WriteString(std::format(L"{}", (size_t)format));
-            Json::BeginObject();
-        }
-        else
-        {
-            PrintIndent();
-            wprintf(L"%s:\n", name);
-            ++g_Indent;
-        }
+        ReportScopeObjectConditional scope2(OutputSpecificString(name, std::format(L"{}", (size_t)format)));
 
         if(formatSupportResult == FormatSupportResult::Ok)
         {
-            PrintFlags(L"Support1", formatSupport.Support1, Enum_D3D12_FORMAT_SUPPORT1);
-            PrintFlags(L"Support2", formatSupport.Support2, Enum_D3D12_FORMAT_SUPPORT2);
-            
-            if(g_UseJson)
-            {
-                Json::WriteString(L"MultisampleQualityLevels");
-                Json::BeginObject();
-            }
+            scope2.Enable();
+            ReportFormatter::GetInstance().AddFieldFlags(L"Support1", formatSupport.Support1, Enum_D3D12_FORMAT_SUPPORT1);
+            ReportFormatter::GetInstance().AddFieldFlags(L"Support2", formatSupport.Support2, Enum_D3D12_FORMAT_SUPPORT2);
+
+            ReportScopeObjectConditional scope3(IsOutputJson(), L"MultisampleQualityLevels");
             msQualityLevels.Format = format;
             for(msQualityLevels.SampleCount = 1; ; msQualityLevels.SampleCount *= 2)
             {
                 if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &msQualityLevels, UINT(sizeof msQualityLevels))) &&
                     msQualityLevels.NumQualityLevels > 0)
                 {
-                    if(g_UseJson)
+                    if(IsOutputJson())
                     {
-                        Json::WriteString(std::format(L"{}", msQualityLevels.SampleCount));
-                        Json::BeginObject();
-
-                        Json::WriteNameAndNumber(L"NumQualityLevels", msQualityLevels.NumQualityLevels);
-                        Json::WriteNameAndNumber(L"Flags", uint32_t(msQualityLevels.Flags));
-
-                        Json::EndObject();
+                        ReportScopeObject scope4(std::format(L"{}", msQualityLevels.SampleCount));
+                        ReportFormatter::GetInstance().AddFieldUint32(L"NumQualityLevels", msQualityLevels.NumQualityLevels);
+                        ReportFormatter::GetInstance().AddFieldUint32(L"Flags", uint32_t(msQualityLevels.Flags));
                     }
                     else
                     {
-                        PrintIndent();
-                        wprintf(L"SampleCount = %u: NumQualityLevels = %u", msQualityLevels.SampleCount, msQualityLevels.NumQualityLevels);
-                        if((msQualityLevels.Flags & D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE) != 0)
-                            wprintf(L" D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE\n");
-                        else
-                            wprintf(L"\n");
+                        bool multisampleTiled = (msQualityLevels.Flags & D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE) != 0;
+                        ReportFormatter::GetInstance().AddFieldString(L"SampleCount", std::format(L"{}: NumQualityLevels = {}{}", msQualityLevels.SampleCount, msQualityLevels.NumQualityLevels, multisampleTiled ? L"  D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE" : L""));
                     }
                 }
                 else
                     break;
             }
-            if(g_UseJson)
-                Json::EndObject();
         }
 
         formatInfo.Format = format;
         if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &formatInfo, UINT(sizeof formatInfo))))
         {
-            Print_uint32(L"PlaneCount", formatInfo.PlaneCount);
-        }
-
-        if(g_UseJson)
-            Json::EndObject();
-        else
-        {
-            --g_Indent;
-            PrintEmptyLine();
+            scope2.Enable();
+            ReportFormatter::GetInstance().AddFieldUint32(L"PlaneCount", formatInfo.PlaneCount);
         }
     }
-    
-    if(g_UseJson)
-        Json::EndObject();
-    else
-        PrintEmptyLine();
 }
 
 static void PrintDeviceOptions(ID3D12Device* device)
@@ -1100,34 +980,25 @@ static void PrintDeviceOptions(ID3D12Device* device)
 
 static void PrintDescriptorSizes(ID3D12Device* device)
 {
-    ScopedStructRegion region(L"GetDescriptorHandleIncrementSize");
-    Print_uint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV",
+    ReportScopeObject scope(L"GetDescriptorHandleIncrementSize");
+    ReportFormatter::GetInstance().AddFieldUint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV",
         device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-    Print_uint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER",
+    ReportFormatter::GetInstance().AddFieldUint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER",
         device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
-    Print_uint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_RTV",
+    ReportFormatter::GetInstance().AddFieldUint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_RTV",
         device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
-    Print_uint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_DSV",
+    ReportFormatter::GetInstance().AddFieldUint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_DSV",
         device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
 }
 
 static void PrintMetaCommand(ID3D12Device5* device5, UINT index, const D3D12_META_COMMAND_DESC& desc)
 {
-    if(g_UseJson)
-    {
-        Json::BeginObject();
-    }
-    else
-    {
-        PrintIndent();
-        wprintf(L"MetaCommand %u:\n", index);
-        ++g_Indent;
-    }
+    ReportScopeArrayItem scope;
 
-    Print_string(L"Id", GuidToStr(desc.Id).c_str());
-    Print_string(L"Name", desc.Name);
-    PrintFlags(L"InitializationDirtyState", desc.InitializationDirtyState, Enum_D3D12_GRAPHICS_STATES);
-    PrintFlags(L"ExecutionDirtyState", desc.ExecutionDirtyState, Enum_D3D12_GRAPHICS_STATES);
+    ReportFormatter::GetInstance().AddFieldString(L"Id", GuidToStr(desc.Id).c_str());
+    ReportFormatter::GetInstance().AddFieldString(L"Name", desc.Name);
+    ReportFormatter::GetInstance().AddFieldFlags(L"InitializationDirtyState", desc.InitializationDirtyState, Enum_D3D12_GRAPHICS_STATES);
+    ReportFormatter::GetInstance().AddFieldFlags(L"ExecutionDirtyState", desc.ExecutionDirtyState, Enum_D3D12_GRAPHICS_STATES);
 
     for(UINT stageIndex = 0; stageIndex < 3; ++stageIndex)
     {
@@ -1138,22 +1009,12 @@ static void PrintMetaCommand(ID3D12Device5* device5, UINT index, const D3D12_MET
             &totalStructureSizeInBytes, &paramCount, nullptr);
         if(FAILED(hr))
             continue;
-        
-        if(g_UseJson)
+
         {
-            Json::WriteString(Enum_D3D12_META_COMMAND_PARAMETER_STAGE[stageIndex].m_Name);
-            Json::BeginObject();
-            Print_uint32(L"TotalStructureSizeInBytes", totalStructureSizeInBytes);
+            ReportScopeObject scope2(Enum_D3D12_META_COMMAND_PARAMETER_STAGE[stageIndex].m_Name);
+            ReportFormatter::GetInstance().AddFieldUint32(L"TotalStructureSizeInBytes", totalStructureSizeInBytes);
         }
-        else
-        {
-            PrintIndent();
-            wprintf(L"%s: TotalStructureSizeInBytes=%u\n",
-                Enum_D3D12_META_COMMAND_PARAMETER_STAGE[stageIndex].m_Name,
-                totalStructureSizeInBytes);
-            ++g_Indent;
-        }
-        
+
         if(paramCount > 0)
         {
             std::vector<D3D12_META_COMMAND_PARAMETER_DESC> paramDescs(paramCount);
@@ -1162,54 +1023,22 @@ static void PrintMetaCommand(ID3D12Device5* device5, UINT index, const D3D12_MET
                 nullptr, &paramCount, paramDescs.data());
             if(SUCCEEDED(hr))
             {
-                if(g_UseJson)
-                {
-                    Json::WriteString(L"Parameters");
-                    Json::BeginArray();
-                }
+                ReportScopeArray scope2(L"Parameters");
 
                 for(UINT paramIndex = 0; paramIndex < paramCount; ++paramIndex)
                 {
                     const auto& paramDesc = paramDescs[paramIndex];
 
-                    if(g_UseJson)
-                        Json::BeginObject();
-                    else
-                    {
-                        PrintIndent();
-                        wprintf(L"Parameter %u:\n", paramIndex);
-                        ++g_Indent;
-                    }
+                    ReportScopeArrayItem scope3;
 
-                    Print_string(L"Name", paramDesc.Name);
-                    PrintEnum(L"Type", paramDesc.Type, Enum_D3D12_META_COMMAND_PARAMETER_TYPE);
-                    PrintFlags(L"Flags", paramDesc.Flags, Enum_D3D12_META_COMMAND_PARAMETER_FLAGS);
-                    PrintFlags(L"RequiredResourceState", paramDesc.RequiredResourceState, Enum_D3D12_RESOURCE_STATES);
-                    Print_uint32(L"StructureOffset", paramDesc.StructureOffset);
-
-                    if(g_UseJson)
-                        Json::EndObject();
-                    else
-                        --g_Indent;
+                    ReportFormatter::GetInstance().AddFieldString(L"Name", paramDesc.Name);
+                    ReportFormatter::GetInstance().AddFieldEnum(L"Type", paramDesc.Type, Enum_D3D12_META_COMMAND_PARAMETER_TYPE);
+                    ReportFormatter::GetInstance().AddFieldFlags(L"Flags", paramDesc.Flags, Enum_D3D12_META_COMMAND_PARAMETER_FLAGS);
+                    ReportFormatter::GetInstance().AddFieldFlags(L"RequiredResourceState", paramDesc.RequiredResourceState, Enum_D3D12_RESOURCE_STATES);
+                    ReportFormatter::GetInstance().AddFieldUint32(L"StructureOffset", paramDesc.StructureOffset);
                 }
-
-                if(g_UseJson)
-                    Json::EndArray();
             }
         }
-        
-        if(g_UseJson)
-            Json::EndObject();
-        else
-            --g_Indent;
-    }
-
-    if(g_UseJson)
-        Json::EndObject();
-    else
-    {
-        --g_Indent;
-        PrintEmptyLine();
     }
 }
 
@@ -1223,25 +1052,11 @@ static void PrintMetaCommands(ID3D12Device5* device5)
     std::vector<D3D12_META_COMMAND_DESC> descs(num);
     if(FAILED(device5->EnumerateMetaCommands(&num, descs.data())))
         return;
-    
-    if(g_UseJson)
-    {
-        Json::WriteString(L"EnumerateMetaCommands");
-        Json::BeginArray();
-    }
-    else
-    {
-        PrintHeader(L"EnumerateMetaCommands", 1);
-        ++g_Indent;
-    }
+
+    ReportScopeArray scope(L"EnumerateMetaCommands");
 
     for(UINT i = 0; i < num; ++i)
         PrintMetaCommand(device5, i, descs[i]);
-
-    if(g_UseJson)
-        Json::EndArray();
-    else
-        --g_Indent;
 }
 
 static void PrintCommandQueuePriorities(ID3D12Device* device)
@@ -1281,28 +1096,14 @@ static void PrintCommandQueuePriorities(ID3D12Device* device)
 static void PrintDirectSROptimizationRankings(const DSR_OPTIMIZATION_TYPE* optimizationRankings)
 {
     constexpr size_t count = _countof(DSR_SUPERRES_VARIANT_DESC::OptimizationRankings);
-    if(g_UseJson)
+
+    uint32_t rankingsCopy[count];
+    for(size_t i = 0; i < count; ++i)
     {
-        Json::WriteString(L"OptimizationRankings");
-        Json::BeginArray();
-        ++g_Indent;
-        for(size_t i = 0; i < count; ++i)
-            Json::WriteNumber((uint32_t)optimizationRankings[i]);
-        Json::EndArray();
+        rankingsCopy[i] = (uint32_t)optimizationRankings[i];
     }
-    else
-    {
-        PrintIndent();
-        wprintf(L"OptimizationRankings:\n");
-        ++g_Indent;
-        for(size_t i = 0; i < count; ++i)
-        {
-            const DSR_OPTIMIZATION_TYPE optimizationType = optimizationRankings[i];
-            PrintIndent();
-            wprintf(L"%s\n", Enum_DSR_OPTIMIZATION_TYPE[optimizationType].m_Name);
-        }
-        --g_Indent;
-    }
+
+    ReportFormatter::GetInstance().AddEnumArray(L"OptimizationRankings", rankingsCopy, count, Enum_DSR_OPTIMIZATION_TYPE);
 }
 
 static void PrintDirectSR(ID3D12Device* device)
@@ -1317,51 +1118,22 @@ static void PrintDirectSR(ID3D12Device* device)
     if(numVariants == 0)
         return;
 
-    if(g_UseJson)
-    {
-        Json::WriteString(L"DirectSR");
-        Json::BeginArray();
-    }
-    else
-    {
-        PrintHeader(L"DirectSR", 1);
-        ++g_Indent;
-    }
+    ReportScopeArray scope(L"DirectSR");
 
     for(UINT variantIndex = 0; variantIndex < numVariants; ++variantIndex)
     {
         DSR_SUPERRES_VARIANT_DESC desc = {};
         if(SUCCEEDED(dsrDevice->GetSuperResVariantDesc(variantIndex, &desc)))
         {
-            if(g_UseJson)
-                Json::BeginObject();
-            else
-            {
-                PrintIndent();
-                wprintf(L"Variant %u:\n", variantIndex);
-                ++g_Indent;
-            }
-            
-            Print_string(L"VariantId", GuidToStr(desc.VariantId).c_str());
-            Print_string(L"VariantName", StrToWstr(desc.VariantName, CP_UTF8).c_str());
-            PrintFlags(L"Flags", desc.Flags, Enum_DSR_SUPERRES_VARIANT_FLAGS);
-            PrintDirectSROptimizationRankings(desc.OptimizationRankings);
-            PrintEnum(L"OptimalTargetFormat", desc.OptimalTargetFormat, Enum_DXGI_FORMAT);
+            ReportScopeArrayItem scope2;
 
-            if(g_UseJson)
-                Json::EndObject();
-            else
-            {
-                --g_Indent;
-                PrintEmptyLine();
-            }
+            ReportFormatter::GetInstance().AddFieldString(L"VariantId", GuidToStr(desc.VariantId).c_str());
+            ReportFormatter::GetInstance().AddFieldString(L"VariantName", StrToWstr(desc.VariantName, CP_UTF8).c_str());
+            ReportFormatter::GetInstance().AddFieldFlags(L"Flags", desc.Flags, Enum_DSR_SUPERRES_VARIANT_FLAGS);
+            PrintDirectSROptimizationRankings(desc.OptimizationRankings);
+            ReportFormatter::GetInstance().AddFieldEnum(L"OptimalTargetFormat", desc.OptimalTargetFormat, Enum_DXGI_FORMAT);
         }
     }
-
-    if(g_UseJson)
-        Json::EndArray();
-    else
-        --g_Indent;
 }
 #endif // #ifdef USE_PREVIEW_AGILITY_SDK
 
@@ -1528,14 +1300,14 @@ static bool LoadLibraries()
     g_DxgiLibrary = ::LoadLibraryEx(DYN_LIB_DXGI, nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
     if (!g_DxgiLibrary)
     {
-        wprintf(L"could not load %s\n", DYN_LIB_DXGI);
+        ErrorPrinter::PrintFormat(L"could not load {}\n", std::make_wformat_args(DYN_LIB_DXGI));
         return false;
     }
 
     g_Dx12Library = ::LoadLibraryEx(DYN_LIB_DX12, nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
     if (!g_Dx12Library)
     {
-        wprintf(L"could not load %s\n", DYN_LIB_DX12);
+        ErrorPrinter::PrintFormat(L"could not load {}\n", std::make_wformat_args(DYN_LIB_DX12));
         return false;
     }
 
@@ -1581,42 +1353,44 @@ static void UnloadLibraries()
 
 #endif
 
-static void PrintCommandLineSyntax()
+template <typename PrinterClass>
+void PrintCommandLineSyntax()
 {
-    wprintf(L"Options:\n");
-    wprintf(L"  -v --Version                     Only print program version information.\n");
-    wprintf(L"  -h --Help                        Only print this help (command line syntax).\n");
-    wprintf(L"  -l --List                        Only print the list of all adapters.\n");
-    wprintf(L"  -a --Adapter=<Index>             Print details of adapter at specified index.\n");
-    wprintf(L"  --AllNonSoftware                 Print details of all (except WARP and Software) adapters (default behavior).\n");
-    wprintf(L"  --AllAdapters                    Print details of all (except WARP) adapters.\n");
-    wprintf(L"  -j --JSON                        Print output in JSON format instead of human-friendly text.\n");
-    wprintf(L"  -f --Formats                     Include information about DXGI format capabilities.\n");
-    wprintf(L"  --MetaCommands                   Include information about meta commands.\n");
-    wprintf(L"  -e --Enums                       Include information about all known enums and their values.\n");
-    wprintf(L"  --PureD3D12                      Extract information only from D3D12 and no other sources.\n");
+    PrinterClass::PrintString(L"Options:\n");
+    PrinterClass::PrintString(L"  -v --Version                     Only print program version information.\n");
+    PrinterClass::PrintString(L"  -h --Help                        Only print this help (command line syntax).\n");
+    PrinterClass::PrintString(L"  -l --List                        Only print the list of all adapters.\n");
+    PrinterClass::PrintString(L"  -a --Adapter=<Index>             Print details of adapter at specified index.\n");
+    PrinterClass::PrintString(L"  --AllNonSoftware                 Print details of all (except Software) adapters (default behavior).\n");
+    PrinterClass::PrintString(L"  --AllAdapters                    Print details of all adapters.\n");
+    PrinterClass::PrintString(L"  -j --JSON                        Print output in JSON format instead of human-friendly text.\n");
+    PrinterClass::PrintString(L"  --JSONPrettyPrint                Print JSON in human friendly form. (default behavior)\n");
+    PrinterClass::PrintString(L"  --JSONNoPrettyPrint              Print JSON in minimal size form.\n");
+    PrinterClass::PrintString(L"  -o --OutputToFile=<FilePath>     Output to specified file.\n");
+    PrinterClass::PrintString(L"  -f --Formats                     Include information about DXGI format capabilities.\n");
+    PrinterClass::PrintString(L"  --MetaCommands                   Include information about meta commands.\n");
+    PrinterClass::PrintString(L"  -e --Enums                       Include information about all known enums and their values.\n");
+    PrinterClass::PrintString(L"  --PureD3D12                      Extract information only from D3D12 and no other sources.\n");
 #ifdef USE_PREVIEW_AGILITY_SDK
-    wprintf(L"  -x --EnableExperimental=<on/off> Whether to enable experimental features before querying device capabilities. Default is on (off for D3d12info and on for D3d12info_preview).\n");
+    PrinterClass::PrintString(L"  -x --EnableExperimental=<on/off> Whether to enable experimental features before querying device capabilities. Default is on (off for D3d12info and on for D3d12info_preview).\n");
 #else
-    wprintf(L"  -x --EnableExperimental=<on/off> Whether to enable experimental features before querying device capabilities. Default is off (off for D3d12info and on for D3d12info_preview).\n");
+    PrinterClass::PrintString(L"  -x --EnableExperimental=<on/off> Whether to enable experimental features before querying device capabilities. Default is off (off for D3d12info and on for D3d12info_preview).\n");
 #endif
-    wprintf(L"  --ForceVendorAPI                 Tries to query info via vendor-specific APIs, even in case when vendor doesn't match.\n");
-    wprintf(L"  --WARP                           Use WARP adapter.\n");
+    PrinterClass::PrintString(L"  --ForceVendorAPI                 Tries to query info via vendor-specific APIs, even in case when vendor doesn't match.\n");
+    PrinterClass::PrintString(L"  --WARP                           Use WARP adapter.\n");
 }
 
 static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter,
     NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
     AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk)
 {
-    if(g_UseJson)
+    ReportScopeArrayItem scope;
+
+    if(!g_WARP && !g_ShowAllAdapters)
     {
-        Json::BeginObject();
-        Print_uint32(L"AdapterIndex", adapterIndex);
-    }
-    else
-    {
-        PrintHeader(std::format(L"DXGI Adapter {}", adapterIndex).c_str(), 0);
-        PrintEmptyLine();
+        // In case of WARP, we queried adapter via different API that didn't use adapter index
+        // In case we show all adapters, array index equals adapter index
+        ReportFormatter::GetInstance().AddFieldUint32(L"AdapterIndex", adapterIndex);
     }
 
     PrintAdapterData(adapter);
@@ -1655,9 +1429,6 @@ static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter,
             vk->PrintData(desc);
 #endif
     }
-
-    if(g_UseJson)
-        Json::EndObject();
 }
 
 static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
@@ -1685,17 +1456,15 @@ int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
     AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk,
     uint32_t& adapterIndex, ComPtr<IDXGIAdapter1>& adapter1)
 {
+    ReportScopeArrayItemConditional scope(g_PrintAdaptersAsArray);
+
     int programResult = PROGRAM_EXIT_SUCCESS;
 
-    if(g_UseJson)
+    if(!g_WARP && !g_ShowAllAdapters)
     {
-        Json::BeginObject();
-        Print_uint32(L"AdapterIndex", adapterIndex);
-    }
-    else
-    {
-        PrintHeader(std::format(L"DXGI Adapter {}", adapterIndex).c_str(), 0);
-        PrintEmptyLine();
+        // In case of WARP, we queried adapter via different API that didn't use adapter index
+        // In case we show all adapters, array index equals adapter index
+        ReportFormatter::GetInstance().AddFieldUint32(L"AdapterIndex", adapterIndex);
     }
 
     PrintAdapterData(adapter1.Get());
@@ -1745,9 +1514,6 @@ int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
     }
 
     programResult = PrintDeviceDetails(adapter1.Get(), nvApi, ags);
-
-    if(g_UseJson)
-        Json::EndObject();
 
     return programResult;
 }
@@ -1833,6 +1599,9 @@ int wmain3(int argc, wchar_t** argv)
         CMD_LINE_OPT_ALL_NON_SOFTWARE,
         CMD_LINE_OPT_ALL_ADAPTERS,
         CMD_LINE_OPT_JSON,
+        CMD_LINE_OPT_JSON_PRETTY_PRINT,
+        CMD_LINE_OPT_JSON_NO_PRETTY_PRINT,
+        CMD_LINE_OPT_OUTPUT_TO_FILE,
         CMD_LINE_OPT_FORMATS,
         CMD_LINE_OPT_META_COMMANDS,
         CMD_LINE_OPT_ENUMS,
@@ -1854,6 +1623,10 @@ int wmain3(int argc, wchar_t** argv)
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ALL_ADAPTERS,          L"AllAdapters",         false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,                  L"JSON",                false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,                  L'j',                   false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON_PRETTY_PRINT,     L"JSONPrettyPrint",     false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON_NO_PRETTY_PRINT,  L"JSONNoPrettyPrint",   false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_OUTPUT_TO_FILE,        L'o',                   true);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_OUTPUT_TO_FILE,        L"OutputToFile",        true);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS,               L"Formats",             false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS,               L'f',                   false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_META_COMMANDS,         L"MetaCommands",        false);
@@ -1872,25 +1645,25 @@ int wmain3(int argc, wchar_t** argv)
         {
         case CmdLineParser::RESULT_ERROR:
         case CmdLineParser::RESULT_PARAMETER:
-            PrintCommandLineSyntax();
-            return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+            g_ShowCommandLineSyntaxAndFail = true;
+            break;
         case CmdLineParser::RESULT_OPT:
             switch(cmdLineParser.GetOptId())
             {
             case CMD_LINE_OPT_VERSION:
-                PrintHeader_Text();
-                return PROGRAM_EXIT_SUCCESS;
+                g_ShowVersionAndQuit = true;
+                break;
             case CMD_LINE_OPT_HELP:
-                PrintCommandLineSyntax();
-                return PROGRAM_EXIT_SUCCESS;
+                g_ShowCommandLineSyntaxAndQuit = true;
+                break;
             case CMD_LINE_OPT_LIST:
                 if(cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ADAPTER) || 
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_NON_SOFTWARE) || 
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_ADAPTERS) ||
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_WARP))
                 {
-                    PrintCommandLineSyntax();
-                    return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+                    g_ShowCommandLineSyntaxAndFail = true;
+                    break;
                 }
                 g_ListAdapters = true;
                 break;
@@ -1900,8 +1673,8 @@ int wmain3(int argc, wchar_t** argv)
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_ADAPTERS) ||
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_WARP))
                 {
-                    PrintCommandLineSyntax();
-                    return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+                    g_ShowCommandLineSyntaxAndFail = true;
+                    break;
                 }
                 g_ShowAllAdapters = false;
                 adapterIndex = _wtoi(cmdLineParser.GetParameter().c_str());
@@ -1912,8 +1685,8 @@ int wmain3(int argc, wchar_t** argv)
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_ADAPTERS) || 
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_WARP))
                 {
-                    PrintCommandLineSyntax();
-                    return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+                    g_ShowCommandLineSyntaxAndFail = true;
+                    break;
                 }
                 g_ShowAllAdapters = true;
                 g_SkipSoftwareAdapter = true;
@@ -1925,15 +1698,25 @@ int wmain3(int argc, wchar_t** argv)
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_NON_SOFTWARE) || 
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_WARP))
                 {
-                    PrintCommandLineSyntax();
-                    return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+                    g_ShowCommandLineSyntaxAndFail = true;
+                    break;
                 }
                 g_ShowAllAdapters = true;
                 g_SkipSoftwareAdapter = false;
                 adapterIndex = UINT32_MAX;
                 break;
             case CMD_LINE_OPT_JSON:
-                g_UseJson = true;
+                g_UseJsonOutput = true;
+                break;
+            case CMD_LINE_OPT_JSON_PRETTY_PRINT:
+                g_UseJsonPrettyPrint = true;
+                break;
+            case CMD_LINE_OPT_JSON_NO_PRETTY_PRINT:
+                g_UseJsonPrettyPrint = false;
+                break;
+            case CMD_LINE_OPT_OUTPUT_TO_FILE:
+                g_OutputToFile = true;
+                g_OutputFilePath = cmdLineParser.GetParameter();
                 break;
             case CMD_LINE_OPT_FORMATS:
                 g_PrintFormats = true;
@@ -1947,8 +1730,8 @@ int wmain3(int argc, wchar_t** argv)
             case CMD_LINE_OPT_PURE_D3D12:
                 if (cmdLineParser.IsOptEncountered(CMD_LINE_OPT_FORCE_VENDOR_SPECIFIC))
                 {
-                    PrintCommandLineSyntax();
-                    return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+                    g_ShowCommandLineSyntaxAndFail = true;
+                    break;
                 }
                 g_PureD3D12 = true;
                 break;
@@ -1959,8 +1742,8 @@ int wmain3(int argc, wchar_t** argv)
                     bool isOff = ::_wcsicmp(param.c_str(), L"off") == 0;
                     if (!isOn && !isOff)
                     {
-                        PrintCommandLineSyntax();
-                        return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+                        g_ShowCommandLineSyntaxAndFail = true;
+                        break;
                     }
                     g_EnableExperimental = isOn;
                 }
@@ -1968,8 +1751,8 @@ int wmain3(int argc, wchar_t** argv)
             case CMD_LINE_OPT_FORCE_VENDOR_SPECIFIC:
                 if (cmdLineParser.IsOptEncountered(CMD_LINE_OPT_PURE_D3D12))
                 {
-                    PrintCommandLineSyntax();
-                    return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+                    g_ShowCommandLineSyntaxAndFail = true;
+                    break;
                 }
                 g_ForceVendorAPI = true;
                 break;
@@ -1979,25 +1762,87 @@ int wmain3(int argc, wchar_t** argv)
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_NON_SOFTWARE) || 
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_ADAPTERS))
                 {
-                    PrintCommandLineSyntax();
-                    return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+                    g_ShowCommandLineSyntaxAndFail = true;
+                    break;
                 }
                 g_WARP = true;
                 break;
             default:
-                PrintCommandLineSyntax();
-                return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+                g_ShowCommandLineSyntaxAndFail = true;
+                break;
             }
             break;
         default:
             assert(0);
+            g_ShowCommandLineSyntaxAndFail = true;
+            break;
         }
     }
 
-    if(g_UseJson)
-        Json::Begin();
+    if (g_ShowCommandLineSyntaxAndFail)
+    {
+        Printer::Initialize(false, {});
+        PrintCommandLineSyntax<ErrorPrinter>();
+        Printer::Release();
+        return PROGRAM_EXIT_ERROR_COMMAND_LINE;
+    }
 
-    PrintHeaderData();
+    g_PrintAdaptersAsArray = g_ShowAllAdapters || g_UseJsonOutput;
+
+    if (g_OutputToFile)
+    {
+        if (!Printer::Initialize(true, g_OutputFilePath))
+        {
+            ErrorPrinter::PrintFormat(L"Could not open file for writing: {}\n", std::make_wformat_args(g_OutputFilePath.c_str()));
+            return PROGRAM_EXIT_ERROR_INIT;
+        }
+    }
+    else
+    {
+        if (!Printer::Initialize(false, {}))
+        {
+            assert(0);
+            return PROGRAM_EXIT_ERROR_INIT;
+        }
+    }
+
+    ReportFormatter::Flags flags = ReportFormatter::Flags::None;
+
+    if (g_UseJsonOutput)
+    {
+        flags = flags | ReportFormatter::Flags::UseJson;
+    }
+    if (g_UseJsonPrettyPrint)
+    {
+        flags = flags | ReportFormatter::Flags::UseJsonPrettyPrint;
+    }
+
+    ReportFormatter::CreateInstance(flags);
+
+    if (g_ShowVersionAndQuit)
+    {
+        if (IsOutputConsole())
+        {
+            PrintVersionHeader();
+        }
+        else
+        {
+            PrintVersionData();
+        }
+        ReportFormatter::DestroyInstance();
+        Printer::Release();
+        return PROGRAM_EXIT_SUCCESS;
+    }
+
+    if (g_ShowCommandLineSyntaxAndQuit)
+    {
+        PrintCommandLineSyntax<Printer>();
+        ReportFormatter::DestroyInstance();
+        Printer::Release();
+        return PROGRAM_EXIT_SUCCESS;
+    }
+
+    PrintVersionData();
 
 #if !defined(AUTO_LINK_DX12)
     if(!LoadLibraries())
@@ -2028,24 +1873,16 @@ int wmain3(int argc, wchar_t** argv)
         vkObjPtr = std::make_unique<Vulkan_Initialize_RAII>();
 #endif
 
-    
-    if(g_UseJson)
     {
-        Json::WriteString(L"SystemInfo");
-        Json::BeginObject();
-    }
-    else 
-    {
-        PrintGeneralData();
-    }
+        ReportScopeObject scope(OutputSpecificString(L"System Info", L"SystemInfo"));
 
-    if(!g_PureD3D12)
-    {
-        PrintOsVersionInfo();
-        PrintSystemMemoryInfo();
-    }
+        if(!g_PureD3D12)
+        {
+            PrintOsVersionInfo();
+            PrintSystemMemoryInfo();
+        }
 
-    PrintDXGIFeatureInfo();
+        PrintDXGIFeatureInfo();
 
 #if USE_NVAPI
     if(nvApiObjPtr && nvApiObjPtr->IsInitialized())
@@ -2056,15 +1893,11 @@ int wmain3(int argc, wchar_t** argv)
         agsObjPtr->PrintData();
 #endif
 
-    EnableExperimentalFeatures();
-
-    if(g_UseJson)
-    {
-        Json::EndObject();
+        EnableExperimentalFeatures();
     }
 
     if(g_PrintEnums)
-        PrintEnumsData();
+        PrintEnums();
 
     int programResult = PROGRAM_EXIT_SUCCESS;
 
@@ -2078,11 +1911,8 @@ int wmain3(int argc, wchar_t** argv)
 #endif
         assert(dxgiFactory != nullptr);
 
-        if(g_UseJson)
-        {
-            Json::WriteString(L"Adapters");
-            Json::BeginArray();
-        }
+        ReportScopeArrayConditional scopeArray(g_PrintAdaptersAsArray, OutputSpecificString(L"Adapter", L"Adapters"), ReportFormatter::ArraySuffix::None);
+        ReportScopeObjectConditional scopeObject(!g_PrintAdaptersAsArray, L"Adapter");
 
         if(g_ListAdapters)
             ListAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(), vkObjPtr.get());
@@ -2095,25 +1925,15 @@ int wmain3(int argc, wchar_t** argv)
             else
                 InspectAllAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(), vkObjPtr.get());
         }
-
-        if(g_UseJson)
-        {
-            Json::EndArray();
-        }
     }
 
 #if !defined(AUTO_LINK_DX12)
     UnloadLibraries();
 #endif
 
-    if(g_UseJson && programResult == PROGRAM_EXIT_SUCCESS)
-    {
-        wstring json = Json::End();
-        wprintf(L"%.*s", (int)json.length(), json.data());
-    }
+    ReportFormatter::DestroyInstance();
+    Printer::Release();
 
-    fflush(stdout);
-    fflush(stderr);
     return programResult;
 }
 
@@ -2125,16 +1945,12 @@ int wmain2(int argc, wchar_t** argv)
     }
     catch(const std::exception& ex)
     {
-        fwprintf(stderr, L"ERROR: %hs\n", ex.what());
-        fflush(stdout);
-        fflush(stderr);
+        ErrorPrinter::PrintFormat("ERROR: {}\n", std::make_format_args(ex.what()));
         return PROGRAM_EXIT_ERROR_EXCEPTION;
     }
     catch(...)
     {
-        fwprintf(stderr, L"UNKNOWN ERROR.\n");
-        fflush(stdout);
-        fflush(stderr);
+        ErrorPrinter::PrintString("UNKNOWN ERROR.\n");
         return PROGRAM_EXIT_ERROR_EXCEPTION;
     }
 }
@@ -2147,9 +1963,7 @@ int wmain(int argc, wchar_t** argv)
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
-        fwprintf(stderr, L"STRUCTURED EXCEPTION: 0x%08X.\n", GetExceptionCode());
-        fflush(stdout);
-        fflush(stderr);
+        ErrorPrinter::PrintFormat("STRUCTURED EXCEPTION: 0x{:08X}\n", std::make_format_args(GetExceptionCode()));
         return PROGRAM_EXIT_ERROR_SEH_EXCEPTION;
     }
 }

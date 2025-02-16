@@ -8,10 +8,9 @@ License: MIT
 For more information, see files README.md, LICENSE.txt.
 */
 #include "VulkanData.hpp"
-#include "Printing.hpp"
 #include "Utils.hpp"
-#include "Json.hpp"
 #include "Enums.hpp"
+#include "ReportFormatter/ReportFormatter.hpp"
 
 // Macro set by Cmake.
 #if USE_VULKAN
@@ -196,32 +195,32 @@ void Vulkan_Initialize_RAII::PrintData(const DXGI_ADAPTER_DESC& adapterDesc)
 
 	{
 		const VkPhysicalDeviceProperties& props = propSet.properties2.properties;
-		ScopedStructRegion region(L"VkPhysicalDeviceProperties");
-		Print_string(L"apiVersion", std::format(L"{}.{}.{}",
+		ReportScopeObject region(L"VkPhysicalDeviceProperties");
+		ReportFormatter::GetInstance().AddFieldString(L"apiVersion", std::format(L"{}.{}.{}",
 			VK_API_VERSION_MAJOR(props.apiVersion), VK_API_VERSION_MINOR(props.apiVersion), VK_API_VERSION_PATCH(props.apiVersion)).c_str());
-		Print_uint32(L"driverVersion", props.driverVersion);
-		PrintVendorId(L"vendorID", props.vendorID);
-		Print_hex32(L"deviceID", props.deviceID);
-		PrintEnum(L"deviceType", props.deviceType, Enum_VkPhysicalDeviceType);
-		Print_string(L"deviceName", StrToWstr(props.deviceName, CP_UTF8).c_str());
+		ReportFormatter::GetInstance().AddFieldUint32(L"driverVersion", props.driverVersion);
+		ReportFormatter::GetInstance().AddFieldVendorId(L"vendorID", props.vendorID);
+		ReportFormatter::GetInstance().AddFieldHex32(L"deviceID", props.deviceID);
+		ReportFormatter::GetInstance().AddFieldEnum(L"deviceType", props.deviceType, Enum_VkPhysicalDeviceType);
+		ReportFormatter::GetInstance().AddFieldString(L"deviceName", StrToWstr(props.deviceName, CP_UTF8).c_str());
 	}
 
 	{
 		const VkPhysicalDeviceIDProperties& IDProps = propSet.IDProperties;
-		ScopedStructRegion region(L"VkPhysicalDeviceIDProperties");
-		PrintHexBytes(L"deviceUUID", IDProps.deviceUUID, VK_UUID_SIZE);
-		PrintHexBytes(L"driverUUID", IDProps.driverUUID, VK_UUID_SIZE);
+		ReportScopeObject region(L"VkPhysicalDeviceIDProperties");
+		ReportFormatter::GetInstance().AddFieldHexBytes(L"deviceUUID", IDProps.deviceUUID, VK_UUID_SIZE);
+		ReportFormatter::GetInstance().AddFieldHexBytes(L"driverUUID", IDProps.driverUUID, VK_UUID_SIZE);
 		if(IDProps.deviceLUIDValid)
-			PrintHexBytes(L"deviceLUID", IDProps.deviceLUID, VK_LUID_SIZE);
+			ReportFormatter::GetInstance().AddFieldHexBytes(L"deviceLUID", IDProps.deviceLUID, VK_LUID_SIZE);
 	}
 
 	if(g_ApiVersion >= VK_API_VERSION_1_2)
 	{
 		const VkPhysicalDeviceVulkan12Properties& vulkan12Props = propSet.vulkan12Properties;
-		ScopedStructRegion region(L"VkPhysicalDeviceVulkan12Properties");
-		PrintEnum(L"driverID", vulkan12Props.driverID, Enum_VkDriverId);
-		Print_string(L"driverName", StrToWstr(vulkan12Props.driverName, CP_UTF8).c_str());
-		Print_string(L"driverInfo", StrToWstr(vulkan12Props.driverInfo, CP_UTF8).c_str());
+		ReportScopeObject region(L"VkPhysicalDeviceVulkan12Properties");
+		ReportFormatter::GetInstance().AddFieldEnum(L"driverID", vulkan12Props.driverID, Enum_VkDriverId);
+		ReportFormatter::GetInstance().AddFieldString(L"driverName", StrToWstr(vulkan12Props.driverName, CP_UTF8).c_str());
+		ReportFormatter::GetInstance().AddFieldString(L"driverInfo", StrToWstr(vulkan12Props.driverInfo, CP_UTF8).c_str());
 	}
 }
 
