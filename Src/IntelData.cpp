@@ -1995,28 +1995,29 @@ void PrintAdapterData(IDXGIAdapter* adapter)
 		return;
 
 	ReportScopeObject region(L"Intel GPUDetect::GPUData");
-	ReportFormatter::GetInstance().AddFieldVendorId(L"VendorId", gpuData.vendorID);
-	ReportFormatter::GetInstance().AddFieldHex32(L"deviceID", gpuData.deviceID);
-	ReportFormatter::GetInstance().AddFieldBool(L"isUMAArchitecture", gpuData.isUMAArchitecture ? TRUE : FALSE);
-	ReportFormatter::GetInstance().AddFieldSize(L"videoMemory", gpuData.videoMemory);
-	ReportFormatter::GetInstance().AddFieldString(L"description", gpuData.description);
-	ReportFormatter::GetInstance().AddFieldHex32(L"extensionVersion", gpuData.extensionVersion);
-	ReportFormatter::GetInstance().AddFieldBool(L"intelExtensionAvailability", gpuData.intelExtensionAvailability ? TRUE : FALSE);
+	ReportFormatter& formatter = ReportFormatter::GetInstance();
+	formatter.AddFieldVendorId(L"VendorId", gpuData.vendorID);
+	formatter.AddFieldHex32(L"deviceID", gpuData.deviceID);
+	formatter.AddFieldBool(L"isUMAArchitecture", gpuData.isUMAArchitecture ? TRUE : FALSE);
+	formatter.AddFieldSize(L"videoMemory", gpuData.videoMemory);
+	formatter.AddFieldString(L"description", gpuData.description);
+	formatter.AddFieldHex32(L"extensionVersion", gpuData.extensionVersion);
+	formatter.AddFieldBool(L"intelExtensionAvailability", gpuData.intelExtensionAvailability ? TRUE : FALSE);
 
 	r = GPUDetect::InitDxDriverVersion(&gpuData);
 	if(r == EXIT_SUCCESS && gpuData.d3dRegistryDataAvailability)
 	{
 		char driverVersionStr[19] = {};
 		GPUDetect::GetDriverVersionAsCString(&gpuData, driverVersionStr, _countof(driverVersionStr));
-		ReportFormatter::GetInstance().AddFieldString(L"dxDriverVersion", StrToWstr(driverVersionStr, CP_ACP).c_str());
-		ReportFormatter::GetInstance().AddFieldUint32(L"driverInfo.driverReleaseRevision", gpuData.driverInfo.driverReleaseRevision);
-		ReportFormatter::GetInstance().AddFieldUint32(L"driverInfo.driverBuildNumber", gpuData.driverInfo.driverBuildNumber);
+		formatter.AddFieldString(L"dxDriverVersion", StrToWstr(driverVersionStr, CP_ACP).c_str());
+		formatter.AddFieldUint32(L"driverInfo.driverReleaseRevision", gpuData.driverInfo.driverReleaseRevision);
+		formatter.AddFieldUint32(L"driverInfo.driverBuildNumber", gpuData.driverInfo.driverBuildNumber);
 	}
 
 	if(gpuData.vendorID == GPUDetect::INTEL_VENDOR_ID)
 	{
 		const GPUDetect::PresetLevel presetLevel = GPUDetect::GetDefaultFidelityPreset(&gpuData);
-		ReportFormatter::GetInstance().AddFieldEnum(L"DefaultFidelityPreset", (uint32_t)presetLevel, GPUDetect::Enum_PresetLevel);
+		formatter.AddFieldEnum(L"DefaultFidelityPreset", (uint32_t)presetLevel, GPUDetect::Enum_PresetLevel);
 
 		r = GPUDetect::InitCounterInfo(&gpuData, device.Get());
 		if(r == EXIT_SUCCESS)
@@ -2024,24 +2025,24 @@ void PrintAdapterData(IDXGIAdapter* adapter)
 			string architectureStr = GPUDetect::GetIntelGPUArchitectureString(gpuData.architecture);
 			if(architectureStr == "Unknown")
 				architectureStr = std::format("Unknown ({})", (uint32_t)gpuData.architecture);
-			ReportFormatter::GetInstance().AddFieldString(L"GPUArchitecture", StrToWstr(architectureStr.c_str(), CP_ACP).c_str());
+			formatter.AddFieldString(L"GPUArchitecture", StrToWstr(architectureStr.c_str(), CP_ACP).c_str());
 
 			const GPUDetect::IntelGraphicsGeneration generation =
 				GPUDetect::GetIntelGraphicsGeneration(gpuData.architecture);
 			string generationStr = GPUDetect::GetIntelGraphicsGenerationString(generation);
 			if(generationStr == "Unknown")
 				generationStr = std::format("Unknown ({})", (uint32_t)generation);
-			ReportFormatter::GetInstance().AddFieldString(L"GraphicsGeneration", StrToWstr(generationStr.c_str(), CP_ACP).c_str());
+			formatter.AddFieldString(L"GraphicsGeneration", StrToWstr(generationStr.c_str(), CP_ACP).c_str());
 
 			if(gpuData.advancedCounterDataAvailability)
 			{
-				ReportFormatter::GetInstance().AddFieldUint32(L"euCount", gpuData.euCount);
-				ReportFormatter::GetInstance().AddFieldUint32(L"packageTDP", gpuData.packageTDP, L"W");
-				ReportFormatter::GetInstance().AddFieldUint32(L"maxFillRate", gpuData.maxFillRate, L"pixels/clock");
+				formatter.AddFieldUint32(L"euCount", gpuData.euCount);
+				formatter.AddFieldUint32(L"packageTDP", gpuData.packageTDP, L"W");
+				formatter.AddFieldUint32(L"maxFillRate", gpuData.maxFillRate, L"pixels/clock");
 			}
 
-			ReportFormatter::GetInstance().AddFieldUint32(L"maxFrequency", gpuData.maxFrequency, L"MHz");
-			ReportFormatter::GetInstance().AddFieldUint32(L"minFrequency", gpuData.minFrequency, L"MHz");
+			formatter.AddFieldUint32(L"maxFrequency", gpuData.maxFrequency, L"MHz");
+			formatter.AddFieldUint32(L"minFrequency", gpuData.minFrequency, L"MHz");
 		}
 	}
 }

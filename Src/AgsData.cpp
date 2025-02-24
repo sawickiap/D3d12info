@@ -113,22 +113,23 @@ void AGS_Initialize_RAII::PrintAgsDeviceData(const DeviceId& id)
 	const AGSDeviceInfo& device = g_GpuInfo.devices[deviceIndex];
 
 	ReportScopeObject region(L"AGSDeviceInfo");
-	ReportFormatter::GetInstance().AddFieldString(L"adapterString", StrToWstr(device.adapterString, CP_ACP).c_str());
-	ReportFormatter::GetInstance().AddFieldEnum(L"asicFamily", device.asicFamily, Enum_AGSDeviceInfo_AsicFamily);
-	ReportFormatter::GetInstance().AddFieldBool(L"isAPU", device.isAPU);
-	ReportFormatter::GetInstance().AddFieldBool(L"isExternal", device.isExternal);
-	ReportFormatter::GetInstance().AddFieldVendorId(L"vendorId", (uint32_t)device.vendorId);
-	ReportFormatter::GetInstance().AddFieldHex32(L"deviceId", (uint32_t)device.deviceId);
-	ReportFormatter::GetInstance().AddFieldHex32(L"revisionId", (uint32_t)device.revisionId);
-	ReportFormatter::GetInstance().AddFieldInt32(L"numCUs", device.numCUs);
-	ReportFormatter::GetInstance().AddFieldInt32(L"numWGPs", device.numWGPs);
-	ReportFormatter::GetInstance().AddFieldInt32(L"numROPs", device.numROPs);
-	ReportFormatter::GetInstance().AddFieldInt32(L"coreClock", device.coreClock, L"MHz");
-	ReportFormatter::GetInstance().AddFieldInt32(L"memoryClock", device.memoryClock, L"MHz");
-	ReportFormatter::GetInstance().AddFieldInt32(L"memoryBandwidth", device.memoryBandwidth, L"MB/s");
-	ReportFormatter::GetInstance().AddFieldFloat(L"teraFlops", device.teraFlops, L"TFLOPS");
-	ReportFormatter::GetInstance().AddFieldSize(L"localMemoryInBytes", device.localMemoryInBytes);
-	ReportFormatter::GetInstance().AddFieldSize(L"sharedMemoryInBytes", device.sharedMemoryInBytes);
+	ReportFormatter& formatter = ReportFormatter::GetInstance();
+	formatter.AddFieldString(L"adapterString", StrToWstr(device.adapterString, CP_ACP).c_str());
+	formatter.AddFieldEnum(L"asicFamily", device.asicFamily, Enum_AGSDeviceInfo_AsicFamily);
+	formatter.AddFieldBool(L"isAPU", device.isAPU);
+	formatter.AddFieldBool(L"isExternal", device.isExternal);
+	formatter.AddFieldVendorId(L"vendorId", (uint32_t)device.vendorId);
+	formatter.AddFieldHex32(L"deviceId", (uint32_t)device.deviceId);
+	formatter.AddFieldHex32(L"revisionId", (uint32_t)device.revisionId);
+	formatter.AddFieldInt32(L"numCUs", device.numCUs);
+	formatter.AddFieldInt32(L"numWGPs", device.numWGPs);
+	formatter.AddFieldInt32(L"numROPs", device.numROPs);
+	formatter.AddFieldInt32(L"coreClock", device.coreClock, L"MHz");
+	formatter.AddFieldInt32(L"memoryClock", device.memoryClock, L"MHz");
+	formatter.AddFieldInt32(L"memoryBandwidth", device.memoryBandwidth, L"MB/s");
+	formatter.AddFieldFloat(L"teraFlops", device.teraFlops, L"TFLOPS");
+	formatter.AddFieldSize(L"localMemoryInBytes", device.localMemoryInBytes);
+	formatter.AddFieldSize(L"sharedMemoryInBytes", device.sharedMemoryInBytes);
 }
 
 ComPtr<ID3D12Device> AGS_Initialize_RAII::CreateDeviceAndPrintData(IDXGIAdapter* adapter, D3D_FEATURE_LEVEL featureLevel)
@@ -152,19 +153,20 @@ ComPtr<ID3D12Device> AGS_Initialize_RAII::CreateDeviceAndPrintData(IDXGIAdapter*
 		g_DeviceCreatedWithAgs = true;
 
 		ReportScopeObject region(L"AGSDX12ReturnedParams::ExtensionsSupported");
-		ReportFormatter::GetInstance().AddFieldBool(L"intrinsics16", returnedParams.extensionsSupported.intrinsics16);
-		ReportFormatter::GetInstance().AddFieldBool(L"intrinsics17", returnedParams.extensionsSupported.intrinsics17);
-		ReportFormatter::GetInstance().AddFieldBool(L"userMarkers", returnedParams.extensionsSupported.userMarkers);
-		ReportFormatter::GetInstance().AddFieldBool(L"appRegistration", returnedParams.extensionsSupported.appRegistration);
-		ReportFormatter::GetInstance().AddFieldBool(L"UAVBindSlot", returnedParams.extensionsSupported.UAVBindSlot);
-		ReportFormatter::GetInstance().AddFieldBool(L"intrinsics19", returnedParams.extensionsSupported.intrinsics19);
-		ReportFormatter::GetInstance().AddFieldBool(L"baseVertex", returnedParams.extensionsSupported.baseVertex);
-		ReportFormatter::GetInstance().AddFieldBool(L"baseInstance", returnedParams.extensionsSupported.baseInstance);
-		ReportFormatter::GetInstance().AddFieldBool(L"getWaveSize", returnedParams.extensionsSupported.getWaveSize);
-		ReportFormatter::GetInstance().AddFieldBool(L"floatConversion", returnedParams.extensionsSupported.floatConversion);
-		ReportFormatter::GetInstance().AddFieldBool(L"readLaneAt", returnedParams.extensionsSupported.readLaneAt);
-		ReportFormatter::GetInstance().AddFieldBool(L"rayHitToken", returnedParams.extensionsSupported.rayHitToken);
-		ReportFormatter::GetInstance().AddFieldBool(L"shaderClock", returnedParams.extensionsSupported.shaderClock);
+		ReportFormatter& formatter = ReportFormatter::GetInstance();
+		formatter.AddFieldBool(L"intrinsics16", returnedParams.extensionsSupported.intrinsics16);
+		formatter.AddFieldBool(L"intrinsics17", returnedParams.extensionsSupported.intrinsics17);
+		formatter.AddFieldBool(L"userMarkers", returnedParams.extensionsSupported.userMarkers);
+		formatter.AddFieldBool(L"appRegistration", returnedParams.extensionsSupported.appRegistration);
+		formatter.AddFieldBool(L"UAVBindSlot", returnedParams.extensionsSupported.UAVBindSlot);
+		formatter.AddFieldBool(L"intrinsics19", returnedParams.extensionsSupported.intrinsics19);
+		formatter.AddFieldBool(L"baseVertex", returnedParams.extensionsSupported.baseVertex);
+		formatter.AddFieldBool(L"baseInstance", returnedParams.extensionsSupported.baseInstance);
+		formatter.AddFieldBool(L"getWaveSize", returnedParams.extensionsSupported.getWaveSize);
+		formatter.AddFieldBool(L"floatConversion", returnedParams.extensionsSupported.floatConversion);
+		formatter.AddFieldBool(L"readLaneAt", returnedParams.extensionsSupported.readLaneAt);
+		formatter.AddFieldBool(L"rayHitToken", returnedParams.extensionsSupported.rayHitToken);
+		formatter.AddFieldBool(L"shaderClock", returnedParams.extensionsSupported.shaderClock);
 
 		return device;
 	}

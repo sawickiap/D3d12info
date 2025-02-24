@@ -124,13 +124,15 @@ void AmdDeviceInfo_Initialize_RAII::PrintDeviceData(const DeviceId& id)
 	if(!cardInfo)
 		return;
 
+	ReportFormatter& formatter = ReportFormatter::GetInstance();
+
 	{
-		ReportScopeObject region{L"AMD GDT_GfxCardInfo"};
-		ReportFormatter::GetInstance().AddFieldEnum(L"asicType", cardInfo->m_asicType, Enum_GDT_HW_ASIC_TYPE);
-		ReportFormatter::GetInstance().AddFieldEnum(L"generation", cardInfo->m_generation, Enum_GDT_HW_GENERATION);
-		ReportFormatter::GetInstance().AddFieldBool(L"APU", cardInfo->m_bAPU ? TRUE : FALSE);
-		ReportFormatter::GetInstance().AddFieldString(L"CALName", StrToWstr(cardInfo->m_szCALName, CP_UTF8).c_str());
-        ReportFormatter::GetInstance().AddFieldString(L"MarketingName", StrToWstr(cardInfo->m_szMarketingName, CP_UTF8).c_str());
+		ReportScopeObject region{ L"AMD GDT_GfxCardInfo" };
+		formatter.AddFieldEnum(L"asicType", cardInfo->m_asicType, Enum_GDT_HW_ASIC_TYPE);
+		formatter.AddFieldEnum(L"generation", cardInfo->m_generation, Enum_GDT_HW_GENERATION);
+		formatter.AddFieldBool(L"APU", cardInfo->m_bAPU ? TRUE : FALSE);
+		formatter.AddFieldString(L"CALName", StrToWstr(cardInfo->m_szCALName, CP_UTF8).c_str());
+        formatter.AddFieldString(L"MarketingName", StrToWstr(cardInfo->m_szMarketingName, CP_UTF8).c_str());
 	}
 
 	if(cardInfo->m_asicType >= 0 && cardInfo->m_asicType < gs_deviceInfoSize)
@@ -139,15 +141,15 @@ void AmdDeviceInfo_Initialize_RAII::PrintDeviceData(const DeviceId& id)
 		if(devInfo.m_deviceInfoValid)
 		{
 			ReportScopeObject region(L"AMD GDT_DeviceInfo");
-			ReportFormatter::GetInstance().AddFieldUint64(L"NumShaderEngines", devInfo.m_nNumShaderEngines); // Number of shader engines.
-			ReportFormatter::GetInstance().AddFieldUint64(L"MaxWavePerSIMD", devInfo.m_nMaxWavePerSIMD); // Number of wave slots per SIMD.
-			ReportFormatter::GetInstance().AddFieldUint64(L"ClocksPrim", devInfo.m_suClocksPrim); // Number of clocks it takes to process a primitive.
-			ReportFormatter::GetInstance().AddFieldUint64(L"NumSQMaxCounters", devInfo.m_nNumSQMaxCounters); // Max number of SQ counters.
-			ReportFormatter::GetInstance().AddFieldUint64(L"NumPrimPipes", devInfo.m_nNumPrimPipes); // Number of primitive pipes.
-			ReportFormatter::GetInstance().AddFieldUint64(L"WaveSize", devInfo.m_nWaveSize); // Wavefront size.
-			ReportFormatter::GetInstance().AddFieldUint64(L"NumSHPerSE", devInfo.m_nNumSHPerSE); // Number of shader array per Shader Engine.
-			ReportFormatter::GetInstance().AddFieldUint64(L"NumCUPerSH", devInfo.m_nNumCUPerSH); // Number of compute unit per Shader Array.
-			ReportFormatter::GetInstance().AddFieldUint64(L"NumSIMDPerCU", devInfo.m_nNumSIMDPerCU); // Number of SIMDs per Compute unit.
+			formatter.AddFieldUint64(L"NumShaderEngines", devInfo.m_nNumShaderEngines); // Number of shader engines.
+			formatter.AddFieldUint64(L"MaxWavePerSIMD", devInfo.m_nMaxWavePerSIMD); // Number of wave slots per SIMD.
+			formatter.AddFieldUint64(L"ClocksPrim", devInfo.m_suClocksPrim); // Number of clocks it takes to process a primitive.
+			formatter.AddFieldUint64(L"NumSQMaxCounters", devInfo.m_nNumSQMaxCounters); // Max number of SQ counters.
+			formatter.AddFieldUint64(L"NumPrimPipes", devInfo.m_nNumPrimPipes); // Number of primitive pipes.
+			formatter.AddFieldUint64(L"WaveSize", devInfo.m_nWaveSize); // Wavefront size.
+			formatter.AddFieldUint64(L"NumSHPerSE", devInfo.m_nNumSHPerSE); // Number of shader array per Shader Engine.
+			formatter.AddFieldUint64(L"NumCUPerSH", devInfo.m_nNumCUPerSH); // Number of compute unit per Shader Array.
+			formatter.AddFieldUint64(L"NumSIMDPerCU", devInfo.m_nNumSIMDPerCU); // Number of SIMDs per Compute unit.
 		}
 	}
 }

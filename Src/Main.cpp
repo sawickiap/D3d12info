@@ -115,40 +115,43 @@ static wstring LuidToStr(LUID value)
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(const D3D12_FEATURE_DATA_D3D12_OPTIONS& options)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS");
-    ReportFormatter::GetInstance().AddFieldBool(L"DoublePrecisionFloatShaderOps", options.DoublePrecisionFloatShaderOps);
-    ReportFormatter::GetInstance().AddFieldBool(L"OutputMergerLogicOp", options.OutputMergerLogicOp);
-    ReportFormatter::GetInstance().AddFieldEnum(L"MinPrecisionSupport", options.MinPrecisionSupport, Enum_D3D12_SHADER_MIN_PRECISION_SUPPORT);
-    ReportFormatter::GetInstance().AddFieldEnum(L"TiledResourcesTier", options.TiledResourcesTier, Enum_D3D12_TILED_RESOURCES_TIER);
-    ReportFormatter::GetInstance().AddFieldEnum(L"ResourceBindingTier", options.ResourceBindingTier, Enum_D3D12_RESOURCE_BINDING_TIER);
-    ReportFormatter::GetInstance().AddFieldBool(L"PSSpecifiedStencilRefSupported", options.PSSpecifiedStencilRefSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"TypedUAVLoadAdditionalFormats", options.TypedUAVLoadAdditionalFormats);
-    ReportFormatter::GetInstance().AddFieldBool(L"ROVsSupported", options.ROVsSupported);
-    ReportFormatter::GetInstance().AddFieldEnum(L"ConservativeRasterizationTier", options.ConservativeRasterizationTier, Enum_D3D12_CONSERVATIVE_RASTERIZATION_TIER);
-    ReportFormatter::GetInstance().AddFieldUint32(L"MaxGPUVirtualAddressBitsPerResource", options.MaxGPUVirtualAddressBitsPerResource);
-    ReportFormatter::GetInstance().AddFieldBool(L"StandardSwizzle64KBSupported", options.StandardSwizzle64KBSupported);
-    ReportFormatter::GetInstance().AddFieldEnum(L"CrossNodeSharingTier", options.CrossNodeSharingTier, Enum_D3D12_CROSS_NODE_SHARING_TIER);
-    ReportFormatter::GetInstance().AddFieldBool(L"CrossAdapterRowMajorTextureSupported", options.CrossAdapterRowMajorTextureSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation", options.VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation);
-    ReportFormatter::GetInstance().AddFieldEnum(L"ResourceHeapTier", options.ResourceHeapTier, Enum_D3D12_RESOURCE_HEAP_TIER);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"DoublePrecisionFloatShaderOps", options.DoublePrecisionFloatShaderOps);
+    formatter.AddFieldBool(L"OutputMergerLogicOp", options.OutputMergerLogicOp);
+    formatter.AddFieldEnum(L"MinPrecisionSupport", options.MinPrecisionSupport, Enum_D3D12_SHADER_MIN_PRECISION_SUPPORT);
+    formatter.AddFieldEnum(L"TiledResourcesTier", options.TiledResourcesTier, Enum_D3D12_TILED_RESOURCES_TIER);
+    formatter.AddFieldEnum(L"ResourceBindingTier", options.ResourceBindingTier, Enum_D3D12_RESOURCE_BINDING_TIER);
+    formatter.AddFieldBool(L"PSSpecifiedStencilRefSupported", options.PSSpecifiedStencilRefSupported);
+    formatter.AddFieldBool(L"TypedUAVLoadAdditionalFormats", options.TypedUAVLoadAdditionalFormats);
+    formatter.AddFieldBool(L"ROVsSupported", options.ROVsSupported);
+    formatter.AddFieldEnum(L"ConservativeRasterizationTier", options.ConservativeRasterizationTier, Enum_D3D12_CONSERVATIVE_RASTERIZATION_TIER);
+    formatter.AddFieldUint32(L"MaxGPUVirtualAddressBitsPerResource", options.MaxGPUVirtualAddressBitsPerResource);
+    formatter.AddFieldBool(L"StandardSwizzle64KBSupported", options.StandardSwizzle64KBSupported);
+    formatter.AddFieldEnum(L"CrossNodeSharingTier", options.CrossNodeSharingTier, Enum_D3D12_CROSS_NODE_SHARING_TIER);
+    formatter.AddFieldBool(L"CrossAdapterRowMajorTextureSupported", options.CrossAdapterRowMajorTextureSupported);
+    formatter.AddFieldBool(L"VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation", options.VPAndRTArrayIndexFromAnyShaderFeedingRasterizerSupportedWithoutGSEmulation);
+    formatter.AddFieldEnum(L"ResourceHeapTier", options.ResourceHeapTier, Enum_D3D12_RESOURCE_HEAP_TIER);
 }
 
 static void Print_D3D12_FEATURE_DATA_ARCHITECTURE(const D3D12_FEATURE_DATA_ARCHITECTURE& architecture)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_ARCHITECTURE");
-    ReportFormatter::GetInstance().AddFieldUint32(L"NodeIndex", architecture.NodeIndex);
-    ReportFormatter::GetInstance().AddFieldBool(L"TileBasedRenderer", architecture.TileBasedRenderer);
-    ReportFormatter::GetInstance().AddFieldBool(L"UMA", architecture.UMA);
-    ReportFormatter::GetInstance().AddFieldBool(L"CacheCoherentUMA", architecture.CacheCoherentUMA);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldUint32(L"NodeIndex", architecture.NodeIndex);
+    formatter.AddFieldBool(L"TileBasedRenderer", architecture.TileBasedRenderer);
+    formatter.AddFieldBool(L"UMA", architecture.UMA);
+    formatter.AddFieldBool(L"CacheCoherentUMA", architecture.CacheCoherentUMA);
 }
 
 static void Print_D3D12_FEATURE_DATA_ARCHITECTURE1(const D3D12_FEATURE_DATA_ARCHITECTURE1& architecture1)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_ARCHITECTURE1");
-    ReportFormatter::GetInstance().AddFieldUint32(L"NodeIndex", architecture1.NodeIndex);
-    ReportFormatter::GetInstance().AddFieldBool(L"TileBasedRenderer", architecture1.TileBasedRenderer);
-    ReportFormatter::GetInstance().AddFieldBool(L"UMA", architecture1.UMA);
-    ReportFormatter::GetInstance().AddFieldBool(L"CacheCoherentUMA", architecture1.CacheCoherentUMA);
-    ReportFormatter::GetInstance().AddFieldBool(L"IsolatedMMU", architecture1.IsolatedMMU);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldUint32(L"NodeIndex", architecture1.NodeIndex);
+    formatter.AddFieldBool(L"TileBasedRenderer", architecture1.TileBasedRenderer);
+    formatter.AddFieldBool(L"UMA", architecture1.UMA);
+    formatter.AddFieldBool(L"CacheCoherentUMA", architecture1.CacheCoherentUMA);
+    formatter.AddFieldBool(L"IsolatedMMU", architecture1.IsolatedMMU);
 }
 
 static void Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(const D3D12_FEATURE_DATA_FEATURE_LEVELS& featureLevels)
@@ -178,12 +181,13 @@ static void Print_D3D12_FEATURE_DATA_SHADER_MODEL(const D3D12_FEATURE_DATA_SHADE
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(const D3D12_FEATURE_DATA_D3D12_OPTIONS1& options1)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS1");
-    ReportFormatter::GetInstance().AddFieldBool(L"WaveOps", options1.WaveOps);
-    ReportFormatter::GetInstance().AddFieldUint32(L"WaveLaneCountMin", options1.WaveLaneCountMin);
-    ReportFormatter::GetInstance().AddFieldUint32(L"WaveLaneCountMax", options1.WaveLaneCountMax);
-    ReportFormatter::GetInstance().AddFieldUint32(L"TotalLaneCount", options1.TotalLaneCount);
-    ReportFormatter::GetInstance().AddFieldBool(L"ExpandedComputeResourceStates", options1.ExpandedComputeResourceStates);
-    ReportFormatter::GetInstance().AddFieldBool(L"Int64ShaderOps", options1.Int64ShaderOps);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"WaveOps", options1.WaveOps);
+    formatter.AddFieldUint32(L"WaveLaneCountMin", options1.WaveLaneCountMin);
+    formatter.AddFieldUint32(L"WaveLaneCountMax", options1.WaveLaneCountMax);
+    formatter.AddFieldUint32(L"TotalLaneCount", options1.TotalLaneCount);
+    formatter.AddFieldBool(L"ExpandedComputeResourceStates", options1.ExpandedComputeResourceStates);
+    formatter.AddFieldBool(L"Int64ShaderOps", options1.Int64ShaderOps);
 }
 
 static void Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(const D3D12_FEATURE_DATA_ROOT_SIGNATURE& rootSignature)
@@ -208,15 +212,16 @@ static void Print_D3D12_FEATURE_DATA_SHADER_CACHE(const D3D12_FEATURE_DATA_SHADE
 static void Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(const std::array<bool, 9>& commandQueuePriority)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY");
-    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_DIRECT.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[0]);
-    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_DIRECT.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[1]);
-    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_DIRECT.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[2]);
-    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_COMPUTE.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[3]);
-    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_COMPUTE.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[4]);
-    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_COMPUTE.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[5]);
-    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_COPY.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[6]);
-    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_COPY.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[7]);
-    ReportFormatter::GetInstance().AddFieldBool(L"TYPE_COPY.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[8]);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"TYPE_DIRECT.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[0]);
+    formatter.AddFieldBool(L"TYPE_DIRECT.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[1]);
+    formatter.AddFieldBool(L"TYPE_DIRECT.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[2]);
+    formatter.AddFieldBool(L"TYPE_COMPUTE.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[3]);
+    formatter.AddFieldBool(L"TYPE_COMPUTE.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[4]);
+    formatter.AddFieldBool(L"TYPE_COMPUTE.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[5]);
+    formatter.AddFieldBool(L"TYPE_COPY.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[6]);
+    formatter.AddFieldBool(L"TYPE_COPY.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[7]);
+    formatter.AddFieldBool(L"TYPE_COPY.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[8]);
 }
 
 static void Print_D3D12_FEATURE_DATA_SERIALIZATION(const D3D12_FEATURE_DATA_SERIALIZATION& serialization)
@@ -255,37 +260,41 @@ static void Print_D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE(const D3D
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(const D3D12_FEATURE_DATA_D3D12_OPTIONS3& options3)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS3");
-    ReportFormatter::GetInstance().AddFieldBool(L"CopyQueueTimestampQueriesSupported", options3.CopyQueueTimestampQueriesSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"CastingFullyTypedFormatSupported", options3.CastingFullyTypedFormatSupported);
-    ReportFormatter::GetInstance().AddFieldFlags(L"WriteBufferImmediateSupportFlags", options3.WriteBufferImmediateSupportFlags, Enum_D3D12_COMMAND_LIST_SUPPORT_FLAGS);
-    ReportFormatter::GetInstance().AddFieldEnum(L"ViewInstancingTier", options3.ViewInstancingTier, Enum_D3D12_VIEW_INSTANCING_TIER);
-    ReportFormatter::GetInstance().AddFieldBool(L"BarycentricsSupported", options3.BarycentricsSupported);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"CopyQueueTimestampQueriesSupported", options3.CopyQueueTimestampQueriesSupported);
+    formatter.AddFieldBool(L"CastingFullyTypedFormatSupported", options3.CastingFullyTypedFormatSupported);
+    formatter.AddFieldFlags(L"WriteBufferImmediateSupportFlags", options3.WriteBufferImmediateSupportFlags, Enum_D3D12_COMMAND_LIST_SUPPORT_FLAGS);
+    formatter.AddFieldEnum(L"ViewInstancingTier", options3.ViewInstancingTier, Enum_D3D12_VIEW_INSTANCING_TIER);
+    formatter.AddFieldBool(L"BarycentricsSupported", options3.BarycentricsSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS4(const D3D12_FEATURE_DATA_D3D12_OPTIONS4& options4)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS4");
-    ReportFormatter::GetInstance().AddFieldBool(L"MSAA64KBAlignedTextureSupported", options4.MSAA64KBAlignedTextureSupported);
-    ReportFormatter::GetInstance().AddFieldEnum(L"SharedResourceCompatibilityTier", options4.SharedResourceCompatibilityTier, Enum_D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER);
-    ReportFormatter::GetInstance().AddFieldBool(L"Native16BitShaderOpsSupported", options4.Native16BitShaderOpsSupported);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"MSAA64KBAlignedTextureSupported", options4.MSAA64KBAlignedTextureSupported);
+    formatter.AddFieldEnum(L"SharedResourceCompatibilityTier", options4.SharedResourceCompatibilityTier, Enum_D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER);
+    formatter.AddFieldBool(L"Native16BitShaderOpsSupported", options4.Native16BitShaderOpsSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS5(const D3D12_FEATURE_DATA_D3D12_OPTIONS5& options5)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS5");
-    ReportFormatter::GetInstance().AddFieldBool(L"SRVOnlyTiledResourceTier3", options5.SRVOnlyTiledResourceTier3);
-    ReportFormatter::GetInstance().AddFieldEnum(L"RenderPassesTier", options5.RenderPassesTier, Enum_D3D12_RENDER_PASS_TIER);
-    ReportFormatter::GetInstance().AddFieldEnum(L"RaytracingTier", options5.RaytracingTier, Enum_D3D12_RAYTRACING_TIER);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"SRVOnlyTiledResourceTier3", options5.SRVOnlyTiledResourceTier3);
+    formatter.AddFieldEnum(L"RenderPassesTier", options5.RenderPassesTier, Enum_D3D12_RENDER_PASS_TIER);
+    formatter.AddFieldEnum(L"RaytracingTier", options5.RaytracingTier, Enum_D3D12_RAYTRACING_TIER);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS6(const D3D12_FEATURE_DATA_D3D12_OPTIONS6& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS6");
-    ReportFormatter::GetInstance().AddFieldBool(L"AdditionalShadingRatesSupported", o.AdditionalShadingRatesSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"PerPrimitiveShadingRateSupportedWithViewportIndexing", o.PerPrimitiveShadingRateSupportedWithViewportIndexing);
-    ReportFormatter::GetInstance().AddFieldEnum(L"VariableShadingRateTier", o.VariableShadingRateTier, Enum_D3D12_VARIABLE_SHADING_RATE_TIER);
-    ReportFormatter::GetInstance().AddFieldUint32(L"ShadingRateImageTileSize", o.ShadingRateImageTileSize);
-    ReportFormatter::GetInstance().AddFieldBool(L"BackgroundProcessingSupported", o.BackgroundProcessingSupported);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"AdditionalShadingRatesSupported", o.AdditionalShadingRatesSupported);
+    formatter.AddFieldBool(L"PerPrimitiveShadingRateSupportedWithViewportIndexing", o.PerPrimitiveShadingRateSupportedWithViewportIndexing);
+    formatter.AddFieldEnum(L"VariableShadingRateTier", o.VariableShadingRateTier, Enum_D3D12_VARIABLE_SHADING_RATE_TIER);
+    formatter.AddFieldUint32(L"ShadingRateImageTileSize", o.ShadingRateImageTileSize);
+    formatter.AddFieldBool(L"BackgroundProcessingSupported", o.BackgroundProcessingSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS7(const D3D12_FEATURE_DATA_D3D12_OPTIONS7& o)
@@ -304,12 +313,13 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS8(const D3D12_FEATURE_DATA_D3D
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(const D3D12_FEATURE_DATA_D3D12_OPTIONS9& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS9");
-    ReportFormatter::GetInstance().AddFieldBool(L"MeshShaderPipelineStatsSupported", o.MeshShaderPipelineStatsSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"MeshShaderSupportsFullRangeRenderTargetArrayIndex", o.MeshShaderSupportsFullRangeRenderTargetArrayIndex);
-    ReportFormatter::GetInstance().AddFieldBool(L"AtomicInt64OnTypedResourceSupported", o.AtomicInt64OnTypedResourceSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"AtomicInt64OnGroupSharedSupported", o.AtomicInt64OnGroupSharedSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"DerivativesInMeshAndAmplificationShadersSupported", o.DerivativesInMeshAndAmplificationShadersSupported);
-    ReportFormatter::GetInstance().AddFieldEnum(L"WaveMMATier", o.WaveMMATier, Enum_D3D12_WAVE_MMA_TIER);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"MeshShaderPipelineStatsSupported", o.MeshShaderPipelineStatsSupported);
+    formatter.AddFieldBool(L"MeshShaderSupportsFullRangeRenderTargetArrayIndex", o.MeshShaderSupportsFullRangeRenderTargetArrayIndex);
+    formatter.AddFieldBool(L"AtomicInt64OnTypedResourceSupported", o.AtomicInt64OnTypedResourceSupported);
+    formatter.AddFieldBool(L"AtomicInt64OnGroupSharedSupported", o.AtomicInt64OnGroupSharedSupported);
+    formatter.AddFieldBool(L"DerivativesInMeshAndAmplificationShadersSupported", o.DerivativesInMeshAndAmplificationShadersSupported);
+    formatter.AddFieldEnum(L"WaveMMATier", o.WaveMMATier, Enum_D3D12_WAVE_MMA_TIER);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS10(const D3D12_FEATURE_DATA_D3D12_OPTIONS10& o)
@@ -328,28 +338,31 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS11(const D3D12_FEATURE_DATA_D3
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS12(const D3D12_FEATURE_DATA_D3D12_OPTIONS12& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS12");
-    ReportFormatter::GetInstance().AddFieldEnumSigned(L"MSPrimitivesPipelineStatisticIncludesCulledPrimitives", o.MSPrimitivesPipelineStatisticIncludesCulledPrimitives, Enum_D3D12_TRI_STATE);
-    ReportFormatter::GetInstance().AddFieldBool(L"EnhancedBarriersSupported", o.EnhancedBarriersSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"RelaxedFormatCastingSupported", o.RelaxedFormatCastingSupported);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldEnumSigned(L"MSPrimitivesPipelineStatisticIncludesCulledPrimitives", o.MSPrimitivesPipelineStatisticIncludesCulledPrimitives, Enum_D3D12_TRI_STATE);
+    formatter.AddFieldBool(L"EnhancedBarriersSupported", o.EnhancedBarriersSupported);
+    formatter.AddFieldBool(L"RelaxedFormatCastingSupported", o.RelaxedFormatCastingSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS13(const D3D12_FEATURE_DATA_D3D12_OPTIONS13& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS13");
-    ReportFormatter::GetInstance().AddFieldBool(L"UnrestrictedBufferTextureCopyPitchSupported", o.UnrestrictedBufferTextureCopyPitchSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"UnrestrictedVertexElementAlignmentSupported", o.UnrestrictedVertexElementAlignmentSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"InvertedViewportHeightFlipsYSupported", o.InvertedViewportHeightFlipsYSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"InvertedViewportDepthFlipsZSupported", o.InvertedViewportDepthFlipsZSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"TextureCopyBetweenDimensionsSupported", o.TextureCopyBetweenDimensionsSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"AlphaBlendFactorSupported", o.AlphaBlendFactorSupported);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"UnrestrictedBufferTextureCopyPitchSupported", o.UnrestrictedBufferTextureCopyPitchSupported);
+    formatter.AddFieldBool(L"UnrestrictedVertexElementAlignmentSupported", o.UnrestrictedVertexElementAlignmentSupported);
+    formatter.AddFieldBool(L"InvertedViewportHeightFlipsYSupported", o.InvertedViewportHeightFlipsYSupported);
+    formatter.AddFieldBool(L"InvertedViewportDepthFlipsZSupported", o.InvertedViewportDepthFlipsZSupported);
+    formatter.AddFieldBool(L"TextureCopyBetweenDimensionsSupported", o.TextureCopyBetweenDimensionsSupported);
+    formatter.AddFieldBool(L"AlphaBlendFactorSupported", o.AlphaBlendFactorSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS14(const D3D12_FEATURE_DATA_D3D12_OPTIONS14& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS14");
-    ReportFormatter::GetInstance().AddFieldBool(L"AdvancedTextureOpsSupported", o.AdvancedTextureOpsSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"WriteableMSAATexturesSupported", o.WriteableMSAATexturesSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"IndependentFrontAndBackStencilRefMaskSupported", o.IndependentFrontAndBackStencilRefMaskSupported);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"AdvancedTextureOpsSupported", o.AdvancedTextureOpsSupported);
+    formatter.AddFieldBool(L"WriteableMSAATexturesSupported", o.WriteableMSAATexturesSupported);
+    formatter.AddFieldBool(L"IndependentFrontAndBackStencilRefMaskSupported", o.IndependentFrontAndBackStencilRefMaskSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS15(const D3D12_FEATURE_DATA_D3D12_OPTIONS15& o)
@@ -382,16 +395,17 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS18(const D3D12_FEATURE_DATA_D3
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS19(const D3D12_FEATURE_DATA_D3D12_OPTIONS19& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS19");
-    ReportFormatter::GetInstance().AddFieldBool(L"MismatchingOutputDimensionsSupported", o.MismatchingOutputDimensionsSupported);
-    ReportFormatter::GetInstance().AddFieldUint32(L"SupportedSampleCountsWithNoOutputs", o.SupportedSampleCountsWithNoOutputs);
-    ReportFormatter::GetInstance().AddFieldBool(L"PointSamplingAddressesNeverRoundUp", o.PointSamplingAddressesNeverRoundUp);
-    ReportFormatter::GetInstance().AddFieldBool(L"RasterizerDesc2Supported", o.RasterizerDesc2Supported);
-    ReportFormatter::GetInstance().AddFieldBool(L"NarrowQuadrilateralLinesSupported", o.NarrowQuadrilateralLinesSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"AnisoFilterWithPointMipSupported", o.AnisoFilterWithPointMipSupported);
-    ReportFormatter::GetInstance().AddFieldUint32(L"MaxSamplerDescriptorHeapSize", o.MaxSamplerDescriptorHeapSize);
-    ReportFormatter::GetInstance().AddFieldUint32(L"MaxSamplerDescriptorHeapSizeWithStaticSamplers", o.MaxSamplerDescriptorHeapSizeWithStaticSamplers);
-    ReportFormatter::GetInstance().AddFieldUint32(L"MaxViewDescriptorHeapSize", o.MaxViewDescriptorHeapSize);
-    ReportFormatter::GetInstance().AddFieldBool(L"ComputeOnlyCustomHeapSupported", o.ComputeOnlyCustomHeapSupported);
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"MismatchingOutputDimensionsSupported", o.MismatchingOutputDimensionsSupported);
+    formatter.AddFieldUint32(L"SupportedSampleCountsWithNoOutputs", o.SupportedSampleCountsWithNoOutputs);
+    formatter.AddFieldBool(L"PointSamplingAddressesNeverRoundUp", o.PointSamplingAddressesNeverRoundUp);
+    formatter.AddFieldBool(L"RasterizerDesc2Supported", o.RasterizerDesc2Supported);
+    formatter.AddFieldBool(L"NarrowQuadrilateralLinesSupported", o.NarrowQuadrilateralLinesSupported);
+    formatter.AddFieldBool(L"AnisoFilterWithPointMipSupported", o.AnisoFilterWithPointMipSupported);
+    formatter.AddFieldUint32(L"MaxSamplerDescriptorHeapSize", o.MaxSamplerDescriptorHeapSize);
+    formatter.AddFieldUint32(L"MaxSamplerDescriptorHeapSizeWithStaticSamplers", o.MaxSamplerDescriptorHeapSizeWithStaticSamplers);
+    formatter.AddFieldUint32(L"MaxViewDescriptorHeapSize", o.MaxViewDescriptorHeapSize);
+    formatter.AddFieldBool(L"ComputeOnlyCustomHeapSupported", o.ComputeOnlyCustomHeapSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS20(const D3D12_FEATURE_DATA_D3D12_OPTIONS20& o)
@@ -403,11 +417,12 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS20(const D3D12_FEATURE_DATA_D3
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(const D3D12_FEATURE_DATA_D3D12_OPTIONS21& o)
 {
-    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS21");
-    ReportFormatter::GetInstance().AddFieldEnum(L"WorkGraphsTier", o.WorkGraphsTier, Enum_D3D12_WORK_GRAPHS_TIER);
-    ReportFormatter::GetInstance().AddFieldEnum(L"ExecuteIndirectTier", o.ExecuteIndirectTier, Enum_D3D12_EXECUTE_INDIRECT_TIER);
-    ReportFormatter::GetInstance().AddFieldBool(L"SampleCmpGradientAndBiasSupported", o.SampleCmpGradientAndBiasSupported);
-    ReportFormatter::GetInstance().AddFieldBool(L"ExtendedCommandInfoSupported", o.ExtendedCommandInfoSupported);
+	ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS21");
+	ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldEnum(L"WorkGraphsTier", o.WorkGraphsTier, Enum_D3D12_WORK_GRAPHS_TIER);
+    formatter.AddFieldEnum(L"ExecuteIndirectTier", o.ExecuteIndirectTier, Enum_D3D12_EXECUTE_INDIRECT_TIER);
+    formatter.AddFieldBool(L"SampleCmpGradientAndBiasSupported", o.SampleCmpGradientAndBiasSupported);
+    formatter.AddFieldBool(L"ExtendedCommandInfoSupported", o.ExtendedCommandInfoSupported);
 }
 
 static void Print_D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED(const D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED& o)
@@ -490,28 +505,29 @@ static void PrintVersionData()
     }
 
     ReportScopeObject scope(OutputSpecificString(L"General", L"Header"));
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
 
     if (IsOutputJson())
     {
-        ReportFormatter::GetInstance().AddFieldString(L"Program", L"D3d12info");
-        ReportFormatter::GetInstance().AddFieldString(L"Version", PROGRAM_VERSION);
-        ReportFormatter::GetInstance().AddFieldString(L"Build Date", MakeBuildDateTime());
-        ReportFormatter::GetInstance().AddFieldString(L"Configuration", CONFIG_STR);
-        ReportFormatter::GetInstance().AddFieldString(L"Configuration bits", CONFIG_BIT_STR);
+        formatter.AddFieldString(L"Program", L"D3d12info");
+        formatter.AddFieldString(L"Version", PROGRAM_VERSION);
+        formatter.AddFieldString(L"Build Date", MakeBuildDateTime());
+        formatter.AddFieldString(L"Configuration", CONFIG_STR);
+        formatter.AddFieldString(L"Configuration bits", CONFIG_BIT_STR);
     }
-    ReportFormatter::GetInstance().AddFieldString(L"Generated on", MakeCurrentDate().c_str());
+    formatter.AddFieldString(L"Generated on", MakeCurrentDate().c_str());
 #ifdef USE_PREVIEW_AGILITY_SDK
     if (IsOutputJson())
     {
-        ReportFormatter::GetInstance().AddFieldBool(L"Using preview Agility SDK", true);
+        formatter.AddFieldBool(L"Using preview Agility SDK", true);
     }
-    ReportFormatter::GetInstance().AddFieldUint32(L"D3D12_PREVIEW_SDK_VERSION", uint32_t(D3D12SDKVersion));
+    formatter.AddFieldUint32(L"D3D12_PREVIEW_SDK_VERSION", uint32_t(D3D12SDKVersion));
 #else
     if (IsOutputJson())
     {
-        ReportFormatter::GetInstance().AddFieldBool(L"Using preview Agility SDK", false);
+        formatter.AddFieldBool(L"Using preview Agility SDK", false);
     }
-    ReportFormatter::GetInstance().AddFieldUint32(L"D3D12_SDK_VERSION", uint32_t(D3D12SDKVersion));
+    formatter.AddFieldUint32(L"D3D12_SDK_VERSION", uint32_t(D3D12SDKVersion));
 #endif
 
     if(!g_PureD3D12)
@@ -553,10 +569,11 @@ static void PrintEnums()
 static void PrintOsVersionInfo()
 {
     ReportScopeObject scope(L"OS Info");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
     HMODULE m = GetModuleHandle(L"ntdll.dll");
     if(!m)
     {
-        ReportFormatter::GetInstance().AddFieldString(L"Windows version", L"Unknown");
+        formatter.AddFieldString(L"Windows version", L"Unknown");
         return;
     }
 
@@ -564,7 +581,7 @@ static void PrintOsVersionInfo()
     RtlGetVersionFunc RtlGetVersion = (RtlGetVersionFunc)GetProcAddress(m, "RtlGetVersion");
     if(!RtlGetVersion)
     {
-        ReportFormatter::GetInstance().AddFieldString(L"Windows version", L"Unknown");
+        formatter.AddFieldString(L"Windows version", L"Unknown");
         return;
     }
 
@@ -572,7 +589,7 @@ static void PrintOsVersionInfo()
     // Documentation says it always returns success.
     RtlGetVersion(&osVersionInfo);
 
-    ReportFormatter::GetInstance().AddFieldString(L"Windows version", std::format(L"{}.{}.{}",
+    formatter.AddFieldString(L"Windows version", std::format(L"{}.{}.{}",
         osVersionInfo.dwMajorVersion, osVersionInfo.dwMinorVersion,
         osVersionInfo.dwBuildNumber));
 }
@@ -609,9 +626,10 @@ static void PrintSystemMemoryInfo()
     if(MEMORYSTATUSEX memStatEx = {sizeof(MEMORYSTATUSEX)};
         GlobalMemoryStatusEx(&memStatEx))
     {
-        ReportFormatter::GetInstance().AddFieldSize(L"MEMORYSTATUSEX::ullTotalPhys", memStatEx.ullTotalPhys);
-        ReportFormatter::GetInstance().AddFieldSize(L"MEMORYSTATUSEX::ullTotalPageFile", memStatEx.ullTotalPageFile);
-        ReportFormatter::GetInstance().AddFieldSize(L"MEMORYSTATUSEX::ullTotalVirtual", memStatEx.ullTotalVirtual);
+        ReportFormatter& formatter = ReportFormatter::GetInstance();
+        formatter.AddFieldSize(L"MEMORYSTATUSEX::ullTotalPhys", memStatEx.ullTotalPhys);
+        formatter.AddFieldSize(L"MEMORYSTATUSEX::ullTotalPageFile", memStatEx.ullTotalPageFile);
+        formatter.AddFieldSize(L"MEMORYSTATUSEX::ullTotalVirtual", memStatEx.ullTotalVirtual);
     }
 }
 
@@ -678,15 +696,16 @@ static void EnableExperimentalFeatures()
 
 static void PrintAdapterDescMembers(const DXGI_ADAPTER_DESC& desc)
 {
-    ReportFormatter::GetInstance().AddFieldString(L"Description", desc.Description);
-    ReportFormatter::GetInstance().AddFieldVendorId(L"VendorId", desc.VendorId);
-    ReportFormatter::GetInstance().AddFieldHex32(L"DeviceId", desc.DeviceId);
-    ReportFormatter::GetInstance().AddFieldSubsystemId(L"SubSysId", desc.SubSysId);
-    ReportFormatter::GetInstance().AddFieldHex32(L"Revision", desc.Revision);
-    ReportFormatter::GetInstance().AddFieldSize(L"DedicatedVideoMemory", desc.DedicatedVideoMemory);
-    ReportFormatter::GetInstance().AddFieldSize(L"DedicatedSystemMemory", desc.DedicatedSystemMemory);
-    ReportFormatter::GetInstance().AddFieldSize(L"SharedSystemMemory", desc.SharedSystemMemory);
-    ReportFormatter::GetInstance().AddFieldString(L"AdapterLuid", LuidToStr(desc.AdapterLuid).c_str());
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldString(L"Description", desc.Description);
+    formatter.AddFieldVendorId(L"VendorId", desc.VendorId);
+    formatter.AddFieldHex32(L"DeviceId", desc.DeviceId);
+    formatter.AddFieldSubsystemId(L"SubSysId", desc.SubSysId);
+    formatter.AddFieldHex32(L"Revision", desc.Revision);
+    formatter.AddFieldSize(L"DedicatedVideoMemory", desc.DedicatedVideoMemory);
+    formatter.AddFieldSize(L"DedicatedSystemMemory", desc.DedicatedSystemMemory);
+    formatter.AddFieldSize(L"SharedSystemMemory", desc.SharedSystemMemory);
+    formatter.AddFieldString(L"AdapterLuid", LuidToStr(desc.AdapterLuid).c_str());
 }
 
 static void PrintAdapterDesc1Members(const DXGI_ADAPTER_DESC1& desc1)
@@ -818,6 +837,7 @@ static FormatSupportResult CheckFormatSupport(ID3D12Device* device, D3D12_FEATUR
 static void PrintFormatInformation(ID3D12Device* device)
 {
     ReportScopeObject scope(L"Formats");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
 
     D3D12_FEATURE_DATA_FORMAT_SUPPORT formatSupport = {};
     D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS msQualityLevels = {};
@@ -841,8 +861,8 @@ static void PrintFormatInformation(ID3D12Device* device)
         if(formatSupportResult == FormatSupportResult::Ok)
         {
             scope2.Enable();
-            ReportFormatter::GetInstance().AddFieldFlags(L"Support1", formatSupport.Support1, Enum_D3D12_FORMAT_SUPPORT1);
-            ReportFormatter::GetInstance().AddFieldFlags(L"Support2", formatSupport.Support2, Enum_D3D12_FORMAT_SUPPORT2);
+            formatter.AddFieldFlags(L"Support1", formatSupport.Support1, Enum_D3D12_FORMAT_SUPPORT1);
+            formatter.AddFieldFlags(L"Support2", formatSupport.Support2, Enum_D3D12_FORMAT_SUPPORT2);
 
             ReportScopeObjectConditional scope3(IsOutputJson(), L"MultisampleQualityLevels");
             msQualityLevels.Format = format;
@@ -854,13 +874,13 @@ static void PrintFormatInformation(ID3D12Device* device)
                     if(IsOutputJson())
                     {
                         ReportScopeObject scope4(std::format(L"{}", msQualityLevels.SampleCount));
-                        ReportFormatter::GetInstance().AddFieldUint32(L"NumQualityLevels", msQualityLevels.NumQualityLevels);
-                        ReportFormatter::GetInstance().AddFieldUint32(L"Flags", uint32_t(msQualityLevels.Flags));
+                        formatter.AddFieldUint32(L"NumQualityLevels", msQualityLevels.NumQualityLevels);
+                        formatter.AddFieldUint32(L"Flags", uint32_t(msQualityLevels.Flags));
                     }
                     else
                     {
                         bool multisampleTiled = (msQualityLevels.Flags & D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE) != 0;
-                        ReportFormatter::GetInstance().AddFieldString(L"SampleCount", std::format(L"{}: NumQualityLevels = {}{}", msQualityLevels.SampleCount, msQualityLevels.NumQualityLevels, multisampleTiled ? L"  D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE" : L""));
+                        formatter.AddFieldString(L"SampleCount", std::format(L"{}: NumQualityLevels = {}{}", msQualityLevels.SampleCount, msQualityLevels.NumQualityLevels, multisampleTiled ? L"  D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_TILED_RESOURCE" : L""));
                     }
                 }
                 else
@@ -872,7 +892,7 @@ static void PrintFormatInformation(ID3D12Device* device)
         if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &formatInfo, UINT(sizeof formatInfo))))
         {
             scope2.Enable();
-            ReportFormatter::GetInstance().AddFieldUint32(L"PlaneCount", formatInfo.PlaneCount);
+            formatter.AddFieldUint32(L"PlaneCount", formatInfo.PlaneCount);
         }
     }
 }
@@ -981,24 +1001,26 @@ static void PrintDeviceOptions(ID3D12Device* device)
 static void PrintDescriptorSizes(ID3D12Device* device)
 {
     ReportScopeObject scope(L"GetDescriptorHandleIncrementSize");
-    ReportFormatter::GetInstance().AddFieldUint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV",
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldUint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV",
         device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-    ReportFormatter::GetInstance().AddFieldUint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER",
+    formatter.AddFieldUint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER",
         device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
-    ReportFormatter::GetInstance().AddFieldUint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_RTV",
+    formatter.AddFieldUint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_RTV",
         device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
-    ReportFormatter::GetInstance().AddFieldUint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_DSV",
+    formatter.AddFieldUint32(L"D3D12_DESCRIPTOR_HEAP_TYPE_DSV",
         device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
 }
 
 static void PrintMetaCommand(ID3D12Device5* device5, UINT index, const D3D12_META_COMMAND_DESC& desc)
 {
     ReportScopeArrayItem scope;
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
 
-    ReportFormatter::GetInstance().AddFieldString(L"Id", GuidToStr(desc.Id).c_str());
-    ReportFormatter::GetInstance().AddFieldString(L"Name", desc.Name);
-    ReportFormatter::GetInstance().AddFieldFlags(L"InitializationDirtyState", desc.InitializationDirtyState, Enum_D3D12_GRAPHICS_STATES);
-    ReportFormatter::GetInstance().AddFieldFlags(L"ExecutionDirtyState", desc.ExecutionDirtyState, Enum_D3D12_GRAPHICS_STATES);
+    formatter.AddFieldString(L"Id", GuidToStr(desc.Id).c_str());
+    formatter.AddFieldString(L"Name", desc.Name);
+    formatter.AddFieldFlags(L"InitializationDirtyState", desc.InitializationDirtyState, Enum_D3D12_GRAPHICS_STATES);
+    formatter.AddFieldFlags(L"ExecutionDirtyState", desc.ExecutionDirtyState, Enum_D3D12_GRAPHICS_STATES);
 
     for(UINT stageIndex = 0; stageIndex < 3; ++stageIndex)
     {
@@ -1012,7 +1034,7 @@ static void PrintMetaCommand(ID3D12Device5* device5, UINT index, const D3D12_MET
 
         {
             ReportScopeObject scope2(Enum_D3D12_META_COMMAND_PARAMETER_STAGE[stageIndex].m_Name);
-            ReportFormatter::GetInstance().AddFieldUint32(L"TotalStructureSizeInBytes", totalStructureSizeInBytes);
+            formatter.AddFieldUint32(L"TotalStructureSizeInBytes", totalStructureSizeInBytes);
         }
 
         if(paramCount > 0)
@@ -1031,11 +1053,11 @@ static void PrintMetaCommand(ID3D12Device5* device5, UINT index, const D3D12_MET
 
                     ReportScopeArrayItem scope3;
 
-                    ReportFormatter::GetInstance().AddFieldString(L"Name", paramDesc.Name);
-                    ReportFormatter::GetInstance().AddFieldEnum(L"Type", paramDesc.Type, Enum_D3D12_META_COMMAND_PARAMETER_TYPE);
-                    ReportFormatter::GetInstance().AddFieldFlags(L"Flags", paramDesc.Flags, Enum_D3D12_META_COMMAND_PARAMETER_FLAGS);
-                    ReportFormatter::GetInstance().AddFieldFlags(L"RequiredResourceState", paramDesc.RequiredResourceState, Enum_D3D12_RESOURCE_STATES);
-                    ReportFormatter::GetInstance().AddFieldUint32(L"StructureOffset", paramDesc.StructureOffset);
+                    formatter.AddFieldString(L"Name", paramDesc.Name);
+                    formatter.AddFieldEnum(L"Type", paramDesc.Type, Enum_D3D12_META_COMMAND_PARAMETER_TYPE);
+                    formatter.AddFieldFlags(L"Flags", paramDesc.Flags, Enum_D3D12_META_COMMAND_PARAMETER_FLAGS);
+                    formatter.AddFieldFlags(L"RequiredResourceState", paramDesc.RequiredResourceState, Enum_D3D12_RESOURCE_STATES);
+                    formatter.AddFieldUint32(L"StructureOffset", paramDesc.StructureOffset);
                 }
             }
         }
@@ -1119,6 +1141,7 @@ static void PrintDirectSR(ID3D12Device* device)
         return;
 
     ReportScopeArray scope(L"DirectSR");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
 
     for(UINT variantIndex = 0; variantIndex < numVariants; ++variantIndex)
     {
@@ -1127,11 +1150,11 @@ static void PrintDirectSR(ID3D12Device* device)
         {
             ReportScopeArrayItem scope2;
 
-            ReportFormatter::GetInstance().AddFieldString(L"VariantId", GuidToStr(desc.VariantId).c_str());
-            ReportFormatter::GetInstance().AddFieldString(L"VariantName", StrToWstr(desc.VariantName, CP_UTF8).c_str());
-            ReportFormatter::GetInstance().AddFieldFlags(L"Flags", desc.Flags, Enum_DSR_SUPERRES_VARIANT_FLAGS);
+            formatter.AddFieldString(L"VariantId", GuidToStr(desc.VariantId).c_str());
+            formatter.AddFieldString(L"VariantName", StrToWstr(desc.VariantName, CP_UTF8).c_str());
+            formatter.AddFieldFlags(L"Flags", desc.Flags, Enum_DSR_SUPERRES_VARIANT_FLAGS);
             PrintDirectSROptimizationRankings(desc.OptimizationRankings);
-            ReportFormatter::GetInstance().AddFieldEnum(L"OptimalTargetFormat", desc.OptimalTargetFormat, Enum_DXGI_FORMAT);
+            formatter.AddFieldEnum(L"OptimalTargetFormat", desc.OptimalTargetFormat, Enum_DXGI_FORMAT);
         }
     }
 }
