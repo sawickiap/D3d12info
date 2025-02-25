@@ -7,7 +7,6 @@ Changes:
 
 Compiled with DirectX 12 Agility SDK 1.615.0 ("D3d12info.exe") / 1.716.0-preview ("D3d12info\_preview.exe"), AMD AGS 6.2.0, AMD device\_info from 2024-09-24 (commit hash `7379d082f1d8d64c9d1168b84b7f6b2a9702c82f`), NVAPI R570, Intel GPU Detect from 2023-07-18 (commit hash `dd962c44acdad4ea21632e0bd144ab139e8ad8eb`) - all same as previous version.
 
-
 # Version 3.9.0 (2025-02-08)
 
 Changes:
