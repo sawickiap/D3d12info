@@ -17,6 +17,12 @@ For more information, see files README.md, LICENSE.txt.
 #include "Printer.hpp"
 #include "ReportFormatter/ReportFormatter.hpp"
 
+#define WIDE_CHAR_STRING_HELPER(x) L ## x
+#define WIDE_CHAR_STRING(x) WIDE_CHAR_STRING_HELPER(x)
+constexpr const wchar_t* BUILD_TIME = WIDE_CHAR_STRING(__DATE__) L" " WIDE_CHAR_STRING(__TIME__);
+#undef WIDE_CHAR_STRING
+#undef WIDE_CHAR_STRING_HELPER
+
 // For Direct3D 12 Agility SDK
 extern "C"
 {
@@ -452,13 +458,6 @@ static void Print_DXGI_QUERY_VIDEO_MEMORY_INFO(const DXGI_QUERY_VIDEO_MEMORY_INF
     ReportFormatter::GetInstance().AddFieldSize(L"AvailableForReservation", videoMemoryInfo.AvailableForReservation);
 }
 
-static wstring MakeBuildDateTime()
-{
-    wchar_t s[128];
-    swprintf_s(s, L"%hs, %hs", __DATE__, __TIME__);
-    return wstring{s};
-}
-
 #ifdef _DEBUG
     static const wchar_t* const CONFIG_STR = L"Debug";
 #else
@@ -490,7 +489,7 @@ static void PrintVersionHeader()
 #endif
     Printer::PrintString(L"============================\n");
     Printer::PrintFormat(L"D3D12INFO {}{}\n", std::make_wformat_args(PROGRAM_VERSION, AGILITY_SDK_NOTE));
-    Printer::PrintFormat(L"BuildDate: {}\n", std::make_wformat_args(MakeBuildDateTime()));
+    Printer::PrintFormat(L"BuildDate: {}\n", std::make_wformat_args(BUILD_TIME));
     Printer::PrintFormat(L"Configuration: {}, {}\n", std::make_wformat_args(CONFIG_STR, CONFIG_BIT_STR));
     Printer::PrintString(L"============================");
 }
@@ -511,7 +510,7 @@ static void PrintVersionData()
     {
         formatter.AddFieldString(L"Program", L"D3d12info");
         formatter.AddFieldString(L"Version", PROGRAM_VERSION);
-        formatter.AddFieldString(L"Build Date", MakeBuildDateTime());
+        formatter.AddFieldString(L"Build Date", BUILD_TIME);
         formatter.AddFieldString(L"Configuration", CONFIG_STR);
         formatter.AddFieldString(L"Configuration bits", CONFIG_BIT_STR);
     }
@@ -1816,7 +1815,7 @@ int wmain3(int argc, wchar_t** argv)
     {
         if (!Printer::Initialize(true, g_OutputFilePath))
         {
-            ErrorPrinter::PrintFormat(L"Could not open file for writing: {}\n", std::make_wformat_args(g_OutputFilePath.c_str()));
+            ErrorPrinter::PrintFormat(L"Could not open file for writing: {}\n", std::make_wformat_args(g_OutputFilePath));
             return PROGRAM_EXIT_ERROR_INIT;
         }
     }
@@ -1968,7 +1967,8 @@ int wmain2(int argc, wchar_t** argv)
     }
     catch(const std::exception& ex)
     {
-        ErrorPrinter::PrintFormat("ERROR: {}\n", std::make_format_args(ex.what()));
+        const char* errorMessage = ex.what();
+        ErrorPrinter::PrintFormat("ERROR: {}\n", std::make_format_args(errorMessage));
         return PROGRAM_EXIT_ERROR_EXCEPTION;
     }
     catch(...)
@@ -1986,7 +1986,8 @@ int wmain(int argc, wchar_t** argv)
     }
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
-        ErrorPrinter::PrintFormat("STRUCTURED EXCEPTION: 0x{:08X}\n", std::make_format_args(GetExceptionCode()));
+		unsigned long exceptionCode = GetExceptionCode();
+        ErrorPrinter::PrintFormat("STRUCTURED EXCEPTION: 0x{:08X}\n", std::make_format_args(exceptionCode));
         return PROGRAM_EXIT_ERROR_SEH_EXCEPTION;
     }
 }

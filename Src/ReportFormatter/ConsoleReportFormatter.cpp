@@ -111,7 +111,8 @@ void ConsoleReportFormatter::AddFieldBool(std::wstring_view name, bool value)
 {
 	assert(!name.empty());
 	PushElement();
-	Printer::PrintFormat(L"{} = {}", std::make_wformat_args(name, (value ? L"TRUE" : L"FALSE")));
+	const wchar_t* boolStr = value ? L"TRUE" : L"FALSE";
+	Printer::PrintFormat(L"{} = {}", std::make_wformat_args(name, boolStr));
 }
 
 void ConsoleReportFormatter::AddFieldUint32(std::wstring_view name, uint32_t value, std::wstring_view unit /*= {}*/)
@@ -160,7 +161,8 @@ void ConsoleReportFormatter::AddFieldSize(std::wstring_view name, uint64_t value
 	}
 	else
 	{
-		Printer::PrintFormat(L"{} = {:.2f} {} ({} B)", std::make_wformat_args(name, double(value) / scale, units[selectedUnit], value));
+		double valueScaled = double(value) / scale;
+		Printer::PrintFormat(L"{} = {:.2f} {} ({} B)", std::make_wformat_args(name, valueScaled, units[selectedUnit], value));
 	}
 }
 
@@ -336,14 +338,21 @@ void ConsoleReportFormatter::AddFieldMicrosoftVersion(std::wstring_view name, ui
 {
 	assert(!name.empty());
 	PushElement();
-	Printer::PrintFormat(L"{} = {}.{}.{}.{}", std::make_wformat_args(name, value >> 48, (value >> 32) & 0xFFFF, (value >> 16) & 0xFFFF, value & 0xFFFF));
+	uint64_t major = value >> 48;
+	uint64_t minor = (value >> 32) & 0xFFFF;
+	uint64_t build = (value >> 16) & 0xFFFF;
+	uint64_t revision = value & 0xFFFF;
+	Printer::PrintFormat(L"{} = {}.{}.{}.{}", std::make_wformat_args(name, major, minor, build, revision));
 }
 
 void ConsoleReportFormatter::AddFieldAMDVersion(std::wstring_view name, uint64_t value)
 {
 	assert(!name.empty());
 	PushElement();
-	Printer::PrintFormat(L"{} = {}.{}.{}", std::make_wformat_args(name, value >> 22, (value >> 12) & 0b11'1111'1111, value & 0b1111'1111'1111));
+	uint64_t major = value >> 22;
+	uint64_t minor = (value >> 12) & 0b11'1111'1111;
+	uint64_t patch = value & 0b1111'1111'1111;
+	Printer::PrintFormat(L"{} = {}.{}.{}", std::make_wformat_args(name, major, minor, patch));
 }
 
 void ConsoleReportFormatter::AddFieldNvidiaImplementationID(std::wstring_view name, uint32_t architectureId, uint32_t implementationId, const EnumItem* architecturePlusImplementationIDEnum)

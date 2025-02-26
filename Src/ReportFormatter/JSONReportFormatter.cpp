@@ -87,7 +87,8 @@ void JSONReportFormatter::AddFieldBool(std::wstring_view name, bool value)
 {
 	assert(!name.empty());
 	PushNewElement();
-	Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(name, value ? L"true" : L"false"));
+	const wchar_t* boolStr = value ? L"true" : L"false";
+	Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(name, boolStr));
 }
 
 void JSONReportFormatter::AddFieldUint32(std::wstring_view name, uint32_t value, std::wstring_view unit /* = {}*/)
