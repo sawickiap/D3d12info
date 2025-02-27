@@ -43,12 +43,7 @@ set(HPP_FILES
     Src/ReportFormatter/ReportFormatter.hpp
 )
 
-set(RAPIDJSON_NATVIS_FILE "Src/ThirdParty/rapidjson/contrib/natvis/rapidjson.natvis")
 set(INTEL_GPUDETECT_CFG_FILE "Src/ThirdParty/gpudetect/IntelGfx.cfg")
-
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/Src/ThirdParty/rapidjson/include/rapidjson/rapidjson.h")
-    message(FATAL_ERROR "rapidjson library not found. This is likely due to missing submodule. Please initialize submodules.")
-endif()
 
 option(ENABLE_AGS "Enables usage of AMD GPU Services (AGS) library." ON)
 if(ENABLE_AGS)
@@ -122,9 +117,6 @@ function(add_my_executable USE_PREVIEW_AGILITY_SDK)
     target_compile_options(${EXE_NAME} PRIVATE /W4 /wd4100 /wd4189)
     target_compile_definitions(${EXE_NAME} PRIVATE UNICODE _UNICODE)
     target_precompile_headers(${EXE_NAME} PRIVATE "Src/pch.hpp")
-    
-    target_sources(${EXE_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/${RAPIDJSON_NATVIS_FILE}")
-    source_group("ThirdParty" FILES ${RAPIDJSON_NATVIS_FILE})
     
     if(USE_PREVIEW_AGILITY_SDK)
         target_compile_definitions(${EXE_NAME} PRIVATE USE_PREVIEW_AGILITY_SDK=1)

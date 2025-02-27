@@ -90,8 +90,6 @@ It uses following thirt-party libraries:
 
 - **[DirectX 12 Agility SDK](https://devblogs.microsoft.com/directx/directx12agility/)** - latest API to Direct3D, by Microsoft.
   - Embedded in directory: Src\ThirdParty\microsoft.direct3d.d3d12.*
-- **[RapidJSON](https://rapidjson.org/)** - a fast JSON parser/generator, by Tencent. License: MIT.
-  - Linked via submodule.
 - **[AMD GPU Services](https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK)** - custom vendor extensions to graphics APIs by AMD.
   - Linked via submodule.
   - Optional, controlled by Cmake variable `ENABLE_AGS` - on by default.
