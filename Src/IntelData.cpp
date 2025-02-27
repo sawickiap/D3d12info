@@ -13,10 +13,10 @@ License: Apache 2.0
 See the original library in directory: Src\ThirdParty\gpudetect
 */
 #include "IntelData.hpp"
-#include "Printing.hpp"
 #include "Utils.hpp"
-#include "Json.hpp"
 #include "Enums.hpp"
+#include "ReportFormatter/ReportFormatter.hpp"
+#include "Printer.hpp"
 
 // Macro set by Cmake.
 #if USE_INTEL_GPUDETECT
@@ -1549,7 +1549,7 @@ PresetLevel GetDefaultFidelityPreset( const GPUData* const gpuData )
 	}
 	else
 	{
-		fprintf( stderr, "Error: %s not found! Fallback to default presets.\n", cfgFileName );
+		ErrorPrinter::PrintFormat("Error: {} not found! Fallback to default presets.", std::make_format_args(cfgFileName));
 	}
 
 	//
@@ -1979,7 +1979,7 @@ namespace IntelData
 
 void PrintStaticParams()
 {
-	Print_string(L"Intel GPU Detect compiled version", INTEL_GPU_DETECT_COMPILED_VERSION);
+	ReportFormatter::GetInstance().AddFieldString(L"Intel GPU Detect compiled version", INTEL_GPU_DETECT_COMPILED_VERSION);
 }
 
 void PrintAdapterData(IDXGIAdapter* adapter)
@@ -1994,29 +1994,30 @@ void PrintAdapterData(IDXGIAdapter* adapter)
 	if(r != EXIT_SUCCESS)
 		return;
 
-	ScopedStructRegion region(L"Intel GPUDetect::GPUData");
-	PrintVendorId(L"VendorId", gpuData.vendorID);
-	Print_hex32(L"deviceID", gpuData.deviceID);
-	Print_BOOL(L"isUMAArchitecture", gpuData.isUMAArchitecture ? TRUE : FALSE);
-	Print_size(L"videoMemory", gpuData.videoMemory);
-	Print_string(L"description", gpuData.description);
-	Print_hex32(L"extensionVersion", gpuData.extensionVersion);
-	Print_BOOL(L"intelExtensionAvailability", gpuData.intelExtensionAvailability ? TRUE : FALSE);
+	ReportScopeObject region(L"Intel GPUDetect::GPUData");
+	ReportFormatter& formatter = ReportFormatter::GetInstance();
+	formatter.AddFieldVendorId(L"VendorId", gpuData.vendorID);
+	formatter.AddFieldHex32(L"deviceID", gpuData.deviceID);
+	formatter.AddFieldBool(L"isUMAArchitecture", gpuData.isUMAArchitecture ? TRUE : FALSE);
+	formatter.AddFieldSize(L"videoMemory", gpuData.videoMemory);
+	formatter.AddFieldString(L"description", gpuData.description);
+	formatter.AddFieldHex32(L"extensionVersion", gpuData.extensionVersion);
+	formatter.AddFieldBool(L"intelExtensionAvailability", gpuData.intelExtensionAvailability ? TRUE : FALSE);
 
 	r = GPUDetect::InitDxDriverVersion(&gpuData);
 	if(r == EXIT_SUCCESS && gpuData.d3dRegistryDataAvailability)
 	{
 		char driverVersionStr[19] = {};
 		GPUDetect::GetDriverVersionAsCString(&gpuData, driverVersionStr, _countof(driverVersionStr));
-		Print_string(L"dxDriverVersion", StrToWstr(driverVersionStr, CP_ACP).c_str());
-		Print_uint32(L"driverInfo.driverReleaseRevision", gpuData.driverInfo.driverReleaseRevision);
-		Print_uint32(L"driverInfo.driverBuildNumber", gpuData.driverInfo.driverBuildNumber);
+		formatter.AddFieldString(L"dxDriverVersion", StrToWstr(driverVersionStr, CP_ACP).c_str());
+		formatter.AddFieldUint32(L"driverInfo.driverReleaseRevision", gpuData.driverInfo.driverReleaseRevision);
+		formatter.AddFieldUint32(L"driverInfo.driverBuildNumber", gpuData.driverInfo.driverBuildNumber);
 	}
 
 	if(gpuData.vendorID == GPUDetect::INTEL_VENDOR_ID)
 	{
 		const GPUDetect::PresetLevel presetLevel = GPUDetect::GetDefaultFidelityPreset(&gpuData);
-		PrintEnum(L"DefaultFidelityPreset", (uint32_t)presetLevel, GPUDetect::Enum_PresetLevel);
+		formatter.AddFieldEnum(L"DefaultFidelityPreset", (uint32_t)presetLevel, GPUDetect::Enum_PresetLevel);
 
 		r = GPUDetect::InitCounterInfo(&gpuData, device.Get());
 		if(r == EXIT_SUCCESS)
@@ -2024,24 +2025,24 @@ void PrintAdapterData(IDXGIAdapter* adapter)
 			string architectureStr = GPUDetect::GetIntelGPUArchitectureString(gpuData.architecture);
 			if(architectureStr == "Unknown")
 				architectureStr = std::format("Unknown ({})", (uint32_t)gpuData.architecture);
-			Print_string(L"GPUArchitecture", StrToWstr(architectureStr.c_str(), CP_ACP).c_str());
+			formatter.AddFieldString(L"GPUArchitecture", StrToWstr(architectureStr.c_str(), CP_ACP).c_str());
 
 			const GPUDetect::IntelGraphicsGeneration generation =
 				GPUDetect::GetIntelGraphicsGeneration(gpuData.architecture);
 			string generationStr = GPUDetect::GetIntelGraphicsGenerationString(generation);
 			if(generationStr == "Unknown")
 				generationStr = std::format("Unknown ({})", (uint32_t)generation);
-			Print_string(L"GraphicsGeneration", StrToWstr(generationStr.c_str(), CP_ACP).c_str());
+			formatter.AddFieldString(L"GraphicsGeneration", StrToWstr(generationStr.c_str(), CP_ACP).c_str());
 
 			if(gpuData.advancedCounterDataAvailability)
 			{
-				Print_uint32(L"euCount", gpuData.euCount);
-				Print_uint32(L"packageTDP", gpuData.packageTDP, L"W");
-				Print_uint32(L"maxFillRate", gpuData.maxFillRate, L"pixels/clock");
+				formatter.AddFieldUint32(L"euCount", gpuData.euCount);
+				formatter.AddFieldUint32(L"packageTDP", gpuData.packageTDP, L"W");
+				formatter.AddFieldUint32(L"maxFillRate", gpuData.maxFillRate, L"pixels/clock");
 			}
 
-			Print_uint32(L"maxFrequency", gpuData.maxFrequency, L"MHz");
-			Print_uint32(L"minFrequency", gpuData.minFrequency, L"MHz");
+			formatter.AddFieldUint32(L"maxFrequency", gpuData.maxFrequency, L"MHz");
+			formatter.AddFieldUint32(L"minFrequency", gpuData.minFrequency, L"MHz");
 		}
 	}
 }

@@ -60,9 +60,10 @@ Options:
   -h --Help                        Only print this help (command line syntax).
   -l --List                        Only print the list of all adapters.
   -a --Adapter=<Index>             Print details of adapter at specified index.
-  --AllNonSoftware                 Print details of all (except WARP and Software) adapters (default behavior).
-  --AllAdapters                    Print details of all (except WARP) adapters.
+  --AllAdapters                    Print details of all adapters.
   -j --JSON                        Print output in JSON format instead of human-friendly text.
+  --MinimizeJson                   Print JSON in minimal size form.
+  -o --OutputFile=<FilePath>       Output to specified file.
   -f --Formats                     Include information about DXGI format capabilities.
   --MetaCommands                   Include information about meta commands.
   -e --Enums                       Include information about all known enums and their values.
@@ -89,8 +90,6 @@ It uses following thirt-party libraries:
 
 - **[DirectX 12 Agility SDK](https://devblogs.microsoft.com/directx/directx12agility/)** - latest API to Direct3D, by Microsoft.
   - Embedded in directory: Src\ThirdParty\microsoft.direct3d.d3d12.*
-- **[RapidJSON](https://rapidjson.org/)** - a fast JSON parser/generator, by Tencent. License: MIT.
-  - Linked via submodule.
 - **[AMD GPU Services](https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK)** - custom vendor extensions to graphics APIs by AMD.
   - Linked via submodule.
   - Optional, controlled by Cmake variable `ENABLE_AGS` - on by default.

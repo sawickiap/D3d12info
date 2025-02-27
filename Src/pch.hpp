@@ -31,22 +31,29 @@ For more information, see files README.md, LICENSE.txt.
 #include <Objbase.h> // For StringFromGUID2
 #include <wrl/client.h> // for ComPtr
 
-#include <vector>
+#include <algorithm>
 #include <array>
-#include <set>
-#include <string>
 #include <exception>
 #include <format>
+#include <fstream>
+#include <iostream>
+#include <numeric>
+#include <optional>
+#include <set>
+#include <stack>
 #include <stdexcept>
-#include <algorithm>
-#include <cwctype>
+#include <string_view>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-#include <cstdint>
 #include <cassert>
+#include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cwchar>
+#include <cwctype>
 
 using std::string;
 using std::wstring;
