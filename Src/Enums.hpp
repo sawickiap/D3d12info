@@ -9,8 +9,6 @@ For more information, see files README.md, LICENSE.txt.
 */
 #pragma once
 
-#include <unordered_map>
-
 struct EnumItem
 {
 	const wchar_t* m_Name;

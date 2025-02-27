@@ -20,7 +20,7 @@ public:
 
 	static void PrintNewLine();
 
-	static void PrintString(std::string_view line);
+	static void PrintString(const std::string& line);
 	static void PrintString(std::wstring_view line);
 
 	static void PrintFormat(std::string_view format, std::format_args&& args);
@@ -32,10 +32,17 @@ private:
 	static std::wostream* m_Output;
 };
 
+class PrinterScope
+{
+public:
+	PrinterScope(bool writeToFile, std::wstring_view name);
+	~PrinterScope();
+};
+
 class ErrorPrinter
 {
 public:
-	static void PrintString(std::string_view line);
+	static void PrintString(const std::string& line);
 	static void PrintString(std::wstring_view line);
 
 	static void PrintFormat(std::string_view format, std::format_args&& args);

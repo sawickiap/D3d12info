@@ -11,8 +11,8 @@ For more information, see files README.md, LICENSE.txt.
 
 #include "Printer.hpp"
 
-JSONReportFormatter::JSONReportFormatter(Flags flags)
-	: m_PrettyPrint((flags& Flags::UseJsonPrettyPrint) != Flags::None)
+JSONReportFormatter::JSONReportFormatter(FLAGS flags)
+	: m_PrettyPrint((flags & FLAGS::FLAG_JSON_PRETTY_PRINT) != FLAGS::FLAG_NONE)
 {
 	Printer::PrintString(L"{");
 	m_ScopeStack.push({ .ElementCount = 0, .Type = ScopeType::Object });
@@ -36,7 +36,7 @@ void JSONReportFormatter::PushObject(std::wstring_view name)
 	m_ScopeStack.push({ .ElementCount = 0, .Type = ScopeType::Object });
 }
 
-void JSONReportFormatter::PushArray(std::wstring_view name, ArraySuffix suffix /* = ArraySuffix::SquareBrackets */)
+void JSONReportFormatter::PushArray(std::wstring_view name, ARRAY_SUFFIX suffix /* = ArraySuffix::SquareBrackets */)
 {
 	assert(!name.empty());
 
@@ -81,6 +81,26 @@ void JSONReportFormatter::AddFieldString(std::wstring_view name, std::wstring_vi
 	assert(!value.empty());
 	PushNewElement();
 	Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": \"{}\"" : L"\"{}\":\"{}\"", std::make_wformat_args(name, value));
+}
+
+void JSONReportFormatter::AddFieldStringArray(std::wstring_view name, const std::vector<std::wstring>& value)
+{
+	assert(!name.empty());
+	PushNewElement();
+	Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": [" : L"\"{}\":[", std::make_wformat_args(name));
+	for (size_t i = 0; i < value.size(); ++i)
+	{
+		if (i > 0)
+		{
+			Printer::PrintString(L",");
+		}
+		PrintNewLine();
+		PrintIndent(1);
+		Printer::PrintFormat(L"\"{}\"", std::make_wformat_args(value[i]));
+	}
+	PrintNewLine();
+	PrintIndent();
+	Printer::PrintString(L"]");
 }
 
 void JSONReportFormatter::AddFieldBool(std::wstring_view name, bool value)

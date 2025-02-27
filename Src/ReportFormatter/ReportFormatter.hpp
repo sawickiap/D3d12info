@@ -10,42 +10,40 @@ For more information, see files README.md, LICENSE.txt.
 
 #pragma once
 
-#include <string_view>
-#include <wtypes.h>
-
 struct EnumItem;
 
 class ReportFormatter
 {
 public:
-	enum class Flags : uint32_t
+	enum FLAGS : uint32_t
 	{
-		None = 0,
-		UseJson = 1 << 0,
-		UseJsonPrettyPrint = 1 << 1
+		FLAG_NONE = 0,
+		FLAG_JSON = 1 << 0,
+		FLAG_JSON_PRETTY_PRINT = 1 << 1
 	};
 
-	enum class ArraySuffix
+	enum ARRAY_SUFFIX
 	{
-		SquareBrackets,
-		None
+		ARRAY_SUFFIX_SQUARE_BRACKETS,
+		ARRAY_SUFFIX_NONE
 	};
 
-	static void CreateInstance(Flags flags);
+	static void CreateInstance(FLAGS flags);
 	static void DestroyInstance();
 	static ReportFormatter& GetInstance();
-	static Flags GetFlags();
+	static FLAGS GetFlags();
 
 	virtual ~ReportFormatter() = default;
 
 	virtual void PushObject(std::wstring_view name) = 0;
-	virtual void PushArray(std::wstring_view name, ArraySuffix suffix = ArraySuffix::SquareBrackets) = 0;
+	virtual void PushArray(std::wstring_view name, ARRAY_SUFFIX suffix = ARRAY_SUFFIX_SQUARE_BRACKETS) = 0;
 	virtual void PushArrayItem() = 0;
 	virtual void PopScope() = 0;
 
 	// Fields
 	// Strings
 	virtual void AddFieldString(std::wstring_view name, std::wstring_view value) = 0;
+	virtual void AddFieldStringArray(std::wstring_view name, const std::vector<std::wstring>& value) = 0;
 	// Booleans
 	virtual void AddFieldBool(std::wstring_view name, bool value) = 0;
 	// Integers
@@ -72,31 +70,64 @@ public:
 	virtual void AddFieldNvidiaImplementationID(std::wstring_view name, uint32_t architectureId, uint32_t implementationId, const EnumItem* architecturePlusImplementationIDEnum) = 0;
 };
 
-ReportFormatter::Flags operator&(ReportFormatter::Flags a, ReportFormatter::Flags b);
-ReportFormatter::Flags operator|(ReportFormatter::Flags a, ReportFormatter::Flags b);
-bool operator||(bool a, ReportFormatter::Flags b);
-bool operator&&(bool a, ReportFormatter::Flags b);
-bool operator!(ReportFormatter::Flags a);
+ReportFormatter::FLAGS& operator|=(ReportFormatter::FLAGS& lhs, ReportFormatter::FLAGS rhs);
+
+class ReportFormatterScope
+{
+public:
+	ReportFormatterScope(ReportFormatter::FLAGS flags)
+	{
+		ReportFormatter::CreateInstance(flags);
+	}
+
+	~ReportFormatterScope()
+	{
+		ReportFormatter::DestroyInstance();
+	}
+};
 
 class ReportScopeObject
 {
 public:
-	ReportScopeObject(std::wstring_view name);
-	~ReportScopeObject();
+
+	ReportScopeObject(std::wstring_view name)
+	{
+		ReportFormatter::GetInstance().PushObject(name);
+	}
+
+	~ReportScopeObject()
+	{
+		ReportFormatter::GetInstance().PopScope();
+	}
 };
 
 class ReportScopeArray
 {
 public:
-	ReportScopeArray(std::wstring_view name, ReportFormatter::ArraySuffix suffix =  ReportFormatter::ArraySuffix::SquareBrackets);
-	~ReportScopeArray();
+
+	ReportScopeArray(std::wstring_view name, ReportFormatter::ARRAY_SUFFIX suffix = ReportFormatter::ARRAY_SUFFIX_SQUARE_BRACKETS)
+	{
+		ReportFormatter::GetInstance().PushArray(name, suffix);
+	}
+
+	~ReportScopeArray()
+	{
+		ReportFormatter::GetInstance().PopScope();
+	}
 };
 
 class ReportScopeArrayItem
 {
 public:
-	ReportScopeArrayItem();
-	~ReportScopeArrayItem();
+	ReportScopeArrayItem()
+	{
+		ReportFormatter::GetInstance().PushArrayItem();
+	}
+
+	~ReportScopeArrayItem()
+	{
+		ReportFormatter::GetInstance().PopScope();
+	}
 };
 
 class ReportScopeObjectConditional
@@ -114,13 +145,13 @@ private:
 class ReportScopeArrayConditional
 {
 public:
-	ReportScopeArrayConditional(std::wstring_view name, ReportFormatter::ArraySuffix suffix = ReportFormatter::ArraySuffix::SquareBrackets);
-	ReportScopeArrayConditional(bool enable, std::wstring_view name, ReportFormatter::ArraySuffix suffix = ReportFormatter::ArraySuffix::SquareBrackets);
+	ReportScopeArrayConditional(std::wstring_view name, ReportFormatter::ARRAY_SUFFIX suffix = ReportFormatter::ARRAY_SUFFIX_SQUARE_BRACKETS);
+	ReportScopeArrayConditional(bool enable, std::wstring_view name, ReportFormatter::ARRAY_SUFFIX suffix = ReportFormatter::ARRAY_SUFFIX_SQUARE_BRACKETS);
 	~ReportScopeArrayConditional();
 	void Enable();
 private:
 	std::wstring m_Name;
-	ReportFormatter::ArraySuffix m_Suffix;
+	ReportFormatter::ARRAY_SUFFIX m_Suffix;
 	bool m_Enabled = false;
 };
 
@@ -135,7 +166,7 @@ private:
 	bool m_Enabled = false;
 };
 
-bool IsOutputConsole();
-bool IsOutputJson();
-std::wstring_view OutputSpecificString(std::wstring_view consoleString, std::wstring_view jsonString);
-std::string_view OutputSpecificString(std::string_view consoleString, std::string_view jsonString);
+bool IsTextOutput();
+bool IsJsonOutput();
+std::wstring_view SelectString(std::wstring_view textString, std::wstring_view jsonString);
+std::string_view SelectString(std::string_view textString, std::string_view jsonString);

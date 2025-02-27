@@ -10,21 +10,21 @@ For more information, see files README.md, LICENSE.txt.
 #include "ReportFormatter.hpp"
 
 #include "JSONReportFormatter.hpp"
-#include "ConsoleReportFormatter.hpp"
+#include "TextReportFormatter.hpp"
 
 static ReportFormatter* s_Instance = nullptr;
-static ReportFormatter::Flags s_Flags = ReportFormatter::Flags::None;
+static ReportFormatter::FLAGS s_Flags = ReportFormatter::FLAGS::FLAG_NONE;
 
-void ReportFormatter::CreateInstance(Flags flags)
+void ReportFormatter::CreateInstance(FLAGS flags)
 {
 	assert(s_Instance == nullptr);
-	if ((flags & Flags::UseJson) != Flags::None)
+	if ((flags & FLAGS::FLAG_JSON) != FLAGS::FLAG_NONE)
 	{
 		s_Instance = new JSONReportFormatter(flags);
 	}
 	else
 	{
-		s_Instance = new ConsoleReportFormatter(flags);
+		s_Instance = new TextReportFormatter(flags);
 	}
 	s_Flags = flags;
 }
@@ -42,65 +42,16 @@ ReportFormatter& ReportFormatter::GetInstance()
 	return *s_Instance;
 }
 
-ReportFormatter::Flags ReportFormatter::GetFlags()
+ReportFormatter::FLAGS ReportFormatter::GetFlags()
 {
 	assert(s_Instance != nullptr);
 	return s_Flags;
 }
 
-ReportFormatter::Flags operator&(ReportFormatter::Flags a, ReportFormatter::Flags b)
+ReportFormatter::FLAGS& operator|=(ReportFormatter::FLAGS& lhs, ReportFormatter::FLAGS rhs)
 {
-	return static_cast<ReportFormatter::Flags>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
-}
-
-ReportFormatter::Flags operator|(ReportFormatter::Flags a, ReportFormatter::Flags b)
-{
-	return static_cast<ReportFormatter::Flags>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
-}
-
-bool operator||(bool a, ReportFormatter::Flags b)
-{
-	return a || (b != ReportFormatter::Flags::None);
-}
-
-bool operator&&(bool a, ReportFormatter::Flags b)
-{
-	return a && (b != ReportFormatter::Flags::None);
-}
-
-bool operator!(ReportFormatter::Flags a)
-{
-	return a == ReportFormatter::Flags::None;
-}
-
-ReportScopeObject::ReportScopeObject(std::wstring_view name)
-{
-	ReportFormatter::GetInstance().PushObject(name);
-}
-
-ReportScopeObject::~ReportScopeObject()
-{
-	ReportFormatter::GetInstance().PopScope();
-}
-
-ReportScopeArray::ReportScopeArray(std::wstring_view name, ReportFormatter::ArraySuffix suffix /*= ReportFormatter::ArraySuffix::SquareBrackets*/)
-{
-	ReportFormatter::GetInstance().PushArray(name, suffix);
-}
-
-ReportScopeArray::~ReportScopeArray()
-{
-	ReportFormatter::GetInstance().PopScope();
-}
-
-ReportScopeArrayItem::ReportScopeArrayItem()
-{
-	ReportFormatter::GetInstance().PushArrayItem();
-}
-
-ReportScopeArrayItem::~ReportScopeArrayItem()
-{
-	ReportFormatter::GetInstance().PopScope();
+	lhs = static_cast<ReportFormatter::FLAGS>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+	return lhs;
 }
 
 ReportScopeObjectConditional::ReportScopeObjectConditional(std::wstring_view name)
@@ -134,13 +85,13 @@ void ReportScopeObjectConditional::Enable()
 	}
 }
 
-ReportScopeArrayConditional::ReportScopeArrayConditional(std::wstring_view name, ReportFormatter::ArraySuffix suffix /*= ReportFormatter::ArraySuffix::SquareBrackets*/)
+ReportScopeArrayConditional::ReportScopeArrayConditional(std::wstring_view name, ReportFormatter::ARRAY_SUFFIX suffix /*= ReportFormatter::SquareBrackets*/)
 	: m_Name(name)
 	, m_Suffix(suffix)
 {
 }
 
-ReportScopeArrayConditional::ReportScopeArrayConditional(bool enable, std::wstring_view name, ReportFormatter::ArraySuffix suffix /*= ReportFormatter::ArraySuffix::SquareBrackets*/)
+ReportScopeArrayConditional::ReportScopeArrayConditional(bool enable, std::wstring_view name, ReportFormatter::ARRAY_SUFFIX suffix /*= ReportFormatter::SquareBrackets*/)
 	: ReportScopeArrayConditional(name, suffix)
 {
 	if (enable)
@@ -195,36 +146,36 @@ void ReportScopeArrayItemConditional::Enable()
 	}
 }
 
-bool IsOutputConsole()
+bool IsTextOutput()
 {
-	return (ReportFormatter::GetFlags() & ReportFormatter::Flags::UseJson) == ReportFormatter::Flags::None;
+	return (ReportFormatter::GetFlags() & ReportFormatter::FLAGS::FLAG_JSON) == ReportFormatter::FLAGS::FLAG_NONE;
 }
 
-bool IsOutputJson()
+bool IsJsonOutput()
 {
-	return !IsOutputConsole();
+	return !IsTextOutput();
 }
 
-std::wstring_view OutputSpecificString(std::wstring_view consoleString, std::wstring_view jsonString)
+std::wstring_view SelectString(std::wstring_view textString, std::wstring_view jsonString)
 {
-	if ((ReportFormatter::GetFlags() & ReportFormatter::Flags::UseJson) != ReportFormatter::Flags::None)
+	if (IsJsonOutput())
 	{
 		return jsonString;
 	}
 	else
 	{
-		return consoleString;
+		return textString;
 	}
 }
 
-std::string_view OutputSpecificString(std::string_view consoleString, std::string_view jsonString)
+std::string_view SelectString(std::string_view textString, std::string_view jsonString)
 {
-	if ((ReportFormatter::GetFlags() & ReportFormatter::Flags::UseJson) != ReportFormatter::Flags::None)
+	if (IsJsonOutput())
 	{
 		return jsonString;
 	}
 	else
 	{
-		return consoleString;
+		return textString;
 	}
 }

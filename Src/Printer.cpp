@@ -9,9 +9,6 @@ For more information, see files README.md, LICENSE.txt.
 */
 #include "Printer.hpp"
 
-#include <fstream>
-#include <iostream>
-
 bool Printer::m_IsInitialized = false;
 bool Printer::m_WritingToFile = false;
 std::wostream* Printer::m_Output = nullptr;
@@ -55,11 +52,11 @@ void Printer::PrintNewLine()
 	*m_Output << std::endl;
 }
 
-void Printer::PrintString(std::string_view line)
+void Printer::PrintString(const std::string& line)
 {
 	assert(m_IsInitialized);
 
-	*m_Output << line.data();
+	*m_Output << line.c_str();
 }
 
 void Printer::PrintString(std::wstring_view line)
@@ -81,6 +78,27 @@ void Printer::PrintFormat(std::wstring_view format, std::wformat_args&& args)
 	PrintString(formatted);
 }
 
+PrinterScope::PrinterScope(bool writeToFile, std::wstring_view name)
+{
+	if (!Printer::Initialize(writeToFile, name))
+	{
+		if (writeToFile)
+		{
+			std::string narrowName(name.begin(), name.end());
+			throw std::runtime_error(std::format("Could not open {} for writing.", narrowName));
+		}
+		else
+		{
+			throw std::runtime_error("Unexpected error during output initialization.");
+		}
+	}
+}
+
+PrinterScope::~PrinterScope()
+{
+	Printer::Release();
+}
+
 void ErrorPrinter::PrintFormat(std::string_view format, std::format_args&& args)
 {
 	std::string formatted = std::vformat(format, args);
@@ -93,7 +111,7 @@ void ErrorPrinter::PrintFormat(std::wstring_view format, std::wformat_args&& arg
 	PrintString(formatted);
 }
 
-void ErrorPrinter::PrintString(std::string_view line)
+void ErrorPrinter::PrintString(const std::string& line)
 {
 	std::cerr << line;
 }

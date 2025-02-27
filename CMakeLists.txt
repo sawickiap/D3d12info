@@ -23,7 +23,7 @@ set(CPP_FILES
     Src/Resources.rc
     Src/Utils.cpp
     Src/VulkanData.cpp
-    Src/ReportFormatter/ConsoleReportFormatter.cpp
+    Src/ReportFormatter/TextReportFormatter.cpp
     Src/ReportFormatter/JSONReportFormatter.cpp
     Src/ReportFormatter/ReportFormatter.cpp
 )
@@ -38,7 +38,7 @@ set(HPP_FILES
     Src/Printer.hpp
     Src/Utils.hpp
     Src/VulkanData.hpp
-    Src/ReportFormatter/ConsoleReportFormatter.hpp
+    Src/ReportFormatter/TextReportFormatter.hpp
     Src/ReportFormatter/JSONReportFormatter.hpp
     Src/ReportFormatter/ReportFormatter.hpp
 )

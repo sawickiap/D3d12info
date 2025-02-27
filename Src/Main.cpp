@@ -94,7 +94,7 @@ static bool g_ShowAllAdapters = true;
 static bool g_SkipSoftwareAdapter = true;
 static bool g_UseJsonOutput = false;
 static bool g_UseJsonPrettyPrint = true;
-static bool g_OutputToFile = false;
+static bool g_OutputFile = false;
 static bool g_PrintFormats = false;
 static bool g_PrintMetaCommands = false;
 static bool g_PrintEnums = false;
@@ -496,17 +496,17 @@ static void PrintVersionHeader()
 
 static void PrintVersionData()
 {
-    if (IsOutputConsole())
+    if (IsTextOutput())
     {
         PrintVersionHeader();
         Printer::PrintNewLine();
         Printer::PrintNewLine();
     }
 
-    ReportScopeObject scope(OutputSpecificString(L"General", L"Header"));
+    ReportScopeObject scope(SelectString(L"General", L"Header"));
     ReportFormatter& formatter = ReportFormatter::GetInstance();
 
-    if (IsOutputJson())
+    if (IsJsonOutput())
     {
         formatter.AddFieldString(L"Program", L"D3d12info");
         formatter.AddFieldString(L"Version", PROGRAM_VERSION);
@@ -516,13 +516,13 @@ static void PrintVersionData()
     }
     formatter.AddFieldString(L"Generated on", MakeCurrentDate().c_str());
 #ifdef USE_PREVIEW_AGILITY_SDK
-    if (IsOutputJson())
+    if (IsJsonOutput())
     {
         formatter.AddFieldBool(L"Using preview Agility SDK", true);
     }
     formatter.AddFieldUint32(L"D3D12_PREVIEW_SDK_VERSION", uint32_t(D3D12SDKVersion));
 #else
-    if (IsOutputJson())
+    if (IsJsonOutput())
     {
         formatter.AddFieldBool(L"Using preview Agility SDK", false);
     }
@@ -687,9 +687,7 @@ static void EnableExperimentalFeatures()
             }
         }
 
-        std::wstring enabledFeaturesStr = std::accumulate(enabledFeatures.begin(), enabledFeatures.end(), std::wstring{},
-            [](const std::wstring& a, const std::wstring& b) { return a.empty() ? b : a + L"," + b; });
-        ReportFormatter::GetInstance().AddFieldString(L"D3D12EnableExperimentalFeatures", enabledFeaturesStr);
+        ReportFormatter::GetInstance().AddFieldStringArray(L"D3D12EnableExperimentalFeatures", enabledFeatures);
     }
 }
 
@@ -855,7 +853,7 @@ static void PrintFormatInformation(ID3D12Device* device)
             break;
         }
 
-        ReportScopeObjectConditional scope2(OutputSpecificString(name, std::format(L"{}", (size_t)format)));
+        ReportScopeObjectConditional scope2(SelectString(name, std::format(L"{}", (size_t)format)));
 
         if(formatSupportResult == FormatSupportResult::Ok)
         {
@@ -863,14 +861,14 @@ static void PrintFormatInformation(ID3D12Device* device)
             formatter.AddFieldFlags(L"Support1", formatSupport.Support1, Enum_D3D12_FORMAT_SUPPORT1);
             formatter.AddFieldFlags(L"Support2", formatSupport.Support2, Enum_D3D12_FORMAT_SUPPORT2);
 
-            ReportScopeObjectConditional scope3(IsOutputJson(), L"MultisampleQualityLevels");
+            ReportScopeObjectConditional scope3(IsJsonOutput(), L"MultisampleQualityLevels");
             msQualityLevels.Format = format;
             for(msQualityLevels.SampleCount = 1; ; msQualityLevels.SampleCount *= 2)
             {
                 if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &msQualityLevels, UINT(sizeof msQualityLevels))) &&
                     msQualityLevels.NumQualityLevels > 0)
                 {
-                    if(IsOutputJson())
+                    if(IsJsonOutput())
                     {
                         ReportScopeObject scope4(std::format(L"{}", msQualityLevels.SampleCount));
                         formatter.AddFieldUint32(L"NumQualityLevels", msQualityLevels.NumQualityLevels);
@@ -1383,12 +1381,10 @@ void PrintCommandLineSyntax()
     PrinterClass::PrintString(L"  -h --Help                        Only print this help (command line syntax).\n");
     PrinterClass::PrintString(L"  -l --List                        Only print the list of all adapters.\n");
     PrinterClass::PrintString(L"  -a --Adapter=<Index>             Print details of adapter at specified index.\n");
-    PrinterClass::PrintString(L"  --AllNonSoftware                 Print details of all (except Software) adapters (default behavior).\n");
     PrinterClass::PrintString(L"  --AllAdapters                    Print details of all adapters.\n");
     PrinterClass::PrintString(L"  -j --JSON                        Print output in JSON format instead of human-friendly text.\n");
-    PrinterClass::PrintString(L"  --JSONPrettyPrint                Print JSON in human friendly form. (default behavior)\n");
     PrinterClass::PrintString(L"  --JSONNoPrettyPrint              Print JSON in minimal size form.\n");
-    PrinterClass::PrintString(L"  -o --OutputToFile=<FilePath>     Output to specified file.\n");
+    PrinterClass::PrintString(L"  -o --OutputFile=<FilePath>       Output to specified file.\n");
     PrinterClass::PrintString(L"  -f --Formats                     Include information about DXGI format capabilities.\n");
     PrinterClass::PrintString(L"  --MetaCommands                   Include information about meta commands.\n");
     PrinterClass::PrintString(L"  -e --Enums                       Include information about all known enums and their values.\n");
@@ -1618,10 +1614,8 @@ int wmain3(int argc, wchar_t** argv)
         CMD_LINE_OPT_HELP,
         CMD_LINE_OPT_LIST,
         CMD_LINE_OPT_ADAPTER,
-        CMD_LINE_OPT_ALL_NON_SOFTWARE,
         CMD_LINE_OPT_ALL_ADAPTERS,
         CMD_LINE_OPT_JSON,
-        CMD_LINE_OPT_JSON_PRETTY_PRINT,
         CMD_LINE_OPT_JSON_NO_PRETTY_PRINT,
         CMD_LINE_OPT_OUTPUT_TO_FILE,
         CMD_LINE_OPT_FORMATS,
@@ -1641,14 +1635,12 @@ int wmain3(int argc, wchar_t** argv)
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_LIST,                  L'l',                   false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ADAPTER,               L"Adapter",             true);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ADAPTER,               L'a',                   true);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_ALL_NON_SOFTWARE,      L"AllNonSoftware",      false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ALL_ADAPTERS,          L"AllAdapters",         false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,                  L"JSON",                false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,                  L'j',                   false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON_PRETTY_PRINT,     L"JSONPrettyPrint",     false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON_NO_PRETTY_PRINT,  L"JSONNoPrettyPrint",   false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_OUTPUT_TO_FILE,        L'o',                   true);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_OUTPUT_TO_FILE,        L"OutputToFile",        true);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_OUTPUT_TO_FILE,        L"OutputFile",          true);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS,               L"Formats",             false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS,               L'f',                   false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_META_COMMANDS,         L"MetaCommands",        false);
@@ -1680,7 +1672,6 @@ int wmain3(int argc, wchar_t** argv)
                 break;
             case CMD_LINE_OPT_LIST:
                 if(cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ADAPTER) || 
-                   cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_NON_SOFTWARE) || 
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_ADAPTERS) ||
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_WARP))
                 {
@@ -1691,7 +1682,6 @@ int wmain3(int argc, wchar_t** argv)
                 break;
             case CMD_LINE_OPT_ADAPTER:
                 if(cmdLineParser.IsOptEncountered(CMD_LINE_OPT_LIST) ||
-                   cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_NON_SOFTWARE) || 
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_ADAPTERS) ||
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_WARP))
                 {
@@ -1701,23 +1691,9 @@ int wmain3(int argc, wchar_t** argv)
                 g_ShowAllAdapters = false;
                 adapterIndex = _wtoi(cmdLineParser.GetParameter().c_str());
                 break;
-            case CMD_LINE_OPT_ALL_NON_SOFTWARE:
-                if(cmdLineParser.IsOptEncountered(CMD_LINE_OPT_LIST) ||
-                   cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ADAPTER) ||
-                   cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_ADAPTERS) || 
-                   cmdLineParser.IsOptEncountered(CMD_LINE_OPT_WARP))
-                {
-                    g_ShowCommandLineSyntaxAndFail = true;
-                    break;
-                }
-                g_ShowAllAdapters = true;
-                g_SkipSoftwareAdapter = true;
-                adapterIndex = UINT32_MAX;
-                break;
             case CMD_LINE_OPT_ALL_ADAPTERS:
                 if(cmdLineParser.IsOptEncountered(CMD_LINE_OPT_LIST) ||
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ADAPTER) ||
-                   cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_NON_SOFTWARE) || 
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_WARP))
                 {
                     g_ShowCommandLineSyntaxAndFail = true;
@@ -1730,14 +1706,11 @@ int wmain3(int argc, wchar_t** argv)
             case CMD_LINE_OPT_JSON:
                 g_UseJsonOutput = true;
                 break;
-            case CMD_LINE_OPT_JSON_PRETTY_PRINT:
-                g_UseJsonPrettyPrint = true;
-                break;
             case CMD_LINE_OPT_JSON_NO_PRETTY_PRINT:
                 g_UseJsonPrettyPrint = false;
                 break;
             case CMD_LINE_OPT_OUTPUT_TO_FILE:
-                g_OutputToFile = true;
+                g_OutputFile = true;
                 g_OutputFilePath = cmdLineParser.GetParameter();
                 break;
             case CMD_LINE_OPT_FORMATS:
@@ -1781,7 +1754,6 @@ int wmain3(int argc, wchar_t** argv)
             case CMD_LINE_OPT_WARP:
                 if(cmdLineParser.IsOptEncountered(CMD_LINE_OPT_LIST) ||
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ADAPTER) ||
-                   cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_NON_SOFTWARE) || 
                    cmdLineParser.IsOptEncountered(CMD_LINE_OPT_ALL_ADAPTERS))
                 {
                     g_ShowCommandLineSyntaxAndFail = true;
@@ -1803,47 +1775,31 @@ int wmain3(int argc, wchar_t** argv)
 
     if (g_ShowCommandLineSyntaxAndFail)
     {
-        Printer::Initialize(false, {});
+        PrinterScope scope(false, {});
         PrintCommandLineSyntax<ErrorPrinter>();
-        Printer::Release();
         return PROGRAM_EXIT_ERROR_COMMAND_LINE;
     }
 
     g_PrintAdaptersAsArray = g_ShowAllAdapters || g_UseJsonOutput;
 
-    if (g_OutputToFile)
-    {
-        if (!Printer::Initialize(true, g_OutputFilePath))
-        {
-            ErrorPrinter::PrintFormat(L"Could not open file for writing: {}\n", std::make_wformat_args(g_OutputFilePath));
-            return PROGRAM_EXIT_ERROR_INIT;
-        }
-    }
-    else
-    {
-        if (!Printer::Initialize(false, {}))
-        {
-            assert(0);
-            return PROGRAM_EXIT_ERROR_INIT;
-        }
-    }
+    PrinterScope printerScope(g_OutputFile, g_OutputFilePath);
 
-    ReportFormatter::Flags flags = ReportFormatter::Flags::None;
+    ReportFormatter::FLAGS flags = ReportFormatter::FLAGS::FLAG_NONE;
 
     if (g_UseJsonOutput)
     {
-        flags = flags | ReportFormatter::Flags::UseJson;
+        flags |= ReportFormatter::FLAGS::FLAG_JSON;
     }
     if (g_UseJsonPrettyPrint)
     {
-        flags = flags | ReportFormatter::Flags::UseJsonPrettyPrint;
+        flags |= ReportFormatter::FLAGS::FLAG_JSON_PRETTY_PRINT;
     }
 
-    ReportFormatter::CreateInstance(flags);
+    ReportFormatterScope formatterScope(flags);
 
     if (g_ShowVersionAndQuit)
     {
-        if (IsOutputConsole())
+        if (IsTextOutput())
         {
             PrintVersionHeader();
         }
@@ -1851,16 +1807,12 @@ int wmain3(int argc, wchar_t** argv)
         {
             PrintVersionData();
         }
-        ReportFormatter::DestroyInstance();
-        Printer::Release();
         return PROGRAM_EXIT_SUCCESS;
     }
 
     if (g_ShowCommandLineSyntaxAndQuit)
     {
         PrintCommandLineSyntax<Printer>();
-        ReportFormatter::DestroyInstance();
-        Printer::Release();
         return PROGRAM_EXIT_SUCCESS;
     }
 
@@ -1896,7 +1848,7 @@ int wmain3(int argc, wchar_t** argv)
 #endif
 
     {
-        ReportScopeObject scope(OutputSpecificString(L"System Info", L"SystemInfo"));
+        ReportScopeObject scope(SelectString(L"System Info", L"SystemInfo"));
 
         if(!g_PureD3D12)
         {
@@ -1933,7 +1885,7 @@ int wmain3(int argc, wchar_t** argv)
 #endif
         assert(dxgiFactory != nullptr);
 
-        ReportScopeArrayConditional scopeArray(g_PrintAdaptersAsArray, OutputSpecificString(L"Adapter", L"Adapters"), ReportFormatter::ArraySuffix::None);
+        ReportScopeArrayConditional scopeArray(g_PrintAdaptersAsArray, SelectString(L"Adapter", L"Adapters"), ReportFormatter::ARRAY_SUFFIX_NONE);
         ReportScopeObjectConditional scopeObject(!g_PrintAdaptersAsArray, L"Adapter");
 
         if(g_ListAdapters)
@@ -1952,9 +1904,6 @@ int wmain3(int argc, wchar_t** argv)
 #if !defined(AUTO_LINK_DX12)
     UnloadLibraries();
 #endif
-
-    ReportFormatter::DestroyInstance();
-    Printer::Release();
 
     return programResult;
 }

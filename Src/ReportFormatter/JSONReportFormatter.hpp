@@ -16,15 +16,16 @@ For more information, see files README.md, LICENSE.txt.
 class JSONReportFormatter final : public ReportFormatter
 {
 public:
-	JSONReportFormatter(Flags flags);
+	JSONReportFormatter(FLAGS flags);
 	~JSONReportFormatter();
 
 	void PushObject(std::wstring_view name) final;
-	void PushArray(std::wstring_view name, ArraySuffix suffix = ArraySuffix::SquareBrackets);
+	void PushArray(std::wstring_view name, ARRAY_SUFFIX suffix = ARRAY_SUFFIX_SQUARE_BRACKETS);
 	void PushArrayItem() final;
 	void PopScope() final;
 
 	void AddFieldString(std::wstring_view name, std::wstring_view value) final;
+	void AddFieldStringArray(std::wstring_view name, const std::vector<std::wstring>& value) final;
 	void AddFieldBool(std::wstring_view name, bool value);
 	void AddFieldUint32(std::wstring_view name, uint32_t value, std::wstring_view unit = {}) final;
 	void AddFieldUint64(std::wstring_view name, uint64_t value, std::wstring_view unit = {}) final;
