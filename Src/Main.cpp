@@ -1383,7 +1383,7 @@ void PrintCommandLineSyntax()
     PrinterClass::PrintString(L"  -a --Adapter=<Index>             Print details of adapter at specified index.\n");
     PrinterClass::PrintString(L"  --AllAdapters                    Print details of all adapters.\n");
     PrinterClass::PrintString(L"  -j --JSON                        Print output in JSON format instead of human-friendly text.\n");
-    PrinterClass::PrintString(L"  --JSONNoPrettyPrint              Print JSON in minimal size form.\n");
+    PrinterClass::PrintString(L"  --MinimizeJson                   Print JSON in minimal size form.\n");
     PrinterClass::PrintString(L"  -o --OutputFile=<FilePath>       Output to specified file.\n");
     PrinterClass::PrintString(L"  -f --Formats                     Include information about DXGI format capabilities.\n");
     PrinterClass::PrintString(L"  --MetaCommands                   Include information about meta commands.\n");
@@ -1616,7 +1616,7 @@ int wmain3(int argc, wchar_t** argv)
         CMD_LINE_OPT_ADAPTER,
         CMD_LINE_OPT_ALL_ADAPTERS,
         CMD_LINE_OPT_JSON,
-        CMD_LINE_OPT_JSON_NO_PRETTY_PRINT,
+        CMD_LINE_OPT_MINIMIZE_JSON,
         CMD_LINE_OPT_OUTPUT_TO_FILE,
         CMD_LINE_OPT_FORMATS,
         CMD_LINE_OPT_META_COMMANDS,
@@ -1638,7 +1638,7 @@ int wmain3(int argc, wchar_t** argv)
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ALL_ADAPTERS,          L"AllAdapters",         false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,                  L"JSON",                false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON,                  L'j',                   false);
-    cmdLineParser.RegisterOpt(CMD_LINE_OPT_JSON_NO_PRETTY_PRINT,  L"JSONNoPrettyPrint",   false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_MINIMIZE_JSON,         L"MinimizeJson",        false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_OUTPUT_TO_FILE,        L'o',                   true);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_OUTPUT_TO_FILE,        L"OutputFile",          true);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_FORMATS,               L"Formats",             false);
@@ -1706,7 +1706,7 @@ int wmain3(int argc, wchar_t** argv)
             case CMD_LINE_OPT_JSON:
                 g_UseJsonOutput = true;
                 break;
-            case CMD_LINE_OPT_JSON_NO_PRETTY_PRINT:
+            case CMD_LINE_OPT_MINIMIZE_JSON:
                 g_UseJsonPrettyPrint = false;
                 break;
             case CMD_LINE_OPT_OUTPUT_TO_FILE:

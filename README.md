@@ -62,7 +62,7 @@ Options:
   -a --Adapter=<Index>             Print details of adapter at specified index.
   --AllAdapters                    Print details of all adapters.
   -j --JSON                        Print output in JSON format instead of human-friendly text.
-  --JSONNoPrettyPrint              Print JSON in minimal size form.
+  --MinimizeJson                   Print JSON in minimal size form.
   -o --OutputFile=<FilePath>       Output to specified file.
   -f --Formats                     Include information about DXGI format capabilities.
   --MetaCommands                   Include information about meta commands.
