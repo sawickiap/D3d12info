@@ -14,20 +14,20 @@ For more information, see files README.md, LICENSE.txt.
 
 namespace GPUDetect
 {
-enum
-{
-	INTEL_VENDOR_ID = 0x8086,
-};
-}
+    enum
+    {
+        INTEL_VENDOR_ID = 0x8086,
+    };
+} // namespace GPUDetect
 
 namespace IntelData
 {
 
-// Prints parameters related to Intel's library itself, regardless of selected adapter.
-void PrintStaticParams();
+    // Prints parameters related to Intel's library itself, regardless of selected adapter.
+    void PrintStaticParams();
 
-void PrintAdapterData(IDXGIAdapter* adapter);
+    void PrintAdapterData(IDXGIAdapter* adapter);
 
-} // namespace Intel
+} // namespace IntelData
 
 #endif // #if USE_INTEL_GPUDETECT

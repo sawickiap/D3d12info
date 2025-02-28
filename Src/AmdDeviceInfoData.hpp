@@ -18,16 +18,17 @@ public:
     // Prints parameters related to AMD's library itself, regardless of selected adapter.
     static void PrintStaticParams();
 
-
-	struct DeviceId
-	{
-		uint32_t deviceId, revisionId;
-	};
-	void PrintDeviceData(const DeviceId& id);
+    struct DeviceId
+    {
+        uint32_t deviceId, revisionId;
+    };
+    void PrintDeviceData(const DeviceId& id);
 };
 
 #else
 
-class AmdDeviceInfo_Initialize_RAII { };
+class AmdDeviceInfo_Initialize_RAII
+{
+};
 
 #endif // #if USE_AMD_DEVICE_INFO
