@@ -70,16 +70,16 @@ static const EnumItem Enum_VendorId[] = {
     { L"Qualcomm",  0x5143     },
     { L"Intel",     0x8086     },
     // ACPI IDs
-    { L"Parallels", 0x344C5250 }, // "PRL4"
-    { L"NVIDIA",    0x4144564E }, // "NVDA"
-    { L"Intel",     0x43544E49 }, // "INTC"
-    { L"Intel",     0x4C544E49 }, // "INTL"
-    { L"AMD",       0x49444D41 }, // "AMDI"
-    { L"Intel",     0x49504341 }, // "ACPI"
-    { L"Qualcomm",  0x4D4F4351 }, // "QCOM"
-    { L"Microsoft", 0x5446534D }, // "MSFT"
-    { L"Microsoft", 0x5748534D }, // "MSHW"
-    { L"Microsoft", 0x5941534D }, // "MSAY"
+    { L"Parallels (PRL4)", 0x344C5250 },
+    { L"NVIDIA (NVDA)",    0x4144564E },
+    { L"Intel (INTC)",     0x43544E49 },
+    { L"Intel (INTL)",     0x4C544E49 },
+    { L"AMD (AMDI)",       0x49444D41 },
+    { L"Intel (ACPI)",     0x49504341 },
+    { L"Qualcomm (QCOM)",  0x4D4F4351 },
+    { L"Microsoft (MSFT)", 0x5446534D },
+    { L"Microsoft (MSHW)", 0x5748534D },
+    { L"Microsoft (MSAY)", 0x5941534D },
     { NULL,         UINT32_MAX }
 };
 static EnumRegistration g_Enum_VendorId_Registration(L"VendorId", Enum_VendorId);
