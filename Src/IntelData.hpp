@@ -12,14 +12,6 @@ For more information, see files README.md, LICENSE.txt.
 // Macro set by Cmake.
 #if USE_INTEL_GPUDETECT
 
-namespace GPUDetect
-{
-    enum
-    {
-        INTEL_VENDOR_ID = 0x8086,
-    };
-} // namespace GPUDetect
-
 namespace IntelData
 {
 
