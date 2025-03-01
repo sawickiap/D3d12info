@@ -1,3 +1,16 @@
+# Version 3.10.0 (2025-03-01)
+
+- Added command-line parameter `-o --OutputFile=<FilePath>` that prints the output to a given file instead of the standard output. (Developed by @Devaniti as #26)
+  - It can be useful for automated processing, where additional messages printed to the standard output e.g., by implicit Vulkan layers can cause problems.
+- Added command-line parameter `--MinimizeJson` that prints the JSON output in a compact format, suitable for efficient automated processing. (Developed by @Devaniti as #26)
+- Removed command-line parameter `--AllNonSoftware`, which is the default behavior anyway. (Developed by @Devaniti as #26)
+- Improved quality of the source code, including:
+  - Rewrite of the entire output printing code, which results in some changes in the text output formatting. (Developed by @Devaniti as #26)
+  - Fixes in enum values, including ones that fix the correctness of the JSON output.
+  - Enabled ClangFormat, reformatted the entire code. (Developed by @Devaniti as #27)
+
+Compiled with DirectX 12 Agility SDK 1.615.1 ("D3d12info.exe") / 1.716.1-preview ("D3d12info\_preview.exe"), AMD AGS 6.2.0, AMD device\_info from 2024-09-24 (commit hash `7379d082f1d8d64c9d1168b84b7f6b2a9702c82f`), NVAPI R570, Intel GPU Detect from 2023-07-18 (commit hash `dd962c44acdad4ea21632e0bd144ab139e8ad8eb`).
+
 # Version 3.9.1 (2025-02-09)
 
 Changes:
