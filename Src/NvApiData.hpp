@@ -17,11 +17,14 @@ class NvAPI_Inititalize_RAII
 public:
     // Prints parameters related to NVAPI itself, regardless of whether intialization succeeded.
     static void PrintStaticParams();
-    
+
     NvAPI_Inititalize_RAII();
     ~NvAPI_Inititalize_RAII();
-    bool IsInitialized() const { return m_Initialized; }
-    
+    bool IsInitialized() const
+    {
+        return m_Initialized;
+    }
+
     // Prints structs from NVAPI unrelated to any specific GPU.
     void PrintData();
     void PrintD3d12DeviceData(ID3D12Device* device);
@@ -33,6 +36,8 @@ private:
 
 #else
 
-class NvAPI_Inititalize_RAII { };
+class NvAPI_Inititalize_RAII
+{
+};
 
 #endif // #if USE_NVAPI
