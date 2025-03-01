@@ -1067,10 +1067,8 @@ static void PrintMetaCommand(ID3D12Device5* device5, UINT index, const D3D12_MET
         if(FAILED(hr))
             continue;
 
-        {
-            ReportScopeObject scope2(Enum_D3D12_META_COMMAND_PARAMETER_STAGE[stageIndex].m_Name);
-            formatter.AddFieldUint32(L"TotalStructureSizeInBytes", totalStructureSizeInBytes);
-        }
+        ReportScopeObject scope2(Enum_D3D12_META_COMMAND_PARAMETER_STAGE[stageIndex].m_Name);
+        formatter.AddFieldUint32(L"TotalStructureSizeInBytes", totalStructureSizeInBytes);
 
         if(paramCount > 0)
         {
@@ -1079,13 +1077,13 @@ static void PrintMetaCommand(ID3D12Device5* device5, UINT index, const D3D12_MET
                 desc.Id, (D3D12_META_COMMAND_PARAMETER_STAGE)stageIndex, nullptr, &paramCount, paramDescs.data());
             if(SUCCEEDED(hr))
             {
-                ReportScopeArray scope2(L"Parameters");
+                ReportScopeArray scope3(L"Parameters");
 
                 for(UINT paramIndex = 0; paramIndex < paramCount; ++paramIndex)
                 {
                     const auto& paramDesc = paramDescs[paramIndex];
 
-                    ReportScopeArrayItem scope3;
+                    ReportScopeArrayItem scope4;
 
                     formatter.AddFieldString(L"Name", paramDesc.Name);
                     formatter.AddFieldEnum(L"Type", paramDesc.Type, Enum_D3D12_META_COMMAND_PARAMETER_TYPE);
