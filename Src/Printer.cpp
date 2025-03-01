@@ -9,6 +9,8 @@ For more information, see files README.md, LICENSE.txt.
 */
 #include "Printer.hpp"
 
+#include "Utils.hpp"
+
 bool Printer::m_IsInitialized = false;
 bool Printer::m_WritingToFile = false;
 std::wostream* Printer::m_Output = nullptr;
@@ -84,7 +86,8 @@ PrinterScope::PrinterScope(bool writeToFile, std::wstring_view name)
     {
         if(writeToFile)
         {
-            std::string narrowName(name.begin(), name.end());
+            std::wstring nameNullTerminated(name.begin(), name.end());
+            std::string narrowName = WstrToStr(nameNullTerminated.c_str(), CP_ACP);
             throw std::runtime_error(std::format("Could not open {} for writing.", narrowName));
         }
         else

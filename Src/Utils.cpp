@@ -46,6 +46,20 @@ wstring StrToWstr(const char* str, uint32_t codePage)
     return wstring{ buf.data(), buf.size() };
 }
 
+string WstrToStr(const wchar_t* str, uint32_t codePage)
+{
+    if(!str || !*str)
+        return string{};
+    const int size = WideCharToMultiByte(codePage, 0, str, (int)wcslen(str), NULL, 0, NULL, NULL);
+    if(size == 0)
+        return string{};
+    std::vector<char> buf((size_t)size);
+    const int result = WideCharToMultiByte(codePage, 0, str, (int)wcslen(str), buf.data(), size, NULL, NULL);
+    if(result == 0)
+        return string{};
+    return string{ buf.data(), buf.size() };
+}
+
 wstring GuidToStr(const GUID& guid)
 {
     wchar_t str[39] = {};
