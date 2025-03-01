@@ -66,7 +66,7 @@ void JSONReportFormatter::PopScope()
     ScopeInfo scope = m_ScopeStack.top();
     m_ScopeStack.pop();
 
-    if (scope.ElementCount != 0)
+    if(scope.ElementCount != 0)
     {
         PrintNewLine();
         PrintIndent();
@@ -88,9 +88,9 @@ void JSONReportFormatter::AddFieldStringArray(std::wstring_view name, const std:
     assert(!name.empty());
     PushNewElement();
     Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": [" : L"\"{}\":[", std::make_wformat_args(name));
-    for (size_t i = 0; i < value.size(); ++i)
+    for(size_t i = 0; i < value.size(); ++i)
     {
-        if (i > 0)
+        if(i > 0)
         {
             Printer::PrintString(L",");
         }
@@ -164,15 +164,15 @@ void JSONReportFormatter::AddFieldEnumSigned(std::wstring_view name, int32_t val
     AddFieldInt32(name, value);
 }
 
-void JSONReportFormatter::AddEnumArray(std::wstring_view name, const uint32_t* values, size_t count,
-                                       const EnumItem* enumItems)
+void JSONReportFormatter::AddEnumArray(
+    std::wstring_view name, const uint32_t* values, size_t count, const EnumItem* enumItems)
 {
     assert(!name.empty());
     PushNewElement();
     Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": [" : L"\"{}\":[", std::make_wformat_args(name));
-    for (size_t i = 0; i < count; ++i)
+    for(size_t i = 0; i < count; ++i)
     {
-        if (i > 0)
+        if(i > 0)
         {
             Printer::PrintString(L",");
         }
@@ -193,7 +193,7 @@ void JSONReportFormatter::AddFieldFlags(std::wstring_view name, uint32_t value, 
 void JSONReportFormatter::AddFieldHexBytes(std::wstring_view name, const void* data, size_t byteCount)
 {
     std::wstring valStr;
-    for (size_t i = 0; i < byteCount; ++i)
+    for(size_t i = 0; i < byteCount; ++i)
     {
         valStr += std::format(L"{:02X}", *((const uint8_t*)data + i));
     }
@@ -221,15 +221,14 @@ void JSONReportFormatter::AddFieldAMDVersion(std::wstring_view name, uint64_t va
 }
 
 void JSONReportFormatter::AddFieldNvidiaImplementationID(std::wstring_view name, uint32_t architectureId,
-                                                         uint32_t implementationId,
-                                                         const EnumItem* architecturePlusImplementationIDEnum)
+    uint32_t implementationId, const EnumItem* architecturePlusImplementationIDEnum)
 {
     AddFieldUint32(name, implementationId);
 }
 
 void JSONReportFormatter::PushNewElement()
 {
-    if (m_ScopeStack.top().ElementCount > 0)
+    if(m_ScopeStack.top().ElementCount > 0)
     {
         Printer::PrintString(L",");
     }
@@ -240,7 +239,7 @@ void JSONReportFormatter::PushNewElement()
 
 void JSONReportFormatter::PrintIndent(size_t additionalIndentation /*= 0*/)
 {
-    if (!m_PrettyPrint)
+    if(!m_PrettyPrint)
     {
         return;
     }
@@ -250,7 +249,7 @@ void JSONReportFormatter::PrintIndent(size_t additionalIndentation /*= 0*/)
 
 void JSONReportFormatter::PrintNewLine()
 {
-    if (m_PrettyPrint)
+    if(m_PrettyPrint)
     {
         Printer::PrintNewLine();
     }

@@ -16,10 +16,10 @@ std::wostream* Printer::m_Output = nullptr;
 bool Printer::Initialize(bool writeToFile, std::wstring_view name)
 {
     assert(!m_IsInitialized);
-    if (writeToFile)
+    if(writeToFile)
     {
         m_Output = new std::wofstream(name.data(), std::ios_base::out);
-        if (!m_Output->good())
+        if(!m_Output->good())
         {
             delete m_Output;
             m_Output = nullptr;
@@ -37,7 +37,7 @@ bool Printer::Initialize(bool writeToFile, std::wstring_view name)
 void Printer::Release()
 {
     assert(m_IsInitialized);
-    if (m_WritingToFile)
+    if(m_WritingToFile)
     {
         delete m_Output;
     }
@@ -80,9 +80,9 @@ void Printer::PrintFormat(std::wstring_view format, std::wformat_args&& args)
 
 PrinterScope::PrinterScope(bool writeToFile, std::wstring_view name)
 {
-    if (!Printer::Initialize(writeToFile, name))
+    if(!Printer::Initialize(writeToFile, name))
     {
-        if (writeToFile)
+        if(writeToFile)
         {
             std::string narrowName(name.begin(), name.end());
             throw std::runtime_error(std::format("Could not open {} for writing.", narrowName));

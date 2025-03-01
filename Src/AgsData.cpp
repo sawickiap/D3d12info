@@ -42,12 +42,12 @@ static bool g_DeviceCreatedWithAgs = false;
 static bool FindDevice(const AGS_Initialize_RAII::DeviceId& id, int& outIndex)
 {
     bool found = false;
-    for (int i = 0; i < g_GpuInfo.numDevices; ++i)
+    for(int i = 0; i < g_GpuInfo.numDevices; ++i)
     {
-        if (g_GpuInfo.devices[i].vendorId == id.vendorId && g_GpuInfo.devices[i].deviceId == id.deviceId &&
+        if(g_GpuInfo.devices[i].vendorId == id.vendorId && g_GpuInfo.devices[i].deviceId == id.deviceId &&
             g_GpuInfo.devices[i].revisionId == id.revisionId)
         {
-            if (found)
+            if(found)
                 // Multiple identical devices found.
                 return false;
             else
@@ -65,8 +65,7 @@ static bool FindDevice(const AGS_Initialize_RAII::DeviceId& id, int& outIndex)
 
 void AGS_Initialize_RAII::PrintStaticParams()
 {
-    ReportFormatter::GetInstance().AddFieldString(
-        L"AMD_AGS_VERSION",
+    ReportFormatter::GetInstance().AddFieldString(L"AMD_AGS_VERSION",
         std::format(L"{}.{}.{}", AMD_AGS_VERSION_MAJOR, AMD_AGS_VERSION_MINOR, AMD_AGS_VERSION_PATCH).c_str());
 
     const uint32_t version = (uint32_t)agsGetVersionNumber();
@@ -76,9 +75,9 @@ void AGS_Initialize_RAII::PrintStaticParams()
 AGS_Initialize_RAII::AGS_Initialize_RAII()
 {
     AGSConfiguration config = {};
-    if (agsInitialize(AGS_CURRENT_VERSION,
-                      nullptr, // config
-                      &g_AgsContext, &g_GpuInfo) == AGS_SUCCESS)
+    if(agsInitialize(AGS_CURRENT_VERSION,
+           nullptr, // config
+           &g_AgsContext, &g_GpuInfo) == AGS_SUCCESS)
     {
         m_Initialized = true;
     }
@@ -86,7 +85,7 @@ AGS_Initialize_RAII::AGS_Initialize_RAII()
 
 AGS_Initialize_RAII::~AGS_Initialize_RAII()
 {
-    if (m_Initialized)
+    if(m_Initialized)
         agsDeInitialize(g_AgsContext);
 }
 
@@ -94,13 +93,13 @@ void AGS_Initialize_RAII::PrintData()
 {
     assert(m_Initialized);
 
-    if (IsStrEmpty(g_GpuInfo.driverVersion) && IsStrEmpty(g_GpuInfo.radeonSoftwareVersion))
+    if(IsStrEmpty(g_GpuInfo.driverVersion) && IsStrEmpty(g_GpuInfo.radeonSoftwareVersion))
         return;
 
     ReportScopeObject region(L"AGSGPUInfo");
     ReportFormatter::GetInstance().AddFieldString(L"driverVersion", StrToWstr(g_GpuInfo.driverVersion, CP_ACP).c_str());
-    ReportFormatter::GetInstance().AddFieldString(L"radeonSoftwareVersion",
-                                                  StrToWstr(g_GpuInfo.radeonSoftwareVersion, CP_ACP).c_str());
+    ReportFormatter::GetInstance().AddFieldString(
+        L"radeonSoftwareVersion", StrToWstr(g_GpuInfo.radeonSoftwareVersion, CP_ACP).c_str());
 }
 
 void AGS_Initialize_RAII::PrintAgsDeviceData(const DeviceId& id)
@@ -108,7 +107,7 @@ void AGS_Initialize_RAII::PrintAgsDeviceData(const DeviceId& id)
     assert(IsInitialized());
 
     int deviceIndex = -1;
-    if (!FindDevice(id, deviceIndex))
+    if(!FindDevice(id, deviceIndex))
         return;
     const AGSDeviceInfo& device = g_GpuInfo.devices[deviceIndex];
 
@@ -132,21 +131,21 @@ void AGS_Initialize_RAII::PrintAgsDeviceData(const DeviceId& id)
     formatter.AddFieldSize(L"sharedMemoryInBytes", device.sharedMemoryInBytes);
 }
 
-ComPtr<ID3D12Device> AGS_Initialize_RAII::CreateDeviceAndPrintData(IDXGIAdapter* adapter,
-                                                                   D3D_FEATURE_LEVEL featureLevel)
+ComPtr<ID3D12Device> AGS_Initialize_RAII::CreateDeviceAndPrintData(
+    IDXGIAdapter* adapter, D3D_FEATURE_LEVEL featureLevel)
 {
     assert(IsInitialized());
 
-    const AGSDX12DeviceCreationParams creationParams = { .pAdapter = adapter,
-                                                         .iid = __uuidof(ID3D12Device),
-                                                         .FeatureLevel = featureLevel };
+    const AGSDX12DeviceCreationParams creationParams = {
+        .pAdapter = adapter, .iid = __uuidof(ID3D12Device), .FeatureLevel = featureLevel
+    };
     const AGSDX12ExtensionParams extensionParams = { .pAppName = PROGRAM_NAME,
-                                                     .pEngineName = PROGRAM_NAME,
-                                                     .appVersion = PROGRAM_VERSION_NUMBER,
-                                                     .engineVersion = PROGRAM_VERSION_NUMBER,
-                                                     .uavSlot = 0 };
+        .pEngineName = PROGRAM_NAME,
+        .appVersion = PROGRAM_VERSION_NUMBER,
+        .engineVersion = PROGRAM_VERSION_NUMBER,
+        .uavSlot = 0 };
     AGSDX12ReturnedParams returnedParams = {};
-    if (agsDriverExtensionsDX12_CreateDevice(g_AgsContext, &creationParams, &extensionParams, &returnedParams) ==
+    if(agsDriverExtensionsDX12_CreateDevice(g_AgsContext, &creationParams, &extensionParams, &returnedParams) ==
         AGS_SUCCESS)
     {
         ComPtr<ID3D12Device> device{ returnedParams.pDevice };
@@ -176,7 +175,7 @@ ComPtr<ID3D12Device> AGS_Initialize_RAII::CreateDeviceAndPrintData(IDXGIAdapter*
 
 void AGS_Initialize_RAII::DestroyDevice(ComPtr<ID3D12Device>&& device)
 {
-    if (IsInitialized() && g_DeviceCreatedWithAgs)
+    if(IsInitialized() && g_DeviceCreatedWithAgs)
     {
         ID3D12Device* rawDevice = device.Detach();
         agsDriverExtensionsDX12_DestroyDevice(g_AgsContext, rawDevice, nullptr);

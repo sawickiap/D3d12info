@@ -60,10 +60,10 @@ char* custom_fgets(char* _Buffer, int _MaxCount, CUSTOM_FILE* _Stream)
     assert(_MaxCount > 0);
     assert(_Stream->m_Ptr);
     int i = 0;
-    for (; i + 1 < _MaxCount && *_Stream->m_Ptr != '\0'; ++i)
+    for(; i + 1 < _MaxCount && *_Stream->m_Ptr != '\0'; ++i)
     {
         _Buffer[i] = *(_Stream->m_Ptr++);
-        if (_Buffer[i] == '\n')
+        if(_Buffer[i] == '\n')
         {
             ++i;
             break;
@@ -183,7 +183,7 @@ namespace GPUDetect
 
     char const* GetIntelGPUArchitectureString(INTEL_GPU_ARCHITECTURE arch)
     {
-        switch (arch)
+        switch(arch)
         {
         case IGFX_SANDYBRIDGE:
             return "Sandy Bridge";
@@ -254,85 +254,85 @@ namespace GPUDetect
         const unsigned int idhi = deviceId & 0xFF00;
         const unsigned int idlo = deviceId & 0x00FF;
 
-        if (idhi == 0x0100)
+        if(idhi == 0x0100)
         {
-            if ((idlo & 0xFFF0) == 0x0050 || (idlo & 0xFFF0) == 0x0060)
+            if((idlo & 0xFFF0) == 0x0050 || (idlo & 0xFFF0) == 0x0060)
             {
                 return IGFX_IVYBRIDGE;
             }
             return IGFX_SANDYBRIDGE;
         }
 
-        if (idhi == 0x0400 || idhi == 0x0A00 || idhi == 0x0D00 || idhi == 0x0C00)
+        if(idhi == 0x0400 || idhi == 0x0A00 || idhi == 0x0D00 || idhi == 0x0C00)
         {
             return IGFX_HASWELL;
         }
 
-        if (idhi == 0x1600 || idhi == 0x0B00)
+        if(idhi == 0x1600 || idhi == 0x0B00)
         {
             return IGFX_BROADWELL;
         }
 
-        if (idhi == 0x1900 || idhi == 0x0900)
+        if(idhi == 0x1900 || idhi == 0x0900)
         {
             return IGFX_SKYLAKE;
         }
 
-        if (idhi == 0x5900)
+        if(idhi == 0x5900)
         {
             return IGFX_KABYLAKE;
         }
 
-        if (idhi == 0x3100)
+        if(idhi == 0x3100)
         {
             return IGFX_GEMINILAKE;
         }
 
-        if (idhi == 0x5A00)
+        if(idhi == 0x5A00)
         {
             return IGFX_CANNONLAKE;
         }
 
-        if (idhi == 0x3E00)
+        if(idhi == 0x3E00)
         {
-            if (idlo == 0x00A0 || idlo == 0x00A1)
+            if(idlo == 0x00A0 || idlo == 0x00A1)
             {
                 return IGFX_WHISKEYLAKE;
             }
             return IGFX_COFFEELAKE;
         }
 
-        if (idhi == 0x8A00)
+        if(idhi == 0x8A00)
         {
             return IGFX_ICELAKE_LP;
         }
 
-        if (idhi == 0x9A00)
+        if(idhi == 0x9A00)
         {
             return IGFX_TIGERLAKE_LP;
         }
 
-        if (idhi == 0x4900)
+        if(idhi == 0x4900)
         {
             return IGFX_DG1;
         }
 
-        if (idhi == 0x4C00)
+        if(idhi == 0x4C00)
         {
             return IGFX_ROCKETLAKE;
         }
 
-        if (idhi == 0x9B00)
+        if(idhi == 0x9B00)
         {
             return IGFX_COMETLAKE;
         }
 
-        if (idhi == 0x4600)
+        if(idhi == 0x4600)
         {
             return IGFX_ADL;
         }
 
-        if (idhi == 0x5600)
+        if(idhi == 0x5600)
         {
             return DGFX_ACM;
         }
@@ -376,9 +376,8 @@ namespace ID3D10
     CONST: CAPS_EXTENSION_KEY
     PURPOSE: KEY to pass to UMD
     \*****************************************************************************/
-    const char CAPS_EXTENSION_KEY[16] = {
-        'I', 'N', 'T', 'C', 'E', 'X', 'T', 'N', 'C', 'A', 'P', 'S', 'F', 'U', 'N', 'C'
-    };
+    const char CAPS_EXTENSION_KEY[16] = { 'I', 'N', 'T', 'C', 'E', 'X', 'T', 'N', 'C', 'A', 'P', 'S', 'F', 'U', 'N',
+        'C' };
 
     /*****************************************************************************\
     TYPEDEF: PFND3D10UMDEXT_CHECKEXTENSIONSUPPORT
@@ -435,10 +434,10 @@ namespace ID3D10
         ID3D11Buffer* pBuffer = NULL;
         HRESULT result = pd3dDevice->CreateBuffer(&desc, &initData, &pBuffer);
 
-        if (pBuffer)
+        if(pBuffer)
             pBuffer->Release();
 
-        if (S_OK == result)
+        if(S_OK == result)
         {
             result = (pCaps->ApplicationVersion <= pCaps->DriverVersion) ? S_OK : S_FALSE;
         }
@@ -450,8 +449,8 @@ namespace ID3D10
     CONST: RESOURCE_EXTENSION_KEY
     PURPOSE: KEY to pass to UMD
     \*****************************************************************************/
-    const char RESOURCE_EXTENSION_KEY[16] = { 'I', 'N', 'T', 'C', 'E', 'X', 'T', 'N',
-                                              'R', 'E', 'S', 'O', 'U', 'R', 'C', 'E' };
+    const char RESOURCE_EXTENSION_KEY[16] = { 'I', 'N', 'T', 'C', 'E', 'X', 'T', 'N', 'R', 'E', 'S', 'O', 'U', 'R', 'C',
+        'E' };
 
     /*****************************************************************************\
     ENUM: RESOURCE_EXTENSION_TYPE
@@ -528,7 +527,7 @@ namespace ID3D10
         ID3D11Buffer* pBuffer = NULL;
         HRESULT result = pd3dDevice->CreateBuffer(&desc, &initData, &pBuffer);
 
-        if (pBuffer)
+        if(pBuffer)
             pBuffer->Release();
 
         return result;
@@ -555,8 +554,8 @@ namespace ID3D10
     CONST: STATE_EXTENSION_KEY
     PURPOSE: KEY to pass to UMD
     \*****************************************************************************/
-    const char STATE_EXTENSION_KEY[16] = { 'I', 'N', 'T', 'C', 'E', 'X', 'T', 'N',
-                                           'S', 'T', 'A', 'T', 'E', 'O', 'B', 'J' };
+    const char STATE_EXTENSION_KEY[16] = { 'I', 'N', 'T', 'C', 'E', 'X', 'T', 'N', 'S', 'T', 'A', 'T', 'E', 'O', 'B',
+        'J' };
 
     /*****************************************************************************\
     ENUM: STATE_EXTENSION_TYPE
@@ -608,7 +607,7 @@ namespace ID3D10
         ID3D11Buffer* pBuffer = NULL;
         HRESULT result = pd3dDevice->CreateBuffer(&desc, &initData, &pBuffer);
 
-        if (pBuffer)
+        if(pBuffer)
             pBuffer->Release();
 
         return result;
@@ -1219,21 +1218,21 @@ namespace GPUDetect
 
     int InitAll(GPUData* const gpuData, int adapterIndex)
     {
-        if (gpuData == nullptr || adapterIndex < 0)
+        if(gpuData == nullptr || adapterIndex < 0)
         {
             return GPUDETECT_ERROR_BAD_DATA;
         }
 
         IDXGIAdapter* adapter = nullptr;
         int returnCode = InitAdapter(&adapter, adapterIndex);
-        if (returnCode != EXIT_SUCCESS)
+        if(returnCode != EXIT_SUCCESS)
         {
             return returnCode;
         }
 
         ID3D11Device* device = nullptr;
         returnCode = InitDevice(adapter, &device);
-        if (returnCode != EXIT_SUCCESS)
+        if(returnCode != EXIT_SUCCESS)
         {
             adapter->Release();
             return returnCode;
@@ -1249,13 +1248,13 @@ namespace GPUDetect
     int InitAll(GPUData* const gpuData, IDXGIAdapter* adapter, ID3D11Device* device)
     {
         int returnCode = InitExtensionInfo(gpuData, adapter, device);
-        if (returnCode != EXIT_SUCCESS)
+        if(returnCode != EXIT_SUCCESS)
         {
             return returnCode;
         }
 
         returnCode = InitDxDriverVersion(gpuData);
-        if (returnCode != EXIT_SUCCESS)
+        if(returnCode != EXIT_SUCCESS)
         {
             return returnCode;
         }
@@ -1267,21 +1266,21 @@ namespace GPUDetect
 
     int InitExtensionInfo(GPUData* const gpuData, int adapterIndex)
     {
-        if (gpuData == nullptr || adapterIndex < 0)
+        if(gpuData == nullptr || adapterIndex < 0)
         {
             return GPUDETECT_ERROR_BAD_DATA;
         }
 
         IDXGIAdapter* adapter = nullptr;
         int returnCode = InitAdapter(&adapter, adapterIndex);
-        if (returnCode != EXIT_SUCCESS)
+        if(returnCode != EXIT_SUCCESS)
         {
             return returnCode;
         }
 
         ID3D11Device* device = nullptr;
         returnCode = InitDevice(adapter, &device);
-        if (returnCode != EXIT_SUCCESS)
+        if(returnCode != EXIT_SUCCESS)
         {
             adapter->Release();
             return returnCode;
@@ -1296,14 +1295,14 @@ namespace GPUDetect
 
     int InitExtensionInfo(GPUData* const gpuData, IDXGIAdapter* adapter, ID3D11Device* device)
     {
-        if (gpuData == nullptr || adapter == nullptr || device == nullptr)
+        if(gpuData == nullptr || adapter == nullptr || device == nullptr)
         {
             return GPUDETECT_ERROR_BAD_DATA;
         }
 
         // basic DXGI information
         DXGI_ADAPTER_DESC AdapterDesc = {};
-        if (FAILED(adapter->GetDesc(&AdapterDesc)))
+        if(FAILED(adapter->GetDesc(&AdapterDesc)))
         {
             return GPUDETECT_ERROR_DXGI_ADAPTER_CREATION;
         }
@@ -1316,18 +1315,18 @@ namespace GPUDetect
 
         wcscpy_s(gpuData->description, _countof(GPUData::description), AdapterDesc.Description);
 
-        if (AdapterDesc.VendorId == INTEL_VENDOR_ID && AdapterDesc.DedicatedVideoMemory <= 512 * 1024 * 1024)
+        if(AdapterDesc.VendorId == INTEL_VENDOR_ID && AdapterDesc.DedicatedVideoMemory <= 512 * 1024 * 1024)
         {
             gpuData->isUMAArchitecture = true;
         }
 
 #ifdef _WIN32_WINNT_WIN10
         ID3D11Device3* pDevice3 = nullptr;
-        if (SUCCEEDED(device->QueryInterface(__uuidof(ID3D11Device3), (void**)&pDevice3)))
+        if(SUCCEEDED(device->QueryInterface(__uuidof(ID3D11Device3), (void**)&pDevice3)))
         {
             D3D11_FEATURE_DATA_D3D11_OPTIONS2 FeatureData = {};
-            if (SUCCEEDED(
-                    pDevice3->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS2, &FeatureData, sizeof(FeatureData))))
+            if(SUCCEEDED(
+                   pDevice3->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS2, &FeatureData, sizeof(FeatureData))))
             {
                 gpuData->isUMAArchitecture = FeatureData.UnifiedMemoryArchitecture == TRUE;
             }
@@ -1335,7 +1334,7 @@ namespace GPUDetect
         }
 #endif // _WIN32_WINNT_WIN10
 
-        if (gpuData->isUMAArchitecture)
+        if(gpuData->isUMAArchitecture)
         {
             gpuData->videoMemory = AdapterDesc.SharedSystemMemory;
         }
@@ -1345,12 +1344,12 @@ namespace GPUDetect
         }
 
         // Intel specific information
-        if (AdapterDesc.VendorId == INTEL_VENDOR_ID)
+        if(AdapterDesc.VendorId == INTEL_VENDOR_ID)
         {
             gpuData->architecture = GetIntelGPUArchitecture(gpuData->deviceID);
 
             ID3D10::CAPS_EXTENSION intelExtCaps = {};
-            if (S_OK == GetExtensionCaps(device, &intelExtCaps))
+            if(S_OK == GetExtensionCaps(device, &intelExtCaps))
             {
                 gpuData->extensionVersion = intelExtCaps.DriverVersion;
                 gpuData->intelExtensionAvailability =
@@ -1363,21 +1362,21 @@ namespace GPUDetect
 
     int InitCounterInfo(GPUData* const gpuData, int adapterIndex)
     {
-        if (gpuData == nullptr || adapterIndex < 0)
+        if(gpuData == nullptr || adapterIndex < 0)
         {
             return GPUDETECT_ERROR_BAD_DATA;
         }
 
         IDXGIAdapter* adapter = nullptr;
         int returnCode = InitAdapter(&adapter, adapterIndex);
-        if (returnCode != EXIT_SUCCESS)
+        if(returnCode != EXIT_SUCCESS)
         {
             return returnCode;
         }
 
         ID3D11Device* device = nullptr;
         returnCode = InitDevice(adapter, &device);
-        if (returnCode != EXIT_SUCCESS)
+        if(returnCode != EXIT_SUCCESS)
         {
             adapter->Release();
             return returnCode;
@@ -1391,7 +1390,7 @@ namespace GPUDetect
 
     int InitCounterInfo(GPUData* const gpuData, ID3D11Device* device)
     {
-        if (gpuData == nullptr || device == nullptr || gpuData->vendorID == 0 || gpuData->deviceID == 0)
+        if(gpuData == nullptr || device == nullptr || gpuData->vendorID == 0 || gpuData->deviceID == 0)
         {
             return GPUDETECT_ERROR_BAD_DATA;
         }
@@ -1401,14 +1400,14 @@ namespace GPUDetect
         // querying a special DX counter
         //
         gpuData->counterAvailability = gpuData->vendorID == INTEL_VENDOR_ID;
-        if (!gpuData->counterAvailability)
+        if(!gpuData->counterAvailability)
         {
             return GPUDETECT_ERROR_NOT_SUPPORTED;
         }
 
         IntelDeviceInfo2 info = {};
         const int deviceInfoReturnCode = GetIntelDeviceInfo(&info, device);
-        if (deviceInfoReturnCode != EXIT_SUCCESS)
+        if(deviceInfoReturnCode != EXIT_SUCCESS)
         {
             return deviceInfoReturnCode;
         }
@@ -1421,7 +1420,7 @@ namespace GPUDetect
             // Older versions of the IntelDeviceInfo query only return
             // GPUMaxFreq and GPUMinFreq, all other members will be zero.
             //
-            if (info.GPUArchitecture != IGFX_UNKNOWN)
+            if(info.GPUArchitecture != IGFX_UNKNOWN)
             {
                 gpuData->advancedCounterDataAvailability = true;
 
@@ -1440,7 +1439,7 @@ namespace GPUDetect
     PresetLevel GetDefaultFidelityPreset(const GPUData* const gpuData)
     {
         // Return if prerequisite info is not met
-        if (!gpuData->dxAdapterAvailability)
+        if(!gpuData->dxAdapterAvailability)
         {
             return PresetLevel::Undefined;
         }
@@ -1455,7 +1454,7 @@ namespace GPUDetect
 
         const char* cfgFileName = nullptr;
 
-        switch (gpuData->vendorID)
+        switch(gpuData->vendorID)
         {
         case INTEL_VENDOR_ID:
             cfgFileName = "IntelGfx.cfg";
@@ -1476,20 +1475,20 @@ namespace GPUDetect
         CUSTOM_FILE* fp = nullptr;
         custom_fopen_s(&fp, cfgFileName, "r");
 
-        if (fp)
+        if(fp)
         {
             char line[100];
 
             //
             // read one line at a time till EOF
             //
-            while (custom_fgets(line, _countof(line), fp))
+            while(custom_fgets(line, _countof(line), fp))
             {
                 //
                 // Parse and remove the comment part of any line
                 //
                 unsigned int i = 0;
-                for (; i < _countof(line) - 1 && line[i] && line[i] != ';'; i++)
+                for(; i < _countof(line) - 1 && line[i] && line[i] != ';'; i++)
                 {
                 }
                 line[i] = '\0';
@@ -1502,7 +1501,7 @@ namespace GPUDetect
                 const char* const szDeviceId = strtok_s(nullptr, ",\n", &context);
                 const char* const szPresetLevel = strtok_s(nullptr, ",\n", &context);
 
-                if ((szVendorId == nullptr) || (szDeviceId == nullptr) || (szPresetLevel == nullptr))
+                if((szVendorId == nullptr) || (szDeviceId == nullptr) || (szPresetLevel == nullptr))
                 {
                     continue; // blank or improper line in cfg file - skip to next line
                 }
@@ -1519,18 +1518,18 @@ namespace GPUDetect
                 // If current graphics device is found in the cfg file, use the
                 // pre-configured default Graphics Presets setting.
                 //
-                if ((vId == gpuData->vendorID) && (dId == gpuData->deviceID))
+                if((vId == gpuData->vendorID) && (dId == gpuData->deviceID))
                 {
                     char s[10] = {};
                     sscanf_s(szPresetLevel, "%s", s, (unsigned int)_countof(s));
 
-                    if (!_stricmp(s, "Low"))
+                    if(!_stricmp(s, "Low"))
                         presets = Low;
-                    else if (!_stricmp(s, "Medium"))
+                    else if(!_stricmp(s, "Medium"))
                         presets = Medium;
-                    else if (!_stricmp(s, "Medium+"))
+                    else if(!_stricmp(s, "Medium+"))
                         presets = MediumPlus;
-                    else if (!_stricmp(s, "High"))
+                    else if(!_stricmp(s, "High"))
                         presets = High;
                     else
                         presets = NotCompatible;
@@ -1543,8 +1542,8 @@ namespace GPUDetect
         }
         else
         {
-            ErrorPrinter::PrintFormat("Error: {} not found! Fallback to default presets.",
-                                      std::make_format_args(cfgFileName));
+            ErrorPrinter::PrintFormat(
+                "Error: {} not found! Fallback to default presets.", std::make_format_args(cfgFileName));
         }
 
         //
@@ -1565,12 +1564,12 @@ namespace GPUDetect
 
     int InitDxDriverVersion(GPUData* const gpuData)
     {
-        if (gpuData == nullptr || !(gpuData->dxAdapterAvailability == true))
+        if(gpuData == nullptr || !(gpuData->dxAdapterAvailability == true))
         {
             return GPUDETECT_ERROR_BAD_DATA;
         }
 
-        if (gpuData->adapterLUID.HighPart == 0 && gpuData->adapterLUID.LowPart == 0)
+        if(gpuData->adapterLUID.HighPart == 0 && gpuData->adapterLUID.LowPart == 0)
         {
             // This should not happen with an active/current adapter.
             // But the registry can contain old leftover driver entries with LUID == 0.
@@ -1584,7 +1583,7 @@ namespace GPUDetect
         LSTATUS returnCode =
             ::RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\DirectX"), 0, KEY_READ, &dxKeyHandle);
 
-        if (returnCode != ERROR_SUCCESS)
+        if(returnCode != ERROR_SUCCESS)
         {
             return GPUDETECT_ERROR_REG_NO_D3D_KEY;
         }
@@ -1594,9 +1593,9 @@ namespace GPUDetect
         DWORD subKeyMaxLength = 0;
 
         returnCode = ::RegQueryInfoKey(dxKeyHandle, nullptr, nullptr, nullptr, &numOfAdapters, &subKeyMaxLength,
-                                       nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+            nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
-        if (returnCode != ERROR_SUCCESS)
+        if(returnCode != ERROR_SUCCESS)
         {
             return GPUDETECT_ERROR_REG_GENERAL_FAILURE;
         }
@@ -1608,30 +1607,30 @@ namespace GPUDetect
         bool foundSubkey = false;
         TCHAR* subKeyName = new TCHAR[subKeyMaxLength];
 
-        for (DWORD i = 0; i < numOfAdapters; ++i)
+        for(DWORD i = 0; i < numOfAdapters; ++i)
         {
             DWORD subKeyLength = subKeyMaxLength;
 
             returnCode = ::RegEnumKeyEx(dxKeyHandle, i, subKeyName, &subKeyLength, nullptr, nullptr, nullptr, nullptr);
 
-            if (returnCode == ERROR_SUCCESS)
+            if(returnCode == ERROR_SUCCESS)
             {
                 LUID adapterLUID = {};
                 DWORD qwordSize = sizeof(uint64_t);
 
-                returnCode = ::RegGetValue(dxKeyHandle, subKeyName, _T("AdapterLuid"), RRF_RT_QWORD, nullptr,
-                                           &adapterLUID, &qwordSize);
+                returnCode = ::RegGetValue(
+                    dxKeyHandle, subKeyName, _T("AdapterLuid"), RRF_RT_QWORD, nullptr, &adapterLUID, &qwordSize);
 
-                if (returnCode == ERROR_SUCCESS // If we were able to retrieve the registry values
+                if(returnCode == ERROR_SUCCESS // If we were able to retrieve the registry values
                     && adapterLUID.HighPart == gpuData->adapterLUID.HighPart &&
                     adapterLUID.LowPart == gpuData->adapterLUID.LowPart) // and if the vendor ID and device ID match
                 {
                     // We have our registry key! Let's get the driver version num now
 
                     returnCode = ::RegGetValue(dxKeyHandle, subKeyName, _T("DriverVersion"), RRF_RT_QWORD, nullptr,
-                                               &driverVersionRaw, &qwordSize);
+                        &driverVersionRaw, &qwordSize);
 
-                    if (returnCode == ERROR_SUCCESS)
+                    if(returnCode == ERROR_SUCCESS)
                     {
                         foundSubkey = true;
                         break;
@@ -1644,7 +1643,7 @@ namespace GPUDetect
         assert(returnCode == ERROR_SUCCESS);
         delete[] subKeyName;
 
-        if (!foundSubkey)
+        if(!foundSubkey)
         {
             return GPUDETECT_ERROR_REG_MISSING_DRIVER_INFO;
         }
@@ -1667,16 +1666,16 @@ namespace GPUDetect
     {
         // let's assume 4 digits max per segment
         const size_t kMaxBufferSize = (4 * 4) + 3;
-        if (gpuData != nullptr && outBuffer != nullptr && outBufferSize <= kMaxBufferSize)
+        if(gpuData != nullptr && outBuffer != nullptr && outBufferSize <= kMaxBufferSize)
         {
             sprintf_s(outBuffer, outBufferSize, "%u.%u.%u.%u", gpuData->dxDriverVersion[0], gpuData->dxDriverVersion[1],
-                      gpuData->dxDriverVersion[2], gpuData->dxDriverVersion[3]);
+                gpuData->dxDriverVersion[2], gpuData->dxDriverVersion[3]);
         }
     }
 
     GPUDetect::IntelGraphicsGeneration GetIntelGraphicsGeneration(INTEL_GPU_ARCHITECTURE architecture)
     {
-        switch (architecture)
+        switch(architecture)
         {
         case IGFX_SANDYBRIDGE:
             return INTEL_GFX_GEN6;
@@ -1726,7 +1725,7 @@ namespace GPUDetect
 
     const char* GetIntelGraphicsGenerationString(const IntelGraphicsGeneration generation)
     {
-        switch (generation)
+        switch(generation)
         {
         case INTEL_GFX_GEN6:
             return "Gen6";
@@ -1757,7 +1756,7 @@ namespace GPUDetect
 
     int InitAdapter(IDXGIAdapter** adapter, int adapterIndex)
     {
-        if (adapter == nullptr || adapterIndex < 0)
+        if(adapter == nullptr || adapterIndex < 0)
         {
             return GPUDETECT_ERROR_BAD_DATA;
         }
@@ -1769,7 +1768,7 @@ namespace GPUDetect
         // DXGIFactory1 is required by Windows Store Apps so try that first.
         //
         const HMODULE hDXGI = ::LoadLibrary(_T("dxgi.dll"));
-        if (hDXGI == nullptr)
+        if(hDXGI == nullptr)
         {
             return GPUDETECT_ERROR_DXGI_LOAD;
         }
@@ -1777,10 +1776,10 @@ namespace GPUDetect
         typedef HRESULT(WINAPI * LPCREATEDXGIFACTORY)(REFIID riid, void** ppFactory);
 
         LPCREATEDXGIFACTORY pCreateDXGIFactory = (LPCREATEDXGIFACTORY)::GetProcAddress(hDXGI, "CreateDXGIFactory1");
-        if (pCreateDXGIFactory == nullptr)
+        if(pCreateDXGIFactory == nullptr)
         {
             pCreateDXGIFactory = (LPCREATEDXGIFACTORY)::GetProcAddress(hDXGI, "CreateDXGIFactory");
-            if (pCreateDXGIFactory == nullptr)
+            if(pCreateDXGIFactory == nullptr)
             {
                 ::FreeLibrary(hDXGI);
                 return GPUDETECT_ERROR_DXGI_FACTORY_CREATION;
@@ -1792,13 +1791,13 @@ namespace GPUDetect
         // through the adapters. Here, we are specifically looking for the Intel gfx adapter.
         //
         IDXGIFactory* pFactory = nullptr;
-        if (FAILED(pCreateDXGIFactory(__uuidof(IDXGIFactory), (void**)(&pFactory))))
+        if(FAILED(pCreateDXGIFactory(__uuidof(IDXGIFactory), (void**)(&pFactory))))
         {
             ::FreeLibrary(hDXGI);
             return GPUDETECT_ERROR_DXGI_FACTORY_CREATION;
         }
 
-        if (FAILED(pFactory->EnumAdapters(adapterIndex, (IDXGIAdapter**)adapter)))
+        if(FAILED(pFactory->EnumAdapters(adapterIndex, (IDXGIAdapter**)adapter)))
         {
             pFactory->Release();
             ::FreeLibrary(hDXGI);
@@ -1812,13 +1811,13 @@ namespace GPUDetect
 
     int InitDevice(IDXGIAdapter* adapter, ID3D11Device** device)
     {
-        if (device == nullptr)
+        if(device == nullptr)
         {
             return GPUDETECT_ERROR_BAD_DATA;
         }
 
-        if (FAILED(::D3D11CreateDevice(adapter, D3D_DRIVER_TYPE_UNKNOWN, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION,
-                                       device, nullptr, nullptr)))
+        if(FAILED(::D3D11CreateDevice(
+               adapter, D3D_DRIVER_TYPE_UNKNOWN, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, device, nullptr, nullptr)))
         {
             return GPUDETECT_ERROR_DXGI_DEVICE_CREATION;
         }
@@ -1842,7 +1841,7 @@ namespace GPUDetect
         //
         D3D11_COUNTER_INFO counterInfo = {};
         device->CheckCounterInfo(&counterInfo);
-        if (counterInfo.LastDeviceDependentCounter == 0)
+        if(counterInfo.LastDeviceDependentCounter == 0)
         {
             deviceContext->Release();
             return GPUDETECT_ERROR_DXGI_BAD_COUNTER;
@@ -1856,7 +1855,7 @@ namespace GPUDetect
         int intelDeviceInfoVersion = 0;
         bool intelDeviceInfo = false;
 
-        for (int i = D3D11_COUNTER_DEVICE_DEPENDENT_0; i <= counterInfo.LastDeviceDependentCounter; ++i)
+        for(int i = D3D11_COUNTER_DEVICE_DEPENDENT_0; i <= counterInfo.LastDeviceDependentCounter; ++i)
         {
             counterDesc.Counter = static_cast<D3D11_COUNTER>(i);
 
@@ -1866,8 +1865,8 @@ namespace GPUDetect
             UINT uiUnitsLength = 0;
             UINT uiDescLength = 0;
 
-            if (FAILED(device->CheckCounter(&counterDesc, &counterType, &uiSlotsRequired, nullptr, &uiNameLength,
-                                            nullptr, &uiUnitsLength, nullptr, &uiDescLength)))
+            if(FAILED(device->CheckCounter(&counterDesc, &counterType, &uiSlotsRequired, nullptr, &uiNameLength,
+                   nullptr, &uiUnitsLength, nullptr, &uiDescLength)))
             {
                 continue;
             }
@@ -1876,12 +1875,11 @@ namespace GPUDetect
             LPSTR sUnits = new char[uiUnitsLength];
             LPSTR sDesc = new char[uiDescLength];
 
-            intelDeviceInfo =
-                SUCCEEDED(device->CheckCounter(&counterDesc, &counterType, &uiSlotsRequired, sName, &uiNameLength,
-                                               sUnits, &uiUnitsLength, sDesc, &uiDescLength)) &&
-                (strcmp(sName, "Intel Device Information") == 0);
+            intelDeviceInfo = SUCCEEDED(device->CheckCounter(&counterDesc, &counterType, &uiSlotsRequired, sName,
+                                  &uiNameLength, sUnits, &uiUnitsLength, sDesc, &uiDescLength)) &&
+                              (strcmp(sName, "Intel Device Information") == 0);
 
-            if (intelDeviceInfo)
+            if(intelDeviceInfo)
             {
                 sscanf_s(sDesc, "Version %d", &intelDeviceInfoVersion);
             }
@@ -1890,7 +1888,7 @@ namespace GPUDetect
             delete[] sUnits;
             delete[] sDesc;
 
-            if (intelDeviceInfo)
+            if(intelDeviceInfo)
             {
                 break;
             }
@@ -1901,7 +1899,7 @@ namespace GPUDetect
         // returns a pointer to the data, not the actual data.
         //
         ID3D11Counter* counter = nullptr;
-        if (!intelDeviceInfo || FAILED(device->CreateCounter(&counterDesc, &counter)))
+        if(!intelDeviceInfo || FAILED(device->CreateCounter(&counterDesc, &counter)))
         {
             deviceContext->Release();
             return GPUDETECT_ERROR_DXGI_COUNTER_CREATION;
@@ -1911,7 +1909,7 @@ namespace GPUDetect
         deviceContext->End(counter);
 
         uintptr_t dataAddress = 0;
-        if (deviceContext->GetData(counter, reinterpret_cast<void*>(&dataAddress), sizeof(dataAddress), 0) != S_OK)
+        if(deviceContext->GetData(counter, reinterpret_cast<void*>(&dataAddress), sizeof(dataAddress), 0) != S_OK)
         {
             counter->Release();
             deviceContext->Release();
@@ -1954,20 +1952,20 @@ namespace IntelData
 
     void PrintStaticParams()
     {
-        ReportFormatter::GetInstance().AddFieldString(L"Intel GPU Detect compiled version",
-                                                      INTEL_GPU_DETECT_COMPILED_VERSION);
+        ReportFormatter::GetInstance().AddFieldString(
+            L"Intel GPU Detect compiled version", INTEL_GPU_DETECT_COMPILED_VERSION);
     }
 
     void PrintAdapterData(IDXGIAdapter* adapter)
     {
         ComPtr<ID3D11Device> device;
         int r = GPUDetect::InitDevice(adapter, &device);
-        if (r != EXIT_SUCCESS)
+        if(r != EXIT_SUCCESS)
             return;
 
         GPUDetect::GPUData gpuData = {};
         r = GPUDetect::InitExtensionInfo(&gpuData, adapter, device.Get());
-        if (r != EXIT_SUCCESS)
+        if(r != EXIT_SUCCESS)
             return;
 
         ReportScopeObject region(L"Intel GPUDetect::GPUData");
@@ -1981,7 +1979,7 @@ namespace IntelData
         formatter.AddFieldBool(L"intelExtensionAvailability", gpuData.intelExtensionAvailability ? TRUE : FALSE);
 
         r = GPUDetect::InitDxDriverVersion(&gpuData);
-        if (r == EXIT_SUCCESS && gpuData.d3dRegistryDataAvailability)
+        if(r == EXIT_SUCCESS && gpuData.d3dRegistryDataAvailability)
         {
             char driverVersionStr[19] = {};
             GPUDetect::GetDriverVersionAsCString(&gpuData, driverVersionStr, _countof(driverVersionStr));
@@ -1990,27 +1988,27 @@ namespace IntelData
             formatter.AddFieldUint32(L"driverInfo.driverBuildNumber", gpuData.driverInfo.driverBuildNumber);
         }
 
-        if (gpuData.vendorID == GPUDetect::INTEL_VENDOR_ID)
+        if(gpuData.vendorID == GPUDetect::INTEL_VENDOR_ID)
         {
             const GPUDetect::PresetLevel presetLevel = GPUDetect::GetDefaultFidelityPreset(&gpuData);
             formatter.AddFieldEnum(L"DefaultFidelityPreset", (uint32_t)presetLevel, GPUDetect::Enum_PresetLevel);
 
             r = GPUDetect::InitCounterInfo(&gpuData, device.Get());
-            if (r == EXIT_SUCCESS)
+            if(r == EXIT_SUCCESS)
             {
                 string architectureStr = GPUDetect::GetIntelGPUArchitectureString(gpuData.architecture);
-                if (architectureStr == "Unknown")
+                if(architectureStr == "Unknown")
                     architectureStr = std::format("Unknown ({})", (uint32_t)gpuData.architecture);
                 formatter.AddFieldString(L"GPUArchitecture", StrToWstr(architectureStr.c_str(), CP_ACP).c_str());
 
                 const GPUDetect::IntelGraphicsGeneration generation =
                     GPUDetect::GetIntelGraphicsGeneration(gpuData.architecture);
                 string generationStr = GPUDetect::GetIntelGraphicsGenerationString(generation);
-                if (generationStr == "Unknown")
+                if(generationStr == "Unknown")
                     generationStr = std::format("Unknown ({})", (uint32_t)generation);
                 formatter.AddFieldString(L"GraphicsGeneration", StrToWstr(generationStr.c_str(), CP_ACP).c_str());
 
-                if (gpuData.advancedCounterDataAvailability)
+                if(gpuData.advancedCounterDataAvailability)
                 {
                     formatter.AddFieldUint32(L"euCount", gpuData.euCount);
                     formatter.AddFieldUint32(L"packageTDP", gpuData.packageTDP, L"W");

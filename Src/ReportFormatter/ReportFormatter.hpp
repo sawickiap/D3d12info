@@ -58,8 +58,8 @@ public:
     // Enums
     virtual void AddFieldEnum(std::wstring_view name, uint32_t value, const EnumItem* enumItems) = 0;
     virtual void AddFieldEnumSigned(std::wstring_view name, int32_t value, const EnumItem* enumItems) = 0;
-    virtual void AddEnumArray(std::wstring_view name, const uint32_t* values, size_t count,
-                              const EnumItem* enumItems) = 0;
+    virtual void AddEnumArray(
+        std::wstring_view name, const uint32_t* values, size_t count, const EnumItem* enumItems) = 0;
     virtual void AddFieldFlags(std::wstring_view name, uint32_t value, const EnumItem* enumItems) = 0;
     // Binary data
     virtual void AddFieldHexBytes(std::wstring_view name, const void* data, size_t byteCount) = 0;
@@ -69,8 +69,7 @@ public:
     virtual void AddFieldMicrosoftVersion(std::wstring_view name, uint64_t value) = 0;
     virtual void AddFieldAMDVersion(std::wstring_view name, uint64_t value) = 0;
     virtual void AddFieldNvidiaImplementationID(std::wstring_view name, uint32_t architectureId,
-                                                uint32_t implementationId,
-                                                const EnumItem* architecturePlusImplementationIDEnum) = 0;
+        uint32_t implementationId, const EnumItem* architecturePlusImplementationIDEnum) = 0;
 };
 
 ReportFormatter::FLAGS& operator|=(ReportFormatter::FLAGS& lhs, ReportFormatter::FLAGS rhs);
@@ -106,8 +105,8 @@ public:
 class ReportScopeArray
 {
 public:
-    ReportScopeArray(std::wstring_view name,
-                     ReportFormatter::ARRAY_SUFFIX suffix = ReportFormatter::ARRAY_SUFFIX_SQUARE_BRACKETS)
+    ReportScopeArray(
+        std::wstring_view name, ReportFormatter::ARRAY_SUFFIX suffix = ReportFormatter::ARRAY_SUFFIX_SQUARE_BRACKETS)
     {
         ReportFormatter::GetInstance().PushArray(name, suffix);
     }
@@ -148,10 +147,10 @@ private:
 class ReportScopeArrayConditional
 {
 public:
-    ReportScopeArrayConditional(std::wstring_view name,
-                                ReportFormatter::ARRAY_SUFFIX suffix = ReportFormatter::ARRAY_SUFFIX_SQUARE_BRACKETS);
+    ReportScopeArrayConditional(
+        std::wstring_view name, ReportFormatter::ARRAY_SUFFIX suffix = ReportFormatter::ARRAY_SUFFIX_SQUARE_BRACKETS);
     ReportScopeArrayConditional(bool enable, std::wstring_view name,
-                                ReportFormatter::ARRAY_SUFFIX suffix = ReportFormatter::ARRAY_SUFFIX_SQUARE_BRACKETS);
+        ReportFormatter::ARRAY_SUFFIX suffix = ReportFormatter::ARRAY_SUFFIX_SQUARE_BRACKETS);
     ~ReportScopeArrayConditional();
     void Enable();
 

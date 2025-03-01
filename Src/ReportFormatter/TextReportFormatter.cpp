@@ -27,7 +27,7 @@ void TextReportFormatter::PushObject(std::wstring_view name)
     assert(!name.empty());
 
     // Need to skip new line when outputting first object
-    if (!m_SkipNewLine)
+    if(!m_SkipNewLine)
     {
         Printer::PrintNewLine();
         Printer::PrintNewLine();
@@ -68,7 +68,7 @@ void TextReportFormatter::PushArrayItem()
     PrintIndent();
 
     std::wstring header;
-    switch (arrayScope.Suffix)
+    switch(arrayScope.Suffix)
     {
     case ARRAY_SUFFIX_SQUARE_BRACKETS:
         header = std::format(L"{}[{}]:", arrayScope.ArrayName, arrayScope.ElementCount++);
@@ -94,7 +94,7 @@ void TextReportFormatter::PopScope()
     assert(!m_ScopeStack.empty());
     ScopeInfo scope = m_ScopeStack.top();
     m_ScopeStack.pop();
-    if (scope.Type != ScopeType::Array)
+    if(scope.Type != ScopeType::Array)
     {
         --m_IndentLevel;
     }
@@ -119,7 +119,7 @@ void TextReportFormatter::AddFieldStringArray(std::wstring_view name, const std:
     PrintDivider(name.size() + 1);
 
     ++m_IndentLevel;
-    for (const auto& element : value)
+    for(const auto& element : value)
     {
         Printer::PrintNewLine();
         PrintIndent();
@@ -147,7 +147,7 @@ void TextReportFormatter::AddFieldUint64(std::wstring_view name, uint64_t value,
 {
     assert(!name.empty());
     PushElement();
-    if (unit.empty())
+    if(unit.empty())
     {
         Printer::PrintFormat(L"{} = {}", std::make_wformat_args(name, value));
     }
@@ -166,16 +166,16 @@ void TextReportFormatter::AddFieldSize(std::wstring_view name, uint64_t value)
 
     int selectedUnit = 0;
     uint64_t scale = 1;
-    for (; selectedUnit < ARRAYSIZE(units) - 1; ++selectedUnit)
+    for(; selectedUnit < ARRAYSIZE(units) - 1; ++selectedUnit)
     {
-        if (value / scale < 1024)
+        if(value / scale < 1024)
         {
             break;
         }
         scale = scale << 10;
     }
 
-    if (selectedUnit == 0)
+    if(selectedUnit == 0)
     {
         Printer::PrintFormat(L"{} = {} {}", std::make_wformat_args(name, value, units[selectedUnit]));
         return;
@@ -183,8 +183,8 @@ void TextReportFormatter::AddFieldSize(std::wstring_view name, uint64_t value)
     else
     {
         double valueScaled = double(value) / scale;
-        Printer::PrintFormat(L"{} = {:.2f} {} ({} B)",
-                             std::make_wformat_args(name, valueScaled, units[selectedUnit], value));
+        Printer::PrintFormat(
+            L"{} = {:.2f} {} ({} B)", std::make_wformat_args(name, valueScaled, units[selectedUnit], value));
     }
 }
 
@@ -204,7 +204,7 @@ void TextReportFormatter::AddFieldInt32(std::wstring_view name, int32_t value, s
 {
     assert(!name.empty());
     PushElement();
-    if (unit.empty())
+    if(unit.empty())
     {
         Printer::PrintFormat(L"{} = {}", std::make_wformat_args(name, value));
     }
@@ -218,7 +218,7 @@ void TextReportFormatter::AddFieldFloat(std::wstring_view name, float value, std
 {
     assert(!name.empty());
     PushElement();
-    if (unit.empty())
+    if(unit.empty())
     {
         Printer::PrintFormat(L"{} = {}", std::make_wformat_args(name, value));
     }
@@ -233,7 +233,7 @@ void TextReportFormatter::AddFieldEnum(std::wstring_view name, uint32_t value, c
     assert(!name.empty());
     PushElement();
     const wchar_t* enumItemName = FindEnumItemName(value, enumItems);
-    if (enumItemName != nullptr)
+    if(enumItemName != nullptr)
     {
         Printer::PrintFormat(L"{} = {} (0x{:X})", std::make_wformat_args(name, enumItemName, value));
     }
@@ -248,7 +248,7 @@ void TextReportFormatter::AddFieldEnumSigned(std::wstring_view name, int32_t val
     assert(!name.empty());
     PushElement();
     const wchar_t* enumItemName = FindEnumItemName(value, enumItems);
-    if (enumItemName != nullptr)
+    if(enumItemName != nullptr)
     {
         Printer::PrintFormat(L"{} = {} ({})", std::make_wformat_args(name, enumItemName, value));
     }
@@ -258,8 +258,8 @@ void TextReportFormatter::AddFieldEnumSigned(std::wstring_view name, int32_t val
     }
 }
 
-void TextReportFormatter::AddEnumArray(std::wstring_view name, const uint32_t* values, size_t count,
-                                       const EnumItem* enumItems)
+void TextReportFormatter::AddEnumArray(
+    std::wstring_view name, const uint32_t* values, size_t count, const EnumItem* enumItems)
 {
     assert(!name.empty());
 
@@ -270,12 +270,12 @@ void TextReportFormatter::AddEnumArray(std::wstring_view name, const uint32_t* v
     PrintDivider(name.size() + 1);
 
     ++m_IndentLevel;
-    for (size_t i = 0; i < count; ++i)
+    for(size_t i = 0; i < count; ++i)
     {
         Printer::PrintNewLine();
         PrintIndent();
         const wchar_t* enumItemName = FindEnumItemName(values[i], enumItems);
-        if (enumItemName != nullptr)
+        if(enumItemName != nullptr)
         {
             Printer::PrintFormat(L"[{}] = {} (0x{:X})", std::make_wformat_args(i, enumItemName, values[i]));
         }
@@ -295,15 +295,15 @@ void TextReportFormatter::AddFieldFlags(std::wstring_view name, uint32_t value, 
 
     ++m_IndentLevel;
     size_t zeroFlagIndex = SIZE_MAX;
-    for (size_t i = 0; enumItems[i].m_Name != nullptr; ++i)
+    for(size_t i = 0; enumItems[i].m_Name != nullptr; ++i)
     {
-        if (enumItems[i].m_Value == 0)
+        if(enumItems[i].m_Value == 0)
         {
             zeroFlagIndex = i;
         }
         else
         {
-            if ((value & enumItems[i].m_Value) != 0)
+            if((value & enumItems[i].m_Value) != 0)
             {
                 Printer::PrintNewLine();
                 PrintIndent();
@@ -311,7 +311,7 @@ void TextReportFormatter::AddFieldFlags(std::wstring_view name, uint32_t value, 
             }
         }
     }
-    if (value == 0 && zeroFlagIndex != SIZE_MAX)
+    if(value == 0 && zeroFlagIndex != SIZE_MAX)
     {
         Printer::PrintNewLine();
         PrintIndent();
@@ -323,7 +323,7 @@ void TextReportFormatter::AddFieldFlags(std::wstring_view name, uint32_t value, 
 void TextReportFormatter::AddFieldHexBytes(std::wstring_view name, const void* data, size_t byteCount)
 {
     std::wstring valStr;
-    for (size_t i = 0; i < byteCount; ++i)
+    for(size_t i = 0; i < byteCount; ++i)
     {
         valStr += std::format(L"{:02X}", *((const uint8_t*)data + i));
     }
@@ -336,12 +336,12 @@ void TextReportFormatter::AddFieldVendorId(std::wstring_view name, uint32_t valu
 
     auto ACPIIDOpt = DecodeACPIID(value);
 
-    if (ACPIIDOpt.has_value())
+    if(ACPIIDOpt.has_value())
     {
         PushElement();
         auto& ACPIID = ACPIIDOpt.value();
         const wchar_t* enumItemName = FindEnumItemName(value, Enum_VendorId);
-        if (enumItemName == nullptr)
+        if(enumItemName == nullptr)
         {
             enumItemName = L"Unknown";
         }
@@ -360,7 +360,7 @@ void TextReportFormatter::AddFieldSubsystemId(std::wstring_view name, uint32_t v
     PushElement();
 
     const wchar_t* enumItemName = FindEnumItemName(value & 0xFFFF, Enum_SubsystemVendorId);
-    if (enumItemName != nullptr)
+    if(enumItemName != nullptr)
     {
         Printer::PrintFormat(L"{} = {} (0x{:X})", std::make_wformat_args(name, enumItemName, value));
     }
@@ -392,8 +392,7 @@ void TextReportFormatter::AddFieldAMDVersion(std::wstring_view name, uint64_t va
 }
 
 void TextReportFormatter::AddFieldNvidiaImplementationID(std::wstring_view name, uint32_t architectureId,
-                                                         uint32_t implementationId,
-                                                         const EnumItem* architecturePlusImplementationIDEnum)
+    uint32_t implementationId, const EnumItem* architecturePlusImplementationIDEnum)
 {
     // Prints only implementationId as the numerical value, but searches enum
     // using architectureId + implementationId.
@@ -403,7 +402,7 @@ void TextReportFormatter::AddFieldNvidiaImplementationID(std::wstring_view name,
 
     const wchar_t* enumItemName =
         FindEnumItemName(architectureId + implementationId, architecturePlusImplementationIDEnum);
-    if (enumItemName == nullptr)
+    if(enumItemName == nullptr)
     {
         enumItemName = L"Unknown";
     }
@@ -430,7 +429,7 @@ void TextReportFormatter::PrintDivider(size_t size)
     PrintIndent();
     wchar_t dividerChar;
 
-    switch (m_IndentLevel)
+    switch(m_IndentLevel)
     {
     case 0:
         dividerChar = L'=';
@@ -445,7 +444,7 @@ void TextReportFormatter::PrintDivider(size_t size)
 
 std::optional<std::wstring> TextReportFormatter::DecodeACPIID(uint32_t value)
 {
-    if (value <= 0xFFFF)
+    if(value <= 0xFFFF)
     {
         return std::nullopt;
     }
@@ -453,10 +452,10 @@ std::optional<std::wstring> TextReportFormatter::DecodeACPIID(uint32_t value)
     std::wstring result;
     result.resize(4);
 
-    for (uint32_t i = 0; i < 4; ++i)
+    for(uint32_t i = 0; i < 4; ++i)
     {
         const uint8_t charValue = (uint8_t)(value >> (i * 8));
-        if (charValue < 32 || charValue > 126)
+        if(charValue < 32 || charValue > 126)
             return std::nullopt;
         result[i] = (wchar_t)charValue;
     }

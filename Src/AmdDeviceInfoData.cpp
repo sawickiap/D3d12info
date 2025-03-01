@@ -99,10 +99,10 @@ ENUM_END(GDT_HW_GENERATION)
 
 static const GDT_GfxCardInfo* FindCardInfo(const AmdDeviceInfo_Initialize_RAII::DeviceId& id)
 {
-    for (size_t i = 0; i < gs_cardInfoSize; ++i)
+    for(size_t i = 0; i < gs_cardInfoSize; ++i)
     {
         const GDT_GfxCardInfo& info = gs_cardInfo[i];
-        if (info.m_deviceID == id.deviceId && (info.m_revID == id.revisionId || info.m_revID == REVISION_ID_ANY))
+        if(info.m_deviceID == id.deviceId && (info.m_revID == id.revisionId || info.m_revID == REVISION_ID_ANY))
         {
             return &info;
         }
@@ -115,14 +115,14 @@ static const GDT_GfxCardInfo* FindCardInfo(const AmdDeviceInfo_Initialize_RAII::
 
 void AmdDeviceInfo_Initialize_RAII::PrintStaticParams()
 {
-    ReportFormatter::GetInstance().AddFieldString(L"AMD device_info compiled version",
-                                                  AMD_DEVICE_INFO_COMPILED_VERSION);
+    ReportFormatter::GetInstance().AddFieldString(
+        L"AMD device_info compiled version", AMD_DEVICE_INFO_COMPILED_VERSION);
 }
 
 void AmdDeviceInfo_Initialize_RAII::PrintDeviceData(const DeviceId& id)
 {
     const GDT_GfxCardInfo* const cardInfo = FindCardInfo(id);
-    if (!cardInfo)
+    if(!cardInfo)
         return;
 
     ReportFormatter& formatter = ReportFormatter::GetInstance();
@@ -136,16 +136,16 @@ void AmdDeviceInfo_Initialize_RAII::PrintDeviceData(const DeviceId& id)
         formatter.AddFieldString(L"MarketingName", StrToWstr(cardInfo->m_szMarketingName, CP_UTF8).c_str());
     }
 
-    if (cardInfo->m_asicType >= 0 && cardInfo->m_asicType < gs_deviceInfoSize)
+    if(cardInfo->m_asicType >= 0 && cardInfo->m_asicType < gs_deviceInfoSize)
     {
         const GDT_DeviceInfo& devInfo = gs_deviceInfo[cardInfo->m_asicType];
-        if (devInfo.m_deviceInfoValid)
+        if(devInfo.m_deviceInfoValid)
         {
             ReportScopeObject region(L"AMD GDT_DeviceInfo");
             formatter.AddFieldUint64(L"NumShaderEngines", devInfo.m_nNumShaderEngines); // Number of shader engines.
             formatter.AddFieldUint64(L"MaxWavePerSIMD", devInfo.m_nMaxWavePerSIMD); // Number of wave slots per SIMD.
             formatter.AddFieldUint64(L"ClocksPrim",
-                                     devInfo.m_suClocksPrim); // Number of clocks it takes to process a primitive.
+                devInfo.m_suClocksPrim); // Number of clocks it takes to process a primitive.
             formatter.AddFieldUint64(L"NumSQMaxCounters", devInfo.m_nNumSQMaxCounters); // Max number of SQ counters.
             formatter.AddFieldUint64(L"NumPrimPipes", devInfo.m_nNumPrimPipes);         // Number of primitive pipes.
             formatter.AddFieldUint64(L"WaveSize", devInfo.m_nWaveSize);                 // Wavefront size.

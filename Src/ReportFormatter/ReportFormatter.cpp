@@ -18,7 +18,7 @@ static ReportFormatter::FLAGS s_Flags = ReportFormatter::FLAGS::FLAG_NONE;
 void ReportFormatter::CreateInstance(FLAGS flags)
 {
     assert(s_Instance == nullptr);
-    if ((flags & FLAGS::FLAG_JSON) != FLAGS::FLAG_NONE)
+    if((flags & FLAGS::FLAG_JSON) != FLAGS::FLAG_NONE)
     {
         s_Instance = new JSONReportFormatter(flags);
     }
@@ -62,7 +62,7 @@ ReportScopeObjectConditional::ReportScopeObjectConditional(std::wstring_view nam
 ReportScopeObjectConditional::ReportScopeObjectConditional(bool enable, std::wstring_view name)
     : ReportScopeObjectConditional(name)
 {
-    if (enable)
+    if(enable)
     {
         Enable();
     }
@@ -70,7 +70,7 @@ ReportScopeObjectConditional::ReportScopeObjectConditional(bool enable, std::wst
 
 ReportScopeObjectConditional::~ReportScopeObjectConditional()
 {
-    if (m_Enabled)
+    if(m_Enabled)
     {
         ReportFormatter::GetInstance().PopScope();
     }
@@ -78,7 +78,7 @@ ReportScopeObjectConditional::~ReportScopeObjectConditional()
 
 void ReportScopeObjectConditional::Enable()
 {
-    if (!m_Enabled)
+    if(!m_Enabled)
     {
         ReportFormatter::GetInstance().PushObject(m_Name);
         m_Enabled = true;
@@ -96,7 +96,7 @@ ReportScopeArrayConditional::ReportScopeArrayConditional(
     bool enable, std::wstring_view name, ReportFormatter::ARRAY_SUFFIX suffix /*= ReportFormatter::SquareBrackets*/)
     : ReportScopeArrayConditional(name, suffix)
 {
-    if (enable)
+    if(enable)
     {
         Enable();
     }
@@ -104,7 +104,7 @@ ReportScopeArrayConditional::ReportScopeArrayConditional(
 
 ReportScopeArrayConditional::~ReportScopeArrayConditional()
 {
-    if (m_Enabled)
+    if(m_Enabled)
     {
         ReportFormatter::GetInstance().PopScope();
     }
@@ -112,7 +112,7 @@ ReportScopeArrayConditional::~ReportScopeArrayConditional()
 
 void ReportScopeArrayConditional::Enable()
 {
-    if (!m_Enabled)
+    if(!m_Enabled)
     {
         ReportFormatter::GetInstance().PushArray(m_Name, m_Suffix);
         m_Enabled = true;
@@ -125,7 +125,7 @@ ReportScopeArrayItemConditional::ReportScopeArrayItemConditional()
 
 ReportScopeArrayItemConditional::ReportScopeArrayItemConditional(bool enable)
 {
-    if (enable)
+    if(enable)
     {
         Enable();
     }
@@ -133,7 +133,7 @@ ReportScopeArrayItemConditional::ReportScopeArrayItemConditional(bool enable)
 
 ReportScopeArrayItemConditional::~ReportScopeArrayItemConditional()
 {
-    if (m_Enabled)
+    if(m_Enabled)
     {
         ReportFormatter::GetInstance().PopScope();
     }
@@ -141,7 +141,7 @@ ReportScopeArrayItemConditional::~ReportScopeArrayItemConditional()
 
 void ReportScopeArrayItemConditional::Enable()
 {
-    if (!m_Enabled)
+    if(!m_Enabled)
     {
         ReportFormatter::GetInstance().PushArrayItem();
         m_Enabled = true;
@@ -160,7 +160,7 @@ bool IsJsonOutput()
 
 std::wstring_view SelectString(std::wstring_view textString, std::wstring_view jsonString)
 {
-    if (IsJsonOutput())
+    if(IsJsonOutput())
     {
         return jsonString;
     }
@@ -172,7 +172,7 @@ std::wstring_view SelectString(std::wstring_view textString, std::wstring_view j
 
 std::string_view SelectString(std::string_view textString, std::string_view jsonString)
 {
-    if (IsJsonOutput())
+    if(IsJsonOutput())
     {
         return jsonString;
     }

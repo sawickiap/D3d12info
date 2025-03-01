@@ -16,32 +16,32 @@ const uint32_t PROGRAM_VERSION_NUMBER = (3u << 20) | (9u << 10) | (1u);
 
 wstring SizeToStr(uint64_t size)
 {
-    if (size == 0)
+    if(size == 0)
         return L"0";
     wchar_t s[16];
-    if (size < 1024llu)
+    if(size < 1024llu)
         swprintf_s(s, L"%llu B", size);
-    else if (size < 1024llu * 1024)
+    else if(size < 1024llu * 1024)
         swprintf_s(s, L"%.2f KB", size / 1024.);
-    else if (size < 1024llu * 1024 * 1024)
+    else if(size < 1024llu * 1024 * 1024)
         swprintf_s(s, L"%.2f MB", size / (1024. * 1024.));
-    else if (size < 1024llu * 1024 * 1024 * 1024)
+    else if(size < 1024llu * 1024 * 1024 * 1024)
         swprintf_s(s, L"%.2f GB", size / (1024. * 1024. * 1024.));
-    else if (size < 1024llu * 1024 * 1024 * 1024 * 1024)
+    else if(size < 1024llu * 1024 * 1024 * 1024 * 1024)
         swprintf_s(s, L"%.2f TB", size / (1024. * 1024. * 1024. * 1024.));
     return s;
 }
 
 wstring StrToWstr(const char* str, uint32_t codePage)
 {
-    if (!str || !*str)
+    if(!str || !*str)
         return wstring{};
     const int size = MultiByteToWideChar(codePage, 0, str, (int)strlen(str), NULL, 0);
-    if (size == 0)
+    if(size == 0)
         return wstring{};
     std::vector<wchar_t> buf((size_t)size);
     const int result = MultiByteToWideChar(codePage, 0, str, (int)strlen(str), buf.data(), size);
-    if (result == 0)
+    if(result == 0)
         return wstring{};
     return wstring{ buf.data(), buf.size() };
 }
@@ -59,9 +59,9 @@ wstring GuidToStr(const GUID& guid)
 
 bool CmdLineParser::ReadNextArg(std::wstring* OutArg)
 {
-    if (m_argv != NULL)
+    if(m_argv != NULL)
     {
-        if (m_ArgIndex >= (size_t)m_argc)
+        if(m_ArgIndex >= (size_t)m_argc)
             return false;
 
         *OutArg = m_argv[m_ArgIndex];
@@ -70,28 +70,28 @@ bool CmdLineParser::ReadNextArg(std::wstring* OutArg)
     }
     else
     {
-        if (m_ArgIndex >= m_CmdLineLength)
+        if(m_ArgIndex >= m_CmdLineLength)
             return false;
 
         OutArg->clear();
         bool InsideQuotes = false;
-        while (m_ArgIndex < m_CmdLineLength)
+        while(m_ArgIndex < m_CmdLineLength)
         {
             wchar_t Ch = m_CmdLine[m_ArgIndex];
-            if (Ch == L'\\')
+            if(Ch == L'\\')
             {
                 bool FollowedByQuote = false;
                 size_t BackslashCount = 1;
                 size_t TmpIndex = m_ArgIndex + 1;
-                while (TmpIndex < m_CmdLineLength)
+                while(TmpIndex < m_CmdLineLength)
                 {
                     wchar_t TmpCh = m_CmdLine[TmpIndex];
-                    if (TmpCh == L'\\')
+                    if(TmpCh == L'\\')
                     {
                         BackslashCount++;
                         TmpIndex++;
                     }
-                    else if (TmpCh == L'"')
+                    else if(TmpCh == L'"')
                     {
                         FollowedByQuote = true;
                         break;
@@ -100,18 +100,18 @@ bool CmdLineParser::ReadNextArg(std::wstring* OutArg)
                         break;
                 }
 
-                if (FollowedByQuote)
+                if(FollowedByQuote)
                 {
-                    if (BackslashCount % 2 == 0)
+                    if(BackslashCount % 2 == 0)
                     {
-                        for (size_t i = 0; i < BackslashCount / 2; i++)
+                        for(size_t i = 0; i < BackslashCount / 2; i++)
                             *OutArg += L'\\';
                         m_ArgIndex += BackslashCount + 1;
                         InsideQuotes = !InsideQuotes;
                     }
                     else
                     {
-                        for (size_t i = 0; i < BackslashCount / 2; i++)
+                        for(size_t i = 0; i < BackslashCount / 2; i++)
                             *OutArg += L'\\';
                         *OutArg += L'"';
                         m_ArgIndex += BackslashCount + 1;
@@ -119,19 +119,19 @@ bool CmdLineParser::ReadNextArg(std::wstring* OutArg)
                 }
                 else
                 {
-                    for (size_t i = 0; i < BackslashCount; i++)
+                    for(size_t i = 0; i < BackslashCount; i++)
                         *OutArg += L'\\';
                     m_ArgIndex += BackslashCount;
                 }
             }
-            else if (Ch == L'"')
+            else if(Ch == L'"')
             {
                 InsideQuotes = !InsideQuotes;
                 m_ArgIndex++;
             }
-            else if (isspace(Ch))
+            else if(isspace(Ch))
             {
-                if (InsideQuotes)
+                if(InsideQuotes)
                 {
                     *OutArg += Ch;
                     m_ArgIndex++;
@@ -149,7 +149,7 @@ bool CmdLineParser::ReadNextArg(std::wstring* OutArg)
             }
         }
 
-        while (m_ArgIndex < m_CmdLineLength && isspace(m_CmdLine[m_ArgIndex]))
+        while(m_ArgIndex < m_CmdLineLength && isspace(m_CmdLine[m_ArgIndex]))
             m_ArgIndex++;
 
         return true;
@@ -158,16 +158,16 @@ bool CmdLineParser::ReadNextArg(std::wstring* OutArg)
 
 CmdLineParser::SHORT_OPT* CmdLineParser::FindShortOpt(wchar_t Opt)
 {
-    for (size_t i = 0; i < m_ShortOpts.size(); i++)
-        if (m_ShortOpts[i].Opt == Opt)
+    for(size_t i = 0; i < m_ShortOpts.size(); i++)
+        if(m_ShortOpts[i].Opt == Opt)
             return &m_ShortOpts[i];
     return NULL;
 }
 
 CmdLineParser::LONG_OPT* CmdLineParser::FindLongOpt(const std::wstring& Opt)
 {
-    for (size_t i = 0; i < m_LongOpts.size(); i++)
-        if (m_LongOpts[i].Opt == Opt)
+    for(size_t i = 0; i < m_LongOpts.size(); i++)
+        if(m_LongOpts[i].Opt == Opt)
             return &m_LongOpts[i];
     return NULL;
 }
@@ -199,7 +199,7 @@ CmdLineParser::CmdLineParser(const wchar_t* CmdLine)
 
     m_CmdLineLength = wcslen(m_CmdLine);
 
-    while (m_ArgIndex < m_CmdLineLength && isspace(m_CmdLine[m_ArgIndex]))
+    while(m_ArgIndex < m_CmdLineLength && isspace(m_CmdLine[m_ArgIndex]))
         m_ArgIndex++;
 }
 
@@ -220,14 +220,14 @@ void CmdLineParser::RegisterOpt(uint32_t Id, const std::wstring& Opt, bool Param
 CmdLineParser::RESULT CmdLineParser::ReadNextOpt()
 {
     RESULT Result = ReadNext();
-    while (Result != RESULT_END && Result != RESULT_ERROR && Result != RESULT_OPT)
+    while(Result != RESULT_END && Result != RESULT_ERROR && Result != RESULT_OPT)
     {
         Result = ReadNext();
     }
 
-    if (Result == RESULT_OPT)
+    if(Result == RESULT_OPT)
     {
-        if (m_EncounteredOpts.contains(m_LastOptId))
+        if(m_EncounteredOpts.contains(m_LastOptId))
             return RESULT_ERROR;
         m_EncounteredOpts.insert(m_LastOptId);
     }
@@ -237,21 +237,21 @@ CmdLineParser::RESULT CmdLineParser::ReadNextOpt()
 
 CmdLineParser::RESULT CmdLineParser::ReadNext()
 {
-    if (m_InsideMultioption)
+    if(m_InsideMultioption)
     {
         assert(m_LastArgIndex < m_LastArg.length());
         SHORT_OPT* so = FindShortOpt(m_LastArg[m_LastArgIndex]);
-        if (so == NULL)
+        if(so == NULL)
         {
             m_LastOptId = 0;
             m_LastParameter.clear();
             return CmdLineParser::RESULT_ERROR;
         }
-        if (so->Parameter)
+        if(so->Parameter)
         {
-            if (m_LastArg.length() == m_LastArgIndex + 1)
+            if(m_LastArg.length() == m_LastArgIndex + 1)
             {
-                if (!ReadNextArg(&m_LastParameter))
+                if(!ReadNextArg(&m_LastParameter))
                 {
                     m_LastOptId = 0;
                     m_LastParameter.clear();
@@ -261,7 +261,7 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
                 m_LastOptId = so->Id;
                 return CmdLineParser::RESULT_OPT;
             }
-            else if (m_LastArg[m_LastArgIndex + 1] == L'=')
+            else if(m_LastArg[m_LastArgIndex + 1] == L'=')
             {
                 m_InsideMultioption = false;
                 m_LastParameter = m_LastArg.substr(m_LastArgIndex + 2);
@@ -278,7 +278,7 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
         }
         else
         {
-            if (m_LastArg.length() == m_LastArgIndex + 1)
+            if(m_LastArg.length() == m_LastArgIndex + 1)
             {
                 m_InsideMultioption = false;
                 m_LastParameter.clear();
@@ -297,22 +297,22 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
     }
     else
     {
-        if (!ReadNextArg(&m_LastArg))
+        if(!ReadNextArg(&m_LastArg))
         {
             m_LastParameter.clear();
             m_LastOptId = 0;
             return CmdLineParser::RESULT_END;
         }
 
-        if (!m_LastArg.empty() && m_LastArg[0] == L'-')
+        if(!m_LastArg.empty() && m_LastArg[0] == L'-')
         {
-            if (m_LastArg.length() > 1 && m_LastArg[1] == L'-')
+            if(m_LastArg.length() > 1 && m_LastArg[1] == L'-')
             {
                 size_t EqualIndex = m_LastArg.find(L'=', 2);
-                if (EqualIndex != std::wstring::npos)
+                if(EqualIndex != std::wstring::npos)
                 {
                     LONG_OPT* lo = FindLongOpt(m_LastArg.substr(2, EqualIndex - 2));
-                    if (lo == NULL || lo->Parameter == false)
+                    if(lo == NULL || lo->Parameter == false)
                     {
                         m_LastOptId = 0;
                         m_LastParameter.clear();
@@ -325,15 +325,15 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
                 else
                 {
                     LONG_OPT* lo = FindLongOpt(m_LastArg.substr(2));
-                    if (lo == NULL)
+                    if(lo == NULL)
                     {
                         m_LastOptId = 0;
                         m_LastParameter.clear();
                         return CmdLineParser::RESULT_ERROR;
                     }
-                    if (lo->Parameter)
+                    if(lo->Parameter)
                     {
-                        if (!ReadNextArg(&m_LastParameter))
+                        if(!ReadNextArg(&m_LastParameter))
                         {
                             m_LastOptId = 0;
                             m_LastParameter.clear();
@@ -348,24 +348,24 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
             }
             else
             {
-                if (m_LastArg.length() < 2)
+                if(m_LastArg.length() < 2)
                 {
                     m_LastOptId = 0;
                     m_LastParameter.clear();
                     return CmdLineParser::RESULT_ERROR;
                 }
                 SHORT_OPT* so = FindShortOpt(m_LastArg[1]);
-                if (so == NULL)
+                if(so == NULL)
                 {
                     m_LastOptId = 0;
                     m_LastParameter.clear();
                     return CmdLineParser::RESULT_ERROR;
                 }
-                if (so->Parameter)
+                if(so->Parameter)
                 {
-                    if (m_LastArg.length() == 2)
+                    if(m_LastArg.length() == 2)
                     {
-                        if (!ReadNextArg(&m_LastParameter))
+                        if(!ReadNextArg(&m_LastParameter))
                         {
                             m_LastOptId = 0;
                             m_LastParameter.clear();
@@ -374,7 +374,7 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
                         m_LastOptId = so->Id;
                         return CmdLineParser::RESULT_OPT;
                     }
-                    else if (m_LastArg[2] == L'=')
+                    else if(m_LastArg[2] == L'=')
                     {
                         m_LastParameter = m_LastArg.substr(3);
                         m_LastOptId = so->Id;
@@ -389,7 +389,7 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
                 }
                 else
                 {
-                    if (m_LastArg.length() == 2)
+                    if(m_LastArg.length() == 2)
                     {
                         m_LastParameter.clear();
                         m_LastOptId = so->Id;
@@ -407,17 +407,17 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
                 }
             }
         }
-        else if (!m_LastArg.empty() && m_LastArg[0] == L'/')
+        else if(!m_LastArg.empty() && m_LastArg[0] == L'/')
         {
             size_t EqualIndex = m_LastArg.find('=', 1);
-            if (EqualIndex != std::wstring::npos)
+            if(EqualIndex != std::wstring::npos)
             {
-                if (EqualIndex == 2)
+                if(EqualIndex == 2)
                 {
                     SHORT_OPT* so = FindShortOpt(m_LastArg[1]);
-                    if (so != NULL)
+                    if(so != NULL)
                     {
-                        if (so->Parameter == false)
+                        if(so->Parameter == false)
                         {
                             m_LastOptId = 0;
                             m_LastParameter.clear();
@@ -429,7 +429,7 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
                     }
                 }
                 LONG_OPT* lo = FindLongOpt(m_LastArg.substr(1, EqualIndex - 1));
-                if (lo == NULL || lo->Parameter == false)
+                if(lo == NULL || lo->Parameter == false)
                 {
                     m_LastOptId = 0;
                     m_LastParameter.clear();
@@ -441,14 +441,14 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
             }
             else
             {
-                if (m_LastArg.length() == 2)
+                if(m_LastArg.length() == 2)
                 {
                     SHORT_OPT* so = FindShortOpt(m_LastArg[1]);
-                    if (so != NULL)
+                    if(so != NULL)
                     {
-                        if (so->Parameter)
+                        if(so->Parameter)
                         {
-                            if (!ReadNextArg(&m_LastParameter))
+                            if(!ReadNextArg(&m_LastParameter))
                             {
                                 m_LastOptId = 0;
                                 m_LastParameter.clear();
@@ -462,15 +462,15 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
                     }
                 }
                 LONG_OPT* lo = FindLongOpt(m_LastArg.substr(1));
-                if (lo == NULL)
+                if(lo == NULL)
                 {
                     m_LastOptId = 0;
                     m_LastParameter.clear();
                     return CmdLineParser::RESULT_ERROR;
                 }
-                if (lo->Parameter)
+                if(lo->Parameter)
                 {
-                    if (!ReadNextArg(&m_LastParameter))
+                    if(!ReadNextArg(&m_LastParameter))
                     {
                         m_LastOptId = 0;
                         m_LastParameter.clear();

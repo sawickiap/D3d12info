@@ -24,20 +24,22 @@ static const wchar_t* NVAPI_COMPILED_VERSION = L"R570";
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE
 
-static const EnumItem Enum_NV_EXTN_OP[] = { { L"NV_EXTN_OP_SHFL", 1 },
-                                            { L"NV_EXTN_OP_SHFL_UP", 2 },
-                                            { L"NV_EXTN_OP_SHFL_DOWN", 3 },
-                                            { L"NV_EXTN_OP_SHFL_XOR", 4 },
-                                            { L"NV_EXTN_OP_VOTE_ALL", 5 },
-                                            { L"NV_EXTN_OP_VOTE_ANY", 6 },
-                                            { L"NV_EXTN_OP_VOTE_BALLOT", 7 },
-                                            { L"NV_EXTN_OP_GET_LANE_ID", 8 },
-                                            { L"NV_EXTN_OP_FP16_ATOMIC", 12 },
-                                            { L"NV_EXTN_OP_FP32_ATOMIC", 13 },
-                                            { L"NV_EXTN_OP_UINT64_ATOMIC", 20 },
-                                            { L"NV_EXTN_OP_GET_SHADING_RATE", 30 },
-                                            { L"NV_EXTN_OP_VPRS_EVAL_ATTRIB_AT_SAMPLE", 51 },
-                                            { NULL, UINT32_MAX } };
+static const EnumItem Enum_NV_EXTN_OP[] = {
+    { L"NV_EXTN_OP_SHFL",                       1          },
+    { L"NV_EXTN_OP_SHFL_UP",                    2          },
+    { L"NV_EXTN_OP_SHFL_DOWN",                  3          },
+    { L"NV_EXTN_OP_SHFL_XOR",                   4          },
+    { L"NV_EXTN_OP_VOTE_ALL",                   5          },
+    { L"NV_EXTN_OP_VOTE_ANY",                   6          },
+    { L"NV_EXTN_OP_VOTE_BALLOT",                7          },
+    { L"NV_EXTN_OP_GET_LANE_ID",                8          },
+    { L"NV_EXTN_OP_FP16_ATOMIC",                12         },
+    { L"NV_EXTN_OP_FP32_ATOMIC",                13         },
+    { L"NV_EXTN_OP_UINT64_ATOMIC",              20         },
+    { L"NV_EXTN_OP_GET_SHADING_RATE",           30         },
+    { L"NV_EXTN_OP_VPRS_EVAL_ATTRIB_AT_SAMPLE", 51         },
+    { NULL,                                     UINT32_MAX }
+};
 static EnumRegistration g_Enum_NV_EXTN_OP_Registration(L"NV_EXTN_OP", Enum_NV_EXTN_OP);
 
 ENUM_BEGIN(NvAPI_Status)
@@ -252,39 +254,39 @@ ENUM_END(NV_GPU_ARCHITECTURE_ID)
 
 // Sum of values from NV_GPU_ARCHITECTURE_ID and NV_GPU_ARCH_IMPLEMENTATION_ID!
 static const EnumItem Enum_NV_ARCH_plus_IMPLEMENTATION_ID[] = {
-    { L"NV_GPU_ARCH_IMPLEMENTATION_T20", 0xE0000020 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_T20",   0xE0000020 },
 
-    { L"NV_GPU_ARCH_IMPLEMENTATION_T30", 0xE0000030 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_T35", 0xE0000035 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_T30",   0xE0000030 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_T35",   0xE0000035 },
 
-    { L"NV_GPU_ARCH_IMPLEMENTATION_T40", 0xE0000040 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_T124", 0xE0000040 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_T40",   0xE0000040 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_T124",  0xE0000040 },
 
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV40", 0x00000040 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV41", 0x00000041 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV42", 0x00000042 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV43", 0x00000043 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV44", 0x00000044 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV40",  0x00000040 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV41",  0x00000041 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV42",  0x00000042 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV43",  0x00000043 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV44",  0x00000044 },
     { L"NV_GPU_ARCH_IMPLEMENTATION_NV44A", 0x0000004A },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV46", 0x00000046 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV47", 0x00000047 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV49", 0x00000049 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV4B", 0x0000004B },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV4C", 0x0000004C },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV4E", 0x0000004E },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV46",  0x00000046 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV47",  0x00000047 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV49",  0x00000049 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV4B",  0x0000004B },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV4C",  0x0000004C },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV4E",  0x0000004E },
 
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV50", 0x00000050 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV50",  0x00000050 },
 
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV63", 0x00000063 }, // Are these really NV_GPU_ARCHITECTURE_G78 despite name NV6X?
-    { L"NV_GPU_ARCH_IMPLEMENTATION_NV67", 0x00000067 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV63",  0x00000063 }, // Are these really NV_GPU_ARCHITECTURE_G78 despite name NV6X?
+    { L"NV_GPU_ARCH_IMPLEMENTATION_NV67",  0x00000067 },
 
-    { L"NV_GPU_ARCH_IMPLEMENTATION_G84", 0x00000084 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_G86", 0x00000086 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_G84",   0x00000084 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_G86",   0x00000086 },
 
-    { L"NV_GPU_ARCH_IMPLEMENTATION_G92", 0x00000092 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_G94", 0x00000094 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_G96", 0x00000096 },
-    { L"NV_GPU_ARCH_IMPLEMENTATION_G98", 0x00000098 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_G92",   0x00000092 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_G94",   0x00000094 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_G96",   0x00000096 },
+    { L"NV_GPU_ARCH_IMPLEMENTATION_G98",   0x00000098 },
 
     { L"NV_GPU_ARCH_IMPLEMENTATION_GT200", 0x000000A0 },
     { L"NV_GPU_ARCH_IMPLEMENTATION_GT212", 0x000000A2 },
@@ -353,10 +355,10 @@ static const EnumItem Enum_NV_ARCH_plus_IMPLEMENTATION_ID[] = {
     { L"NV_GPU_ARCH_IMPLEMENTATION_AD104", 0x00000194 },
 
     { L"NV_GPU_ARCH_IMPLEMENTATION_GB202", 0x000001B2 },
-    { NULL, UINT32_MAX }
+    { NULL,                                UINT32_MAX }
 };
-static EnumRegistration g_Enum_NV_ARCH_plus_IMPLEMENTATION_ID(L"NV_ARCH_plus_IMPLEMENTATION_ID",
-                                                              Enum_NV_ARCH_plus_IMPLEMENTATION_ID);
+static EnumRegistration g_Enum_NV_ARCH_plus_IMPLEMENTATION_ID(
+    L"NV_ARCH_plus_IMPLEMENTATION_ID", Enum_NV_ARCH_plus_IMPLEMENTATION_ID);
 
 ENUM_BEGIN(NV_GPU_CHIP_REVISION)
     ENUM_ITEM(NV_GPU_CHIP_REV_EMULATION_QT)
@@ -494,9 +496,9 @@ static wstring NvShortStringToStr(NvAPI_ShortString str)
 
 static void LoadGpus()
 {
-    if (NvAPI_EnumLogicalGPUs(g_LogicalGpuHandles, &g_LogicalGpuCount) != NVAPI_OK)
+    if(NvAPI_EnumLogicalGPUs(g_LogicalGpuHandles, &g_LogicalGpuCount) != NVAPI_OK)
         g_LogicalGpuCount = 0;
-    for (NvU32 i = 0; i < g_LogicalGpuCount; ++i)
+    for(NvU32 i = 0; i < g_LogicalGpuCount; ++i)
     {
         g_LogicalGpuData[i] = { .version = NV_LOGICAL_GPU_DATA_VER, .pOSAdapterId = &g_LogicalGpuLuids[i] };
         NvAPI_Status status = NvAPI_GPU_GetLogicalGpuInfo(g_LogicalGpuHandles[i], &g_LogicalGpuData[i]);
@@ -505,7 +507,7 @@ static void LoadGpus()
 
     // Success in fetching this structure is optional.
     g_PhysicalGpus.version = NV_PHYSICAL_GPUS_VER;
-    if (NvAPI_SYS_GetPhysicalGPUs(&g_PhysicalGpus) != NVAPI_OK)
+    if(NvAPI_SYS_GetPhysicalGPUs(&g_PhysicalGpus) != NVAPI_OK)
     {
         ZeroMemory(&g_PhysicalGpus, sizeof g_PhysicalGpus);
     }
@@ -514,21 +516,21 @@ static void LoadGpus()
 static bool FindPhysicalGpu(const LUID& adapterLuid, NvPhysicalGpuHandle& outGpu)
 {
     NvU32 foundIndex = UINT32_MAX;
-    for (NvU32 i = 0; i < g_LogicalGpuCount; ++i)
+    for(NvU32 i = 0; i < g_LogicalGpuCount; ++i)
     {
-        if (memcmp(&g_LogicalGpuLuids[i], &adapterLuid, sizeof(LUID)) == 0)
+        if(memcmp(&g_LogicalGpuLuids[i], &adapterLuid, sizeof(LUID)) == 0)
         {
-            if (g_LogicalGpuData[i].physicalGpuCount != 1)
+            if(g_LogicalGpuData[i].physicalGpuCount != 1)
                 // A logical GPU with multiple physical GPUs not supported by this tool.
                 return false;
-            if (foundIndex != UINT32_MAX)
+            if(foundIndex != UINT32_MAX)
                 // Found multiple GPUs with same LUID.
                 return false;
             else
                 foundIndex = i;
         }
     }
-    if (foundIndex != UINT32_MAX)
+    if(foundIndex != UINT32_MAX)
     {
         outGpu = g_LogicalGpuData[foundIndex].physicalGpuHandles[0];
         return true;
@@ -538,9 +540,9 @@ static bool FindPhysicalGpu(const LUID& adapterLuid, NvPhysicalGpuHandle& outGpu
 
 static bool FindPhysicalGpuAdapterType(NvPhysicalGpuHandle physicalGpuHandle, NV_ADAPTER_TYPE& outAdapterType)
 {
-    for (size_t i = 0; i < g_PhysicalGpus.gpuHandleCount; ++i)
+    for(size_t i = 0; i < g_PhysicalGpus.gpuHandleCount; ++i)
     {
-        if (g_PhysicalGpus.gpuHandleData[i].hPhysicalGpu == physicalGpuHandle)
+        if(g_PhysicalGpus.gpuHandleData[i].hPhysicalGpu == physicalGpuHandle)
         {
             outAdapterType = g_PhysicalGpus.gpuHandleData[i].adapterType;
             return true;
@@ -556,12 +558,12 @@ static void PrintCooperativeVectorProperty(size_t index, const NVAPI_COOPERATIVE
 
     formatter.AddFieldHex32(L"version", props.version);
     formatter.AddFieldEnum(L"inputType", props.inputType, Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
-    formatter.AddFieldEnum(L"inputInterpretation", props.inputInterpretation,
-                           Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
-    formatter.AddFieldEnum(L"matrixInterpretation", props.matrixInterpretation,
-                           Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
-    formatter.AddFieldEnum(L"biasInterpretation", props.biasInterpretation,
-                           Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
+    formatter.AddFieldEnum(
+        L"inputInterpretation", props.inputInterpretation, Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
+    formatter.AddFieldEnum(
+        L"matrixInterpretation", props.matrixInterpretation, Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
+    formatter.AddFieldEnum(
+        L"biasInterpretation", props.biasInterpretation, Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
     formatter.AddFieldEnum(L"resultType", props.resultType, Enum_NVAPI_COOPERATIVE_VECTOR_COMPONENT_TYPE);
     formatter.AddFieldBool(L"transpose", props.transpose);
 }
@@ -570,7 +572,7 @@ static void PrintCooperativeVectorProperties(const std::vector<NVAPI_COOPERATIVE
 {
     ReportScopeArray scope(L"NvAPI_D3D12_GetPhysicalDeviceCooperativeVectorProperties");
 
-    for (size_t i = 0; i < props.size(); ++i)
+    for(size_t i = 0; i < props.size(); ++i)
     {
         PrintCooperativeVectorProperty(i, props[i]);
     }
@@ -586,20 +588,20 @@ void NvAPI_Inititalize_RAII::PrintStaticParams()
     formatter.AddFieldUint32(L"NVAPI_SDK_VERSION", NVAPI_SDK_VERSION);
 
     NvAPI_ShortString nvShortString;
-    if (NvAPI_GetInterfaceVersionString(nvShortString) == NVAPI_OK)
+    if(NvAPI_GetInterfaceVersionString(nvShortString) == NVAPI_OK)
         formatter.AddFieldString(L"NvAPI_GetInterfaceVersionString", NvShortStringToStr(nvShortString).c_str());
 }
 
 NvAPI_Inititalize_RAII::NvAPI_Inititalize_RAII()
 {
     m_Initialized = NvAPI_Initialize() == NVAPI_OK;
-    if (m_Initialized)
+    if(m_Initialized)
         LoadGpus();
 }
 
 NvAPI_Inititalize_RAII::~NvAPI_Inititalize_RAII()
 {
-    if (m_Initialized)
+    if(m_Initialized)
         NvAPI_Unload();
 }
 
@@ -610,7 +612,7 @@ void NvAPI_Inititalize_RAII::PrintData()
 
     NvU32 pDriverVersion = UINT32_MAX;
     NvAPI_ShortString szBuildBranchString = {};
-    if (NvAPI_SYS_GetDriverAndBranchVersion(&pDriverVersion, szBuildBranchString) == NVAPI_OK)
+    if(NvAPI_SYS_GetDriverAndBranchVersion(&pDriverVersion, szBuildBranchString) == NVAPI_OK)
     {
         ReportScopeObject scope(L"NvAPI_SYS_GetDriverAndBranchVersion");
         formatter.AddFieldUint32(L"pDriverVersion", pDriverVersion);
@@ -619,7 +621,7 @@ void NvAPI_Inititalize_RAII::PrintData()
 
     {
         NV_DISPLAY_DRIVER_INFO info = { NV_DISPLAY_DRIVER_INFO_VER };
-        if (NvAPI_SYS_GetDisplayDriverInfo(&info) == NVAPI_OK)
+        if(NvAPI_SYS_GetDisplayDriverInfo(&info) == NVAPI_OK)
         {
             ReportScopeObject scope(L"NvAPI_SYS_GetDisplayDriverInfo - NV_DISPLAY_DRIVER_INFO");
             formatter.AddFieldUint32(L"driverVersion", info.driverVersion);
@@ -627,10 +629,10 @@ void NvAPI_Inititalize_RAII::PrintData()
             formatter.AddFieldBool(L"bIsDCHDriver", info.bIsDCHDriver != 0);
             formatter.AddFieldBool(L"bIsNVIDIAStudioPackage", info.bIsNVIDIAStudioPackage != 0);
             formatter.AddFieldBool(L"bIsNVIDIAGameReadyPackage", info.bIsNVIDIAGameReadyPackage != 0);
-            formatter.AddFieldBool(L"bIsNVIDIARTXProductionBranchPackage",
-                                   info.bIsNVIDIARTXProductionBranchPackage != 0);
-            formatter.AddFieldBool(L"bIsNVIDIARTXNewFeatureBranchPackage",
-                                   info.bIsNVIDIARTXNewFeatureBranchPackage != 0);
+            formatter.AddFieldBool(
+                L"bIsNVIDIARTXProductionBranchPackage", info.bIsNVIDIARTXProductionBranchPackage != 0);
+            formatter.AddFieldBool(
+                L"bIsNVIDIARTXNewFeatureBranchPackage", info.bIsNVIDIARTXNewFeatureBranchPackage != 0);
             formatter.AddFieldString(L"szBuildBaseBranch", StrToWstr(info.szBuildBaseBranch, CP_ACP).c_str());
         }
     }
@@ -645,7 +647,7 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
 
     {
         NvU64 totalBytes = 0, freeBytes = 0;
-        if (NvAPI_D3D12_QueryCpuVisibleVidmem(device, &totalBytes, &freeBytes) == NVAPI_OK)
+        if(NvAPI_D3D12_QueryCpuVisibleVidmem(device, &totalBytes, &freeBytes) == NVAPI_OK)
         {
             ReportScopeObject scope(L"NvAPI_D3D12_QueryCpuVisibleVidmem");
             formatter.AddFieldSize(L"pTotalBytes", totalBytes);
@@ -654,10 +656,10 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
 
     {
         ReportScopeObjectConditional scope(L"NvAPI_D3D12_IsNvShaderExtnOpCodeSupported");
-        for (const EnumItem* ei = Enum_NV_EXTN_OP; ei->m_Name != nullptr; ++ei)
+        for(const EnumItem* ei = Enum_NV_EXTN_OP; ei->m_Name != nullptr; ++ei)
         {
             bool supported = false;
-            if (NvAPI_D3D12_IsNvShaderExtnOpCodeSupported(device, ei->m_Value, &supported) == NVAPI_OK)
+            if(NvAPI_D3D12_IsNvShaderExtnOpCodeSupported(device, ei->m_Value, &supported) == NVAPI_OK)
             {
                 scope.Enable();
                 formatter.AddFieldBool(ei->m_Name, supported);
@@ -667,7 +669,7 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
 
     {
         NvU32 threadCount = 0;
-        if (NvAPI_D3D12_GetOptimalThreadCountForMesh(device, &threadCount) == NVAPI_OK)
+        if(NvAPI_D3D12_GetOptimalThreadCountForMesh(device, &threadCount) == NVAPI_OK)
         {
             ReportScopeObject scope(L"NvAPI_D3D12_GetOptimalThreadCountForMesh");
             formatter.AddFieldUint32(L"pThreadCount", (uint32_t)threadCount);
@@ -677,67 +679,66 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
     {
         ReportScopeObjectConditional scope(L"NvAPI_D3D12_GetRaytracingCaps");
         NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS threadReorderingCaps = {};
-        if (NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_THREAD_REORDERING,
-                                          &threadReorderingCaps, sizeof threadReorderingCaps) == NVAPI_OK)
+        if(NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_THREAD_REORDERING,
+               &threadReorderingCaps, sizeof threadReorderingCaps) == NVAPI_OK)
         {
             scope.Enable();
             formatter.AddFieldEnum(L"NVAPI_D3D12_RAYTRACING_CAPS_TYPE_THREAD_REORDERING",
-                                   (uint32_t)threadReorderingCaps, Enum_NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS);
+                (uint32_t)threadReorderingCaps, Enum_NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS);
         }
 
         NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAPS opacityMicromapCaps = {};
-        if (NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_OPACITY_MICROMAP,
-                                          &opacityMicromapCaps, sizeof opacityMicromapCaps) == NVAPI_OK)
+        if(NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_OPACITY_MICROMAP,
+               &opacityMicromapCaps, sizeof opacityMicromapCaps) == NVAPI_OK)
         {
             scope.Enable();
             formatter.AddFieldEnum(L"NVAPI_D3D12_RAYTRACING_CAPS_TYPE_OPACITY_MICROMAP", (uint32_t)opacityMicromapCaps,
-                                   Enum_NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAPS);
+                Enum_NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAPS);
         }
 
         NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAPS displacementMicromapCaps = {};
-        if (NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_DISPLACEMENT_MICROMAP,
-                                          &displacementMicromapCaps, sizeof displacementMicromapCaps) == NVAPI_OK)
+        if(NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_DISPLACEMENT_MICROMAP,
+               &displacementMicromapCaps, sizeof displacementMicromapCaps) == NVAPI_OK)
         {
             scope.Enable();
             formatter.AddFieldEnum(L"NVAPI_D3D12_RAYTRACING_CAPS_TYPE_DISPLACEMENT_MICROMAP",
-                                   (uint32_t)displacementMicromapCaps,
-                                   Enum_NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAPS);
+                (uint32_t)displacementMicromapCaps, Enum_NVAPI_D3D12_RAYTRACING_DISPLACEMENT_MICROMAP_CAPS);
         }
 
-        if (NVAPI_D3D12_RAYTRACING_CLUSTER_OPERATIONS_CAPS caps = {};
-            NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_CLUSTER_OPERATIONS, &caps,
-                                          sizeof caps) == NVAPI_OK)
+        if(NVAPI_D3D12_RAYTRACING_CLUSTER_OPERATIONS_CAPS caps = {};
+            NvAPI_D3D12_GetRaytracingCaps(
+                device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_CLUSTER_OPERATIONS, &caps, sizeof caps) == NVAPI_OK)
         {
             scope.Enable();
             formatter.AddFieldEnum(L"NVAPI_D3D12_RAYTRACING_CAPS_TYPE_CLUSTER_OPERATIONS", (uint32_t)caps,
-                                   Enum_NVAPI_D3D12_RAYTRACING_CLUSTER_OPERATIONS_CAPS);
+                Enum_NVAPI_D3D12_RAYTRACING_CLUSTER_OPERATIONS_CAPS);
         }
 
-        if (NVAPI_D3D12_RAYTRACING_PARTITIONED_TLAS_CAPS caps = {};
-            NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_PARTITIONED_TLAS, &caps,
-                                          sizeof caps) == NVAPI_OK)
+        if(NVAPI_D3D12_RAYTRACING_PARTITIONED_TLAS_CAPS caps = {};
+            NvAPI_D3D12_GetRaytracingCaps(
+                device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_PARTITIONED_TLAS, &caps, sizeof caps) == NVAPI_OK)
         {
             scope.Enable();
             formatter.AddFieldEnum(L"NVAPI_D3D12_RAYTRACING_CAPS_TYPE_PARTITIONED_TLAS", (uint32_t)caps,
-                                   Enum_NVAPI_D3D12_RAYTRACING_PARTITIONED_TLAS_CAPS);
+                Enum_NVAPI_D3D12_RAYTRACING_PARTITIONED_TLAS_CAPS);
         }
 
-        if (NVAPI_D3D12_RAYTRACING_SPHERES_CAPS caps = {};
+        if(NVAPI_D3D12_RAYTRACING_SPHERES_CAPS caps = {};
             NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_SPHERES, &caps, sizeof caps) ==
             NVAPI_OK)
         {
             scope.Enable();
-            formatter.AddFieldEnum(L"NVAPI_D3D12_RAYTRACING_CAPS_TYPE_SPHERES", (uint32_t)caps,
-                                   Enum_NVAPI_D3D12_RAYTRACING_SPHERES_CAPS);
+            formatter.AddFieldEnum(
+                L"NVAPI_D3D12_RAYTRACING_CAPS_TYPE_SPHERES", (uint32_t)caps, Enum_NVAPI_D3D12_RAYTRACING_SPHERES_CAPS);
         }
 
-        if (NVAPI_D3D12_RAYTRACING_LINEAR_SWEPT_SPHERES_CAPS caps = {};
-            NvAPI_D3D12_GetRaytracingCaps(device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_LINEAR_SWEPT_SPHERES, &caps,
-                                          sizeof caps) == NVAPI_OK)
+        if(NVAPI_D3D12_RAYTRACING_LINEAR_SWEPT_SPHERES_CAPS caps = {};
+            NvAPI_D3D12_GetRaytracingCaps(
+                device, NVAPI_D3D12_RAYTRACING_CAPS_TYPE_LINEAR_SWEPT_SPHERES, &caps, sizeof caps) == NVAPI_OK)
         {
             scope.Enable();
             formatter.AddFieldEnum(L"NVAPI_D3D12_RAYTRACING_CAPS_TYPE_LINEAR_SWEPT_SPHERES", (uint32_t)caps,
-                                   Enum_NVAPI_D3D12_RAYTRACING_LINEAR_SWEPT_SPHERES_CAPS);
+                Enum_NVAPI_D3D12_RAYTRACING_LINEAR_SWEPT_SPHERES_CAPS);
         }
     }
 
@@ -748,39 +749,39 @@ void NvAPI_Inititalize_RAII::PrintD3d12DeviceData(ID3D12Device* device)
         };
 
         params.workstationFeatureType = NV_D3D12_WORKSTATION_FEATURE_TYPE_PRESENT_BARRIER;
-        if (NvAPI_D3D12_QueryWorkstationFeatureProperties(device, &params) == NVAPI_OK)
+        if(NvAPI_D3D12_QueryWorkstationFeatureProperties(device, &params) == NVAPI_OK)
         {
             scope.Enable();
             formatter.AddFieldBool(L"NV_D3D12_WORKSTATION_FEATURE_TYPE_PRESENT_BARRIER - supported", params.supported);
         }
 
         params.workstationFeatureType = NV_D3D12_WORKSTATION_FEATURE_TYPE_RDMA_BAR1_SUPPORT;
-        if (NvAPI_D3D12_QueryWorkstationFeatureProperties(device, &params) == NVAPI_OK)
+        if(NvAPI_D3D12_QueryWorkstationFeatureProperties(device, &params) == NVAPI_OK)
         {
             scope.Enable();
-            formatter.AddFieldBool(L"NV_D3D12_WORKSTATION_FEATURE_TYPE_RDMA_BAR1_SUPPORT - supported",
-                                   params.supported);
-            if (params.supported)
+            formatter.AddFieldBool(
+                L"NV_D3D12_WORKSTATION_FEATURE_TYPE_RDMA_BAR1_SUPPORT - supported", params.supported);
+            if(params.supported)
             {
                 formatter.AddFieldUint64(L"NV_D3D12_WORKSTATION_FEATURE_TYPE_RDMA_BAR1_SUPPORT - rdmaHeapSize",
-                                         params.rdmaInfo.rdmaHeapSize);
+                    params.rdmaInfo.rdmaHeapSize);
             }
         }
     }
 
     {
         bool appClampNeeded = false;
-        if (NvAPI_D3D12_GetNeedsAppFPBlendClamping(device, &appClampNeeded) == NVAPI_OK)
+        if(NvAPI_D3D12_GetNeedsAppFPBlendClamping(device, &appClampNeeded) == NVAPI_OK)
         {
             ReportScopeObject scope(L"NvAPI_D3D12_GetNeedsAppFPBlendClamping");
             formatter.AddFieldBool(L"pAppClampNeeded", appClampNeeded);
         }
     }
 
-    if (NvU32 count = 0;
+    if(NvU32 count = 0;
         NvAPI_D3D12_GetPhysicalDeviceCooperativeVectorProperties(device, &count, nullptr) == NVAPI_OK && count > 0)
     {
-        if (std::vector<NVAPI_COOPERATIVE_VECTOR_PROPERTIES> props(count);
+        if(std::vector<NVAPI_COOPERATIVE_VECTOR_PROPERTIES> props(count);
             NvAPI_D3D12_GetPhysicalDeviceCooperativeVectorProperties(device, &count, props.data()) == NVAPI_OK)
         {
             PrintCooperativeVectorProperties(props);
@@ -795,27 +796,27 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
     NvPhysicalGpuHandle gpu = {};
     // This will always fail on non Nvidia GPUs
     // so NVAPI can't be forced to run on non Nvidia GPU
-    if (!FindPhysicalGpu(adapterLuid, gpu))
+    if(!FindPhysicalGpu(adapterLuid, gpu))
         return;
 
     ReportScopeObject scope(L"NvPhysicalGpuHandle");
     ReportFormatter& formatter = ReportFormatter::GetInstance();
 
-    if (NV_ADAPTER_TYPE adapterType; FindPhysicalGpuAdapterType(gpu, adapterType))
+    if(NV_ADAPTER_TYPE adapterType; FindPhysicalGpuAdapterType(gpu, adapterType))
     {
         formatter.AddFieldFlags(L"adapterType", (uint32_t)adapterType, Enum_NV_ADAPTER_TYPE);
     }
 
     NV_SYSTEM_TYPE systemType = {};
-    if (NvAPI_GPU_GetSystemType(gpu, &systemType) == NVAPI_OK)
+    if(NvAPI_GPU_GetSystemType(gpu, &systemType) == NVAPI_OK)
         formatter.AddFieldEnum(L"NvAPI_GPU_GetSystemType", systemType, Enum_NV_SYSTEM_TYPE);
 
     NvAPI_ShortString name = {};
-    if (NvAPI_GPU_GetFullName(gpu, name) == NVAPI_OK)
+    if(NvAPI_GPU_GetFullName(gpu, name) == NVAPI_OK)
         formatter.AddFieldString(L"NvAPI_GPU_GetFullName", StrToWstr(name, CP_ACP).c_str());
 
     NvU32 DeviceId = 0, SubSystemId = 0, RevisionId = 0, ExtDeviceId = 0;
-    if (NvAPI_GPU_GetPCIIdentifiers(gpu, &DeviceId, &SubSystemId, &RevisionId, &ExtDeviceId) == NVAPI_OK)
+    if(NvAPI_GPU_GetPCIIdentifiers(gpu, &DeviceId, &SubSystemId, &RevisionId, &ExtDeviceId) == NVAPI_OK)
     {
         formatter.AddFieldHex32(L"NvAPI_GPU_GetPCIIdentifiers - pDeviceID", DeviceId);
         formatter.AddFieldSubsystemId(L"NvAPI_GPU_GetPCIIdentifiers - pSubSystemId", SubSystemId);
@@ -824,82 +825,82 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
     }
 
     NV_GPU_TYPE gpuType = {};
-    if (NvAPI_GPU_GetGPUType(gpu, &gpuType) == NVAPI_OK)
+    if(NvAPI_GPU_GetGPUType(gpu, &gpuType) == NVAPI_OK)
         formatter.AddFieldEnum(L"NvAPI_GPU_GetGPUType", gpuType, Enum_NV_GPU_TYPE);
 
     NV_GPU_BUS_TYPE busType = {};
-    if (NvAPI_GPU_GetBusType(gpu, &busType) == NVAPI_OK)
+    if(NvAPI_GPU_GetBusType(gpu, &busType) == NVAPI_OK)
         formatter.AddFieldEnum(L"NvAPI_GPU_GetBusType", busType, Enum_NV_GPU_BUS_TYPE);
 
     NvU32 biosRevision = 0;
-    if (NvAPI_GPU_GetVbiosRevision(gpu, &biosRevision) == NVAPI_OK)
+    if(NvAPI_GPU_GetVbiosRevision(gpu, &biosRevision) == NVAPI_OK)
         formatter.AddFieldUint32(L"NvAPI_GPU_GetVbiosRevision", biosRevision);
 
     NvU32 biosOemRevision = 0;
-    if (NvAPI_GPU_GetVbiosOEMRevision(gpu, &biosOemRevision) == NVAPI_OK)
+    if(NvAPI_GPU_GetVbiosOEMRevision(gpu, &biosOemRevision) == NVAPI_OK)
         formatter.AddFieldUint32(L"NvAPI_GPU_GetVbiosOEMRevision", biosOemRevision);
 
     NvAPI_ShortString biosVersionString = {};
-    if (NvAPI_GPU_GetVbiosVersionString(gpu, biosVersionString) == NVAPI_OK)
+    if(NvAPI_GPU_GetVbiosVersionString(gpu, biosVersionString) == NVAPI_OK)
         formatter.AddFieldString(L"NvAPI_GPU_GetVbiosVersionString", StrToWstr(biosVersionString, CP_ACP).c_str());
 
     NvU32 physicalFrameBufferSize = 0;
-    if (NvAPI_GPU_GetPhysicalFrameBufferSize(gpu, &physicalFrameBufferSize) == NVAPI_OK)
+    if(NvAPI_GPU_GetPhysicalFrameBufferSize(gpu, &physicalFrameBufferSize) == NVAPI_OK)
         formatter.AddFieldSizeKilobytes(L"NvAPI_GPU_GetPhysicalFrameBufferSize", physicalFrameBufferSize);
 
     NvU32 virtualFrameBufferSize = 0;
-    if (NvAPI_GPU_GetVirtualFrameBufferSize(gpu, &virtualFrameBufferSize) == NVAPI_OK)
+    if(NvAPI_GPU_GetVirtualFrameBufferSize(gpu, &virtualFrameBufferSize) == NVAPI_OK)
         formatter.AddFieldSizeKilobytes(L"NvAPI_GPU_GetVirtualFrameBufferSize", virtualFrameBufferSize);
 
     NV_GPU_ARCH_INFO archInfo = { NV_GPU_ARCH_INFO_VER };
-    if (NvAPI_GPU_GetArchInfo(gpu, &archInfo) == NVAPI_OK)
+    if(NvAPI_GPU_GetArchInfo(gpu, &archInfo) == NVAPI_OK)
     {
         formatter.AddFieldEnum(L"NvAPI_GPU_GetArchInfo - NV_GPU_ARCH_INFO::architecture_id", archInfo.architecture_id,
-                               Enum_NV_GPU_ARCHITECTURE_ID);
-        formatter.AddFieldNvidiaImplementationID(
-            L"NvAPI_GPU_GetArchInfo - NV_GPU_ARCH_INFO::implementation_id", (uint32_t)archInfo.architecture_id,
-            (uint32_t)archInfo.implementation_id, Enum_NV_ARCH_plus_IMPLEMENTATION_ID);
-        formatter.AddFieldEnum(L"NvAPI_GPU_GetArchInfo - NV_GPU_ARCH_INFO::revision_id", archInfo.revision_id,
-                               Enum_NV_GPU_CHIP_REVISION);
+            Enum_NV_GPU_ARCHITECTURE_ID);
+        formatter.AddFieldNvidiaImplementationID(L"NvAPI_GPU_GetArchInfo - NV_GPU_ARCH_INFO::implementation_id",
+            (uint32_t)archInfo.architecture_id, (uint32_t)archInfo.implementation_id,
+            Enum_NV_ARCH_plus_IMPLEMENTATION_ID);
+        formatter.AddFieldEnum(
+            L"NvAPI_GPU_GetArchInfo - NV_GPU_ARCH_INFO::revision_id", archInfo.revision_id, Enum_NV_GPU_CHIP_REVISION);
     }
 
     NV_GPU_VR_READY vrReady = { NV_GPU_VR_READY_VER };
-    if (NvAPI_GPU_GetVRReadyData(gpu, &vrReady) == NVAPI_OK)
+    if(NvAPI_GPU_GetVRReadyData(gpu, &vrReady) == NVAPI_OK)
         formatter.AddFieldBool(L"NvAPI_GPU_GetVRReadyData - NV_GPU_VR_READY::isVRReady", vrReady.isVRReady != 0);
 
     NV_GPU_QUERY_ILLUMINATION_SUPPORT_PARM queryIlluminationSupportParm = {
         .version = NV_GPU_QUERY_ILLUMINATION_SUPPORT_PARM_VER, .hPhysicalGpu = gpu
     };
-    for (const EnumItem* ei = Enum_NV_GPU_ILLUMINATION_ATTRIB; ei->m_Name != nullptr; ++ei)
+    for(const EnumItem* ei = Enum_NV_GPU_ILLUMINATION_ATTRIB; ei->m_Name != nullptr; ++ei)
     {
         queryIlluminationSupportParm.Attribute = (NV_GPU_ILLUMINATION_ATTRIB)ei->m_Value;
-        if (NvAPI_GPU_QueryIlluminationSupport(&queryIlluminationSupportParm) == NVAPI_OK)
+        if(NvAPI_GPU_QueryIlluminationSupport(&queryIlluminationSupportParm) == NVAPI_OK)
         {
             formatter.AddFieldBool(std::format(L"NvAPI_GPU_QueryIlluminationSupport({})", ei->m_Name).c_str(),
-                                   queryIlluminationSupportParm.bSupported != 0);
+                queryIlluminationSupportParm.bSupported != 0);
         }
     }
 
-    for (const EnumItem* ei = Enum_NV_GPU_WORKSTATION_FEATURE_TYPE; ei->m_Name != nullptr; ++ei)
+    for(const EnumItem* ei = Enum_NV_GPU_WORKSTATION_FEATURE_TYPE; ei->m_Name != nullptr; ++ei)
     {
         NvAPI_Status status =
             NvAPI_GPU_QueryWorkstationFeatureSupport(gpu, (NV_GPU_WORKSTATION_FEATURE_TYPE)ei->m_Value);
         formatter.AddFieldEnumSigned(std::format(L"NvAPI_GPU_QueryWorkstationFeatureSupport({})", ei->m_Name).c_str(),
-                                     status, Enum_NvAPI_Status);
+            status, Enum_NvAPI_Status);
     }
 
     {
         NV_GPU_MEMORY_INFO_EX memInfo = { NV_GPU_MEMORY_INFO_EX_VER };
-        if (NvAPI_GPU_GetMemoryInfoEx(gpu, &memInfo) == NVAPI_OK)
+        if(NvAPI_GPU_GetMemoryInfoEx(gpu, &memInfo) == NVAPI_OK)
         {
             formatter.AddFieldSize(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::dedicatedVideoMemory",
-                                   memInfo.dedicatedVideoMemory);
+                memInfo.dedicatedVideoMemory);
             formatter.AddFieldSize(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::availableDedicatedVideoMemory",
-                                   memInfo.availableDedicatedVideoMemory);
-            formatter.AddFieldSize(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::systemVideoMemory",
-                                   memInfo.systemVideoMemory);
-            formatter.AddFieldSize(L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::sharedSystemMemory",
-                                   memInfo.sharedSystemMemory);
+                memInfo.availableDedicatedVideoMemory);
+            formatter.AddFieldSize(
+                L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::systemVideoMemory", memInfo.systemVideoMemory);
+            formatter.AddFieldSize(
+                L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::sharedSystemMemory", memInfo.sharedSystemMemory);
             formatter.AddFieldSize(
                 L"NvAPI_GPU_GetMemoryInfoEx - NV_GPU_MEMORY_INFO_EX::curAvailableDedicatedVideoMemory",
                 memInfo.curAvailableDedicatedVideoMemory);
@@ -919,33 +920,33 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
     }
 
     NvU32 shaderSubPipeCount = 0;
-    if (NvAPI_GPU_GetShaderSubPipeCount(gpu, &shaderSubPipeCount) == NVAPI_OK)
+    if(NvAPI_GPU_GetShaderSubPipeCount(gpu, &shaderSubPipeCount) == NVAPI_OK)
         formatter.AddFieldUint32(L"NvAPI_GPU_GetShaderSubPipeCount", shaderSubPipeCount);
 
     NvU32 gpuCoreCount = 0;
-    if (NvAPI_GPU_GetGpuCoreCount(gpu, &gpuCoreCount) == NVAPI_OK)
+    if(NvAPI_GPU_GetGpuCoreCount(gpu, &gpuCoreCount) == NVAPI_OK)
         formatter.AddFieldUint32(L"NvAPI_GPU_GetGpuCoreCount", gpuCoreCount);
 
     NV_GPU_ECC_STATUS_INFO GPUECCStatusInfo = { NV_GPU_ECC_STATUS_INFO_VER };
-    if (NvAPI_GPU_GetECCStatusInfo(gpu, &GPUECCStatusInfo) == NVAPI_OK)
+    if(NvAPI_GPU_GetECCStatusInfo(gpu, &GPUECCStatusInfo) == NVAPI_OK)
     {
-        formatter.AddFieldBool(L"NvAPI_GPU_GetECCStatusInfo - NV_GPU_ECC_STATUS_INFO::isSupported",
-                               GPUECCStatusInfo.isSupported != 0);
+        formatter.AddFieldBool(
+            L"NvAPI_GPU_GetECCStatusInfo - NV_GPU_ECC_STATUS_INFO::isSupported", GPUECCStatusInfo.isSupported != 0);
         formatter.AddFieldEnum(L"NvAPI_GPU_GetECCStatusInfo - NV_GPU_ECC_STATUS_INFO::configurationOptions",
-                               GPUECCStatusInfo.configurationOptions, Enum_NV_ECC_CONFIGURATION);
-        formatter.AddFieldBool(L"NvAPI_GPU_GetECCStatusInfo - NV_GPU_ECC_STATUS_INFO::isEnabled",
-                               GPUECCStatusInfo.isEnabled != 0);
+            GPUECCStatusInfo.configurationOptions, Enum_NV_ECC_CONFIGURATION);
+        formatter.AddFieldBool(
+            L"NvAPI_GPU_GetECCStatusInfo - NV_GPU_ECC_STATUS_INFO::isEnabled", GPUECCStatusInfo.isEnabled != 0);
     }
 
     {
         NvU32 busWidth = 0;
-        if (NvAPI_GPU_GetRamBusWidth(gpu, &busWidth) == NVAPI_OK)
+        if(NvAPI_GPU_GetRamBusWidth(gpu, &busWidth) == NVAPI_OK)
             formatter.AddFieldUint32(L"NvAPI_GPU_GetRamBusWidth", busWidth);
     }
 
     {
         NV_GPU_INFO gpuInfo = { NV_GPU_INFO_VER };
-        if (NvAPI_GPU_GetGPUInfo(gpu, &gpuInfo) == NVAPI_OK)
+        if(NvAPI_GPU_GetGPUInfo(gpu, &gpuInfo) == NVAPI_OK)
         {
             formatter.AddFieldBool(L"NvAPI_GPU_GetGPUInfo - NV_GPU_INFO::bIsExternalGpu", gpuInfo.bIsExternalGpu);
             formatter.AddFieldUint32(L"NvAPI_GPU_GetGPUInfo - NV_GPU_INFO::rayTracingCores", gpuInfo.rayTracingCores);
@@ -955,10 +956,10 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
 
     {
         NV_GPU_GSP_INFO gspInfo = { NV_GPU_GSP_INFO_VER };
-        if (NvAPI_GPU_GetGspFeatures(gpu, &gspInfo) == NVAPI_OK)
+        if(NvAPI_GPU_GetGspFeatures(gpu, &gspInfo) == NVAPI_OK)
         {
             formatter.AddFieldHexBytes(L"NvAPI_GPU_GetGspFeatures - NV_GPU_GSP_INFO::firmwareVersion",
-                                       gspInfo.firmwareVersion, NVAPI_GPU_MAX_BUILD_VERSION_LENGTH);
+                gspInfo.firmwareVersion, NVAPI_GPU_MAX_BUILD_VERSION_LENGTH);
         }
     }
 }

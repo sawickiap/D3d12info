@@ -88,9 +88,9 @@ static bool FindPhysicalDevice(const DXGI_ADAPTER_DESC& adapterDesc, size_t& out
 {
     outIndex = SIZE_MAX;
     // Match LUID
-    for (size_t i = 0; i < g_PhysicalDeviceProperties.size(); ++i)
+    for(size_t i = 0; i < g_PhysicalDeviceProperties.size(); ++i)
     {
-        if (g_PhysicalDeviceProperties[i].IDProperties.deviceLUIDValid &&
+        if(g_PhysicalDeviceProperties[i].IDProperties.deviceLUIDValid &&
             memcmp(g_PhysicalDeviceProperties[i].IDProperties.deviceLUID, &adapterDesc.AdapterLuid, VK_LUID_SIZE) == 0)
         {
             outIndex = i;
@@ -98,12 +98,12 @@ static bool FindPhysicalDevice(const DXGI_ADAPTER_DESC& adapterDesc, size_t& out
         }
     }
     // Match VendorID and DeviceID
-    for (size_t i = 0; i < g_PhysicalDeviceProperties.size(); ++i)
+    for(size_t i = 0; i < g_PhysicalDeviceProperties.size(); ++i)
     {
-        if (g_PhysicalDeviceProperties[i].properties2.properties.vendorID == adapterDesc.VendorId &&
+        if(g_PhysicalDeviceProperties[i].properties2.properties.vendorID == adapterDesc.VendorId &&
             g_PhysicalDeviceProperties[i].properties2.properties.deviceID == adapterDesc.DeviceId)
         {
-            if (outIndex != SIZE_MAX)
+            if(outIndex != SIZE_MAX)
                 // Multiple matches found.
                 return false;
             outIndex = i;
@@ -123,7 +123,7 @@ void Vulkan_Initialize_RAII::PrintStaticParams()
 Vulkan_Initialize_RAII::Vulkan_Initialize_RAII()
 {
     g_VulkanModule = LoadLibrary(L"vulkan-1.dll");
-    if (!g_VulkanModule)
+    if(!g_VulkanModule)
         return;
 
     g_vkGetInstanceProcAddr = PFN_vkGetInstanceProcAddr(GetProcAddress(g_VulkanModule, "vkGetInstanceProcAddr"));
@@ -134,46 +134,46 @@ Vulkan_Initialize_RAII::Vulkan_Initialize_RAII()
     g_vkGetPhysicalDeviceProperties2 =
         PFN_vkGetPhysicalDeviceProperties2(GetProcAddress(g_VulkanModule, "vkGetPhysicalDeviceProperties2"));
 
-    if (!g_vkGetInstanceProcAddr || !g_vkCreateInstance || !g_vkDestroyInstance || !g_vkEnumeratePhysicalDevices ||
+    if(!g_vkGetInstanceProcAddr || !g_vkCreateInstance || !g_vkDestroyInstance || !g_vkEnumeratePhysicalDevices ||
         !g_vkGetPhysicalDeviceProperties2)
         return;
 
     VkApplicationInfo appInfo = { .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-                                  .pApplicationName = PROGRAM_NAME_ANSI,
-                                  .applicationVersion = PROGRAM_VERSION_NUMBER,
-                                  .pEngineName = PROGRAM_NAME_ANSI,
-                                  .engineVersion = PROGRAM_VERSION_NUMBER,
-                                  .apiVersion = VK_API_VERSION_1_2 };
+        .pApplicationName = PROGRAM_NAME_ANSI,
+        .applicationVersion = PROGRAM_VERSION_NUMBER,
+        .pEngineName = PROGRAM_NAME_ANSI,
+        .engineVersion = PROGRAM_VERSION_NUMBER,
+        .apiVersion = VK_API_VERSION_1_2 };
     const VkInstanceCreateInfo instanceCreateInfo = { .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-                                                      .pApplicationInfo = &appInfo };
-    if (g_vkCreateInstance(&instanceCreateInfo, nullptr, &g_vkInstance) != VK_SUCCESS)
+        .pApplicationInfo = &appInfo };
+    if(g_vkCreateInstance(&instanceCreateInfo, nullptr, &g_vkInstance) != VK_SUCCESS)
     {
         appInfo.apiVersion = VK_API_VERSION_1_1;
-        if (g_vkCreateInstance(&instanceCreateInfo, nullptr, &g_vkInstance) != VK_SUCCESS)
+        if(g_vkCreateInstance(&instanceCreateInfo, nullptr, &g_vkInstance) != VK_SUCCESS)
             return;
     }
     g_ApiVersion = appInfo.apiVersion;
 
     uint32_t physDeviceCount = 0;
-    if (g_vkEnumeratePhysicalDevices(g_vkInstance, &physDeviceCount, nullptr) != VK_SUCCESS)
+    if(g_vkEnumeratePhysicalDevices(g_vkInstance, &physDeviceCount, nullptr) != VK_SUCCESS)
         return;
-    if (physDeviceCount)
+    if(physDeviceCount)
     {
         g_PhysicalDevices.resize(physDeviceCount);
-        if (g_vkEnumeratePhysicalDevices(g_vkInstance, &physDeviceCount, g_PhysicalDevices.data()) != VK_SUCCESS)
+        if(g_vkEnumeratePhysicalDevices(g_vkInstance, &physDeviceCount, g_PhysicalDevices.data()) != VK_SUCCESS)
             return;
     }
 
     g_PhysicalDeviceProperties.resize(physDeviceCount);
-    for (uint32_t i = 0; i < physDeviceCount; ++i)
+    for(uint32_t i = 0; i < physDeviceCount; ++i)
     {
         g_PhysicalDeviceProperties[i].properties2 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2 };
         g_PhysicalDeviceProperties[i].IDProperties = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES };
         g_PhysicalDeviceProperties[i].vulkan12Properties = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES };
         AddToPnextChain(&g_PhysicalDeviceProperties[i].properties2, &g_PhysicalDeviceProperties[i].IDProperties);
-        if (g_ApiVersion >= VK_API_VERSION_1_2)
-            AddToPnextChain(&g_PhysicalDeviceProperties[i].properties2,
-                            &g_PhysicalDeviceProperties[i].vulkan12Properties);
+        if(g_ApiVersion >= VK_API_VERSION_1_2)
+            AddToPnextChain(
+                &g_PhysicalDeviceProperties[i].properties2, &g_PhysicalDeviceProperties[i].vulkan12Properties);
         g_vkGetPhysicalDeviceProperties2(g_PhysicalDevices[i], &g_PhysicalDeviceProperties[i].properties2);
     }
 
@@ -182,7 +182,7 @@ Vulkan_Initialize_RAII::Vulkan_Initialize_RAII()
 
 Vulkan_Initialize_RAII::~Vulkan_Initialize_RAII()
 {
-    if (g_vkInstance)
+    if(g_vkInstance)
         g_vkDestroyInstance(g_vkInstance, nullptr);
 }
 
@@ -192,17 +192,17 @@ void Vulkan_Initialize_RAII::PrintData(const DXGI_ADAPTER_DESC& adapterDesc)
     ReportFormatter& formatter = ReportFormatter::GetInstance();
 
     size_t physDevIndex = SIZE_MAX;
-    if (!FindPhysicalDevice(adapterDesc, physDevIndex))
+    if(!FindPhysicalDevice(adapterDesc, physDevIndex))
         return;
     const PhysicalDevicePropertySet& propSet = g_PhysicalDeviceProperties[physDevIndex];
 
     {
         const VkPhysicalDeviceProperties& props = propSet.properties2.properties;
         ReportScopeObject region(L"VkPhysicalDeviceProperties");
-        formatter.AddFieldString(L"apiVersion", std::format(L"{}.{}.{}", VK_API_VERSION_MAJOR(props.apiVersion),
-                                                            VK_API_VERSION_MINOR(props.apiVersion),
-                                                            VK_API_VERSION_PATCH(props.apiVersion))
-                                                    .c_str());
+        formatter.AddFieldString(
+            L"apiVersion", std::format(L"{}.{}.{}", VK_API_VERSION_MAJOR(props.apiVersion),
+                               VK_API_VERSION_MINOR(props.apiVersion), VK_API_VERSION_PATCH(props.apiVersion))
+                               .c_str());
         formatter.AddFieldUint32(L"driverVersion", props.driverVersion);
         formatter.AddFieldVendorId(L"vendorID", props.vendorID);
         formatter.AddFieldHex32(L"deviceID", props.deviceID);
@@ -215,11 +215,11 @@ void Vulkan_Initialize_RAII::PrintData(const DXGI_ADAPTER_DESC& adapterDesc)
         ReportScopeObject region(L"VkPhysicalDeviceIDProperties");
         formatter.AddFieldHexBytes(L"deviceUUID", IDProps.deviceUUID, VK_UUID_SIZE);
         formatter.AddFieldHexBytes(L"driverUUID", IDProps.driverUUID, VK_UUID_SIZE);
-        if (IDProps.deviceLUIDValid)
+        if(IDProps.deviceLUIDValid)
             formatter.AddFieldHexBytes(L"deviceLUID", IDProps.deviceLUID, VK_LUID_SIZE);
     }
 
-    if (g_ApiVersion >= VK_API_VERSION_1_2)
+    if(g_ApiVersion >= VK_API_VERSION_1_2)
     {
         const VkPhysicalDeviceVulkan12Properties& vulkan12Props = propSet.vulkan12Properties;
         ReportScopeObject region(L"VkPhysicalDeviceVulkan12Properties");

@@ -43,7 +43,7 @@ public:
     void AddFieldMicrosoftVersion(std::wstring_view name, uint64_t value) final;
     void AddFieldAMDVersion(std::wstring_view name, uint64_t value) final;
     void AddFieldNvidiaImplementationID(std::wstring_view name, uint32_t architectureId, uint32_t implementationId,
-                                        const EnumItem* architecturePlusImplementationIDEnum) final;
+        const EnumItem* architecturePlusImplementationIDEnum) final;
 
 private:
     static constexpr size_t INDENT_SIZE = 4;
