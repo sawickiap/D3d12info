@@ -67,4 +67,6 @@ private:
     void PushNewElement();
     void PrintIndent(size_t additionalIndentation = 0);
     void PrintNewLine();
+
+    std::wstring EscapeString(std::wstring_view str);
 };

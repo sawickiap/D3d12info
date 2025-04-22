@@ -31,7 +31,8 @@ void JSONReportFormatter::PushObject(std::wstring_view name)
 
     PushNewElement();
 
-    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {{" : L"\"{}\":{{", std::make_wformat_args(name));
+    std::wstring escapedName = EscapeString(name);
+    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {{" : L"\"{}\":{{", std::make_wformat_args(escapedName));
 
     m_ScopeStack.push({ .ElementCount = 0, .Type = ScopeType::Object });
 }
@@ -42,7 +43,8 @@ void JSONReportFormatter::PushArray(std::wstring_view name, ARRAY_SUFFIX suffix 
 
     PushNewElement();
 
-    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": [" : L"\"{}\":[", std::make_wformat_args(name));
+    std::wstring escapedName = EscapeString(name);
+    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": [" : L"\"{}\":[", std::make_wformat_args(escapedName));
 
     m_ScopeStack.push({ .ElementCount = 0, .Type = ScopeType::Array });
 }
@@ -80,14 +82,20 @@ void JSONReportFormatter::AddFieldString(std::wstring_view name, std::wstring_vi
     assert(!name.empty());
     assert(!value.empty());
     PushNewElement();
-    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": \"{}\"" : L"\"{}\":\"{}\"", std::make_wformat_args(name, value));
+
+    std::wstring escapedName = EscapeString(name);
+    std::wstring escapedValue = EscapeString(value);
+    Printer::PrintFormat(
+        m_PrettyPrint ? L"\"{}\": \"{}\"" : L"\"{}\":\"{}\"", std::make_wformat_args(escapedName, escapedValue));
 }
 
 void JSONReportFormatter::AddFieldStringArray(std::wstring_view name, const std::vector<std::wstring>& value)
 {
     assert(!name.empty());
     PushNewElement();
-    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": [" : L"\"{}\":[", std::make_wformat_args(name));
+
+    std::wstring escapedName = EscapeString(name);
+    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": [" : L"\"{}\":[", std::make_wformat_args(escapedName));
     for(size_t i = 0; i < value.size(); ++i)
     {
         if(i > 0)
@@ -96,7 +104,8 @@ void JSONReportFormatter::AddFieldStringArray(std::wstring_view name, const std:
         }
         PrintNewLine();
         PrintIndent(1);
-        Printer::PrintFormat(L"\"{}\"", std::make_wformat_args(value[i]));
+        std::wstring escapedValue = EscapeString(value[i]);
+        Printer::PrintFormat(L"\"{}\"", std::make_wformat_args(escapedValue));
     }
     PrintNewLine();
     PrintIndent();
@@ -107,22 +116,28 @@ void JSONReportFormatter::AddFieldBool(std::wstring_view name, bool value)
 {
     assert(!name.empty());
     PushNewElement();
+
+    std::wstring escapedName = EscapeString(name);
     const wchar_t* boolStr = value ? L"true" : L"false";
-    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(name, boolStr));
+    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(escapedName, boolStr));
 }
 
 void JSONReportFormatter::AddFieldUint32(std::wstring_view name, uint32_t value, std::wstring_view unit /* = {}*/)
 {
     assert(!name.empty());
     PushNewElement();
-    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(name, value));
+
+    std::wstring escapedName = EscapeString(name);
+    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(escapedName, value));
 }
 
 void JSONReportFormatter::AddFieldUint64(std::wstring_view name, uint64_t value, std::wstring_view unit /* = {}*/)
 {
     assert(!name.empty());
     PushNewElement();
-    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(name, value));
+
+    std::wstring escapedName = EscapeString(name);
+    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(escapedName, value));
 }
 
 void JSONReportFormatter::AddFieldSize(std::wstring_view name, uint64_t value)
@@ -144,14 +159,18 @@ void JSONReportFormatter::AddFieldInt32(std::wstring_view name, int32_t value, s
 {
     assert(!name.empty());
     PushNewElement();
-    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(name, value));
+
+    std::wstring escapedName = EscapeString(name);
+    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(escapedName, value));
 }
 
 void JSONReportFormatter::AddFieldFloat(std::wstring_view name, float value, std::wstring_view unit /* = {}*/)
 {
     assert(!name.empty());
     PushNewElement();
-    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(name, value));
+
+    std::wstring escapedName = EscapeString(name);
+    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(escapedName, value));
 }
 
 void JSONReportFormatter::AddFieldEnum(std::wstring_view name, uint32_t value, const EnumItem* enumItems)
@@ -169,7 +188,9 @@ void JSONReportFormatter::AddEnumArray(
 {
     assert(!name.empty());
     PushNewElement();
-    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": [" : L"\"{}\":[", std::make_wformat_args(name));
+
+    std::wstring escapedName = EscapeString(name);
+    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": [" : L"\"{}\":[", std::make_wformat_args(escapedName));
     for(size_t i = 0; i < count; ++i)
     {
         if(i > 0)
@@ -253,4 +274,41 @@ void JSONReportFormatter::PrintNewLine()
     {
         Printer::PrintNewLine();
     }
+}
+
+std::wstring JSONReportFormatter::EscapeString(std::wstring_view str)
+{
+    // Escapes string for JSON format
+    std::wstring escapedStr;
+    escapedStr.reserve(str.size() * 2); // Reserve enough space to avoid multiple allocations
+    for(wchar_t ch : str)
+    {
+        switch(ch)
+        {
+        case L'"':
+            escapedStr += L"\\\"";
+            break;
+        case L'\\':
+            escapedStr += L"\\\\";
+            break;
+        case L'\b':
+            escapedStr += L"\\b";
+            break;
+        case L'\f':
+            escapedStr += L"\\f";
+            break;
+        case L'\n':
+            escapedStr += L"\\n";
+            break;
+        case L'\r':
+            escapedStr += L"\\r";
+            break;
+        case L'\t':
+            escapedStr += L"\\t";
+            break;
+        default:
+            escapedStr += ch;
+        }
+    }
+    return escapedStr;
 }
