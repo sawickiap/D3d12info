@@ -1,4 +1,14 @@
+# Version 3.10.1 (2025-04-23)
+
+Changes:
+
+- Fixed JSON printing in case of multi-line strings. (Developed by @Devaniti as #28)
+
+Compiled with DirectX 12 Agility SDK 1.615.1 ("D3d12info.exe") / 1.716.1-preview ("D3d12info\_preview.exe"), AMD AGS 6.2.0, AMD device\_info from 2024-09-24 (commit hash `7379d082f1d8d64c9d1168b84b7f6b2a9702c82f`), NVAPI R570, Intel GPU Detect from 2023-07-18 (commit hash `dd962c44acdad4ea21632e0bd144ab139e8ad8eb`) - all same as previous version.
+
 # Version 3.10.0 (2025-03-01)
+
+Changes:
 
 - Added command-line parameter `-o --OutputFile=<FilePath>` that prints the output to a given file instead of the standard output. (Developed by @Devaniti as #26)
   - It can be useful for automated processing, where additional messages printed to the standard output e.g., by implicit Vulkan layers can cause problems.
