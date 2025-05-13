@@ -1385,10 +1385,7 @@ static bool LoadLibraries()
 
     g_D3D12GetInterface =
         reinterpret_cast<PFN_D3D12_GET_INTERFACE>(::GetProcAddress(g_Dx12Library, "D3D12GetInterface"));
-    if(!g_D3D12GetInterface)
-    {
-        return false;
-    }
+    // Optional, null is accepted.
 
     return true;
 }
