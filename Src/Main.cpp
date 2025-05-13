@@ -78,7 +78,7 @@ typedef HRESULT(WINAPI* PFN_D3D12_ENABLE_EXPERIMENTAL_FEATURES)(UINT NumFeatures
 PFN_DXGI_CREATE_FACTORY1 g_CreateDXGIFactory1;
 PFN_D3D12_CREATE_DEVICE g_D3D12CreateDevice;
 PFN_D3D12_ENABLE_EXPERIMENTAL_FEATURES g_D3D12EnableExperimentalFeatures; // Optional, can be null.
-PFN_D3D12_GET_INTERFACE g_D3D12GetInterface;
+PFN_D3D12_GET_INTERFACE g_D3D12GetInterface; // Optional, can be null.
 
 #endif // #if defined(AUTO_LINK_DX12)
 
@@ -1159,6 +1159,8 @@ static void PrintDirectSROptimizationRankings(const DSR_OPTIMIZATION_TYPE* optim
 
 static void PrintDirectSR(ID3D12Device* device)
 {
+    if(g_D3D12GetInterface == nullptr)
+        return;
     ComPtr<ID3D12DSRDeviceFactory> dsrDeviceFactory;
     if(FAILED(g_D3D12GetInterface(CLSID_D3D12DSRDeviceFactory, IID_PPV_ARGS(&dsrDeviceFactory))))
         return;
