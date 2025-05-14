@@ -19,6 +19,7 @@ set(CPP_FILES
     Src/IntelData.cpp
     Src/Main.cpp
     Src/NvApiData.cpp
+    Src/SystemData.cpp
     Src/Printer.cpp
     Src/Resources.rc
     Src/Utils.cpp
@@ -34,6 +35,7 @@ set(HPP_FILES
     Src/Enums.hpp
     Src/IntelData.hpp
     Src/NvApiData.hpp
+    Src/SystemData.hpp
     Src/pch.hpp
     Src/Printer.hpp
     Src/Utils.hpp

@@ -16,6 +16,7 @@ For more information, see files README.md, LICENSE.txt.
 #include "ReportFormatter/ReportFormatter.hpp"
 #include "Utils.hpp"
 #include "VulkanData.hpp"
+#include "SystemData.hpp"
 
 #define WIDE_CHAR_STRING_HELPER(x) L ## x
 #define WIDE_CHAR_STRING(x) WIDE_CHAR_STRING_HELPER(x)
@@ -596,33 +597,6 @@ static void PrintEnums()
     }
 }
 
-static void PrintOsVersionInfo()
-{
-    ReportScopeObject scope(L"OS Info");
-    ReportFormatter& formatter = ReportFormatter::GetInstance();
-    HMODULE m = GetModuleHandle(L"ntdll.dll");
-    if(!m)
-    {
-        formatter.AddFieldString(L"Windows version", L"Unknown");
-        return;
-    }
-
-    typedef int32_t(WINAPI * RtlGetVersionFunc)(OSVERSIONINFOEX*);
-    RtlGetVersionFunc RtlGetVersion = (RtlGetVersionFunc)GetProcAddress(m, "RtlGetVersion");
-    if(!RtlGetVersion)
-    {
-        formatter.AddFieldString(L"Windows version", L"Unknown");
-        return;
-    }
-
-    OSVERSIONINFOEX osVersionInfo = { sizeof(osVersionInfo) };
-    // Documentation says it always returns success.
-    RtlGetVersion(&osVersionInfo);
-
-    formatter.AddFieldString(L"Windows version", std::format(L"{}.{}.{}", osVersionInfo.dwMajorVersion,
-                                                     osVersionInfo.dwMinorVersion, osVersionInfo.dwBuildNumber));
-}
-
 static void PrintDXGIFeatureInfo()
 {
     ReportScopeObject scope(L"DXGI_FEATURE");
@@ -640,24 +614,6 @@ static void PrintDXGIFeatureInfo()
     if(SUCCEEDED(hr))
     {
         ReportFormatter::GetInstance().AddFieldBool(L"DXGI_FEATURE_PRESENT_ALLOW_TEARING", allowTearing);
-    }
-}
-
-static void PrintSystemMemoryInfo()
-{
-    ReportScopeObject scope(L"System memory");
-
-    if(uint64_t physicallyInstalledSystemMemory = 0;
-        GetPhysicallyInstalledSystemMemory(&physicallyInstalledSystemMemory))
-        ReportFormatter::GetInstance().AddFieldSizeKilobytes(
-            L"GetPhysicallyInstalledSystemMemory", physicallyInstalledSystemMemory);
-
-    if(MEMORYSTATUSEX memStatEx = { sizeof(MEMORYSTATUSEX) }; GlobalMemoryStatusEx(&memStatEx))
-    {
-        ReportFormatter& formatter = ReportFormatter::GetInstance();
-        formatter.AddFieldSize(L"MEMORYSTATUSEX::ullTotalPhys", memStatEx.ullTotalPhys);
-        formatter.AddFieldSize(L"MEMORYSTATUSEX::ullTotalPageFile", memStatEx.ullTotalPageFile);
-        formatter.AddFieldSize(L"MEMORYSTATUSEX::ullTotalVirtual", memStatEx.ullTotalVirtual);
     }
 }
 
