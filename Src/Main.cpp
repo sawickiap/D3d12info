@@ -694,8 +694,7 @@ static void DetectVkd3dGlobal()
 static void DetectVkd3dForDevice(ID3D12Device* dev)
 {
     ComPtr<IUnknown> ptr;
-    if (g_D3D12GetInterface &&
-        SUCCEEDED(g_D3D12GetInterface(CLSID_ID3D12DXVKInteropDevice, CLSID_ID3D12DXVKInteropDevice, &ptr)) &&
+    if (SUCCEEDED(dev->QueryInterface(CLSID_ID3D12DXVKInteropDevice, &ptr)) &&
         ptr)
     {
         ReportScopeObject scope(L"vkd3d-proton detection");
