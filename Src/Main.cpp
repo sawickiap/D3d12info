@@ -89,9 +89,6 @@ PFN_D3D12_GET_INTERFACE g_D3D12GetInterface; // Optional, can be null.
 // Query using D3D12GetInterface.
 DEFINE_GUID(CLSID_IVKD3DCoreInterface,
     0xed53efad, 0xda21, 0x4d96, 0xa1, 0xbc, 0xe7, 0x34, 0xe0, 0x78, 0x87, 0x9c);
-// Query using D3D12 device object.
-DEFINE_GUID(CLSID_ID3D12DXVKInteropDevice,
-    0x39da4e09, 0xbd1c, 0x4198, 0x9f, 0xae, 0x86, 0xbb, 0xe3, 0xbe, 0x41, 0xfd);
 
 // Command line flags
 static bool g_ShowVersionAndQuit = false;
@@ -679,7 +676,7 @@ static void EnableExperimentalFeatures()
     }
 }
 
-static void DetectVkd3dGlobal()
+static void DetectVkd3d()
 {
     ComPtr<IUnknown> ptr;
     if(g_D3D12GetInterface &&
@@ -688,17 +685,6 @@ static void DetectVkd3dGlobal()
     {
         ReportScopeObject scope(L"vkd3d-proton detection");
         ReportFormatter::GetInstance().AddFieldBool(L"IVKD3DCoreInterface", true);
-    }
-}
-
-static void DetectVkd3dForDevice(ID3D12Device* dev)
-{
-    ComPtr<IUnknown> ptr;
-    if (SUCCEEDED(dev->QueryInterface(CLSID_ID3D12DXVKInteropDevice, &ptr)) &&
-        ptr)
-    {
-        ReportScopeObject scope(L"vkd3d-proton detection");
-        ReportFormatter::GetInstance().AddFieldBool(L"ID3D12DXVKInteropDevice", true);
     }
 }
 
@@ -1319,8 +1305,6 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     }
 #endif
 
-    DetectVkd3dForDevice(device.Get());
-
 #if USE_NVAPI
     bool useNVAPI = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_NVIDIA;
     if(nvAPI && nvAPI->IsInitialized())
@@ -1895,7 +1879,7 @@ int wmain3(int argc, wchar_t** argv)
 
         EnableExperimentalFeatures();
 
-        DetectVkd3dGlobal();
+        DetectVkd3d();
     }
 
     if(g_PrintEnums)
