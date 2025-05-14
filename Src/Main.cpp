@@ -1814,87 +1814,93 @@ int wmain3(int argc, wchar_t** argv)
         throw std::runtime_error("Could not load DXGI & D3D12 libraries.");
 #endif
 
-    std::unique_ptr<NvAPI_Inititalize_RAII> nvApiObjPtr;
-#if USE_NVAPI
-    if(!g_PureD3D12)
-        nvApiObjPtr = std::make_unique<NvAPI_Inititalize_RAII>();
-#endif
-
-    std::unique_ptr<AGS_Initialize_RAII> agsObjPtr;
-#if USE_AGS
-    if(!g_PureD3D12)
-        agsObjPtr = std::make_unique<AGS_Initialize_RAII>();
-#endif
-
-    std::unique_ptr<AmdDeviceInfo_Initialize_RAII> amdDeviceInfoObjPtr;
-#if USE_AMD_DEVICE_INFO
-    if(!g_PureD3D12)
-        amdDeviceInfoObjPtr = std::make_unique<AmdDeviceInfo_Initialize_RAII>();
-#endif
-
-    std::unique_ptr<Vulkan_Initialize_RAII> vkObjPtr;
-#if USE_VULKAN
-    if(!g_PureD3D12)
-        vkObjPtr = std::make_unique<Vulkan_Initialize_RAII>();
-#endif
-
-    {
-        ReportScopeObject scope(SelectString(L"System Info", L"SystemInfo"));
-
-        if(!g_PureD3D12)
-        {
-            PrintOsVersionInfo();
-            PrintSystemMemoryInfo();
-        }
-
-        PrintDXGIFeatureInfo();
-
-#if USE_NVAPI
-        if(nvApiObjPtr && nvApiObjPtr->IsInitialized())
-            nvApiObjPtr->PrintData();
-#endif
-#if USE_AGS
-        if(agsObjPtr && agsObjPtr->IsInitialized())
-            agsObjPtr->PrintData();
-#endif
-
-        EnableExperimentalFeatures();
-    }
-
-    if(g_PrintEnums)
-        PrintEnums();
-
     int programResult = PROGRAM_EXIT_SUCCESS;
 
-    // Scope for COM objects.
+    // Scope for objects like nvApiObjPtr, agsObjPtr...
     {
-        ComPtr<IDXGIFactory4> dxgiFactory = nullptr;
-#if defined(AUTO_LINK_DX12)
-        CHECK_HR(::CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
-#else
-        CHECK_HR(g_CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
+        std::unique_ptr<NvAPI_Inititalize_RAII> nvApiObjPtr;
+#if USE_NVAPI
+        if(!g_PureD3D12)
+            nvApiObjPtr = std::make_unique<NvAPI_Inititalize_RAII>();
 #endif
-        assert(dxgiFactory != nullptr);
 
-        ReportScopeArrayConditional scopeArray(
-            g_PrintAdaptersAsArray, SelectString(L"Adapter", L"Adapters"), ReportFormatter::ARRAY_SUFFIX_NONE);
-        ReportScopeObjectConditional scopeObject(!g_PrintAdaptersAsArray, L"Adapter");
+        std::unique_ptr<AGS_Initialize_RAII> agsObjPtr;
+#if USE_AGS
+        if(!g_PureD3D12)
+            agsObjPtr = std::make_unique<AGS_Initialize_RAII>();
+#endif
 
-        if(g_ListAdapters)
-            ListAdapters(
-                dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(), vkObjPtr.get());
-        else
+        std::unique_ptr<AmdDeviceInfo_Initialize_RAII> amdDeviceInfoObjPtr;
+#if USE_AMD_DEVICE_INFO
+        if(!g_PureD3D12)
+            amdDeviceInfoObjPtr = std::make_unique<AmdDeviceInfo_Initialize_RAII>();
+#endif
+
+        std::unique_ptr<Vulkan_Initialize_RAII> vkObjPtr;
+#if USE_VULKAN
+        if(!g_PureD3D12)
+            vkObjPtr = std::make_unique<Vulkan_Initialize_RAII>();
+#endif
+
         {
-            if(g_WARP)
-                InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(),
-                    vkObjPtr.get(), UINT32_MAX);
-            else if(!g_ShowAllAdapters)
-                InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(),
-                    vkObjPtr.get(), adapterIndex);
-            else
-                InspectAllAdapters(
-                    dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(), vkObjPtr.get());
+            ReportScopeObject scope(SelectString(L"System Info", L"SystemInfo"));
+
+            if(!g_PureD3D12)
+            {
+                PrintOsVersionInfo();
+                PrintSystemMemoryInfo();
+            }
+
+            PrintDXGIFeatureInfo();
+
+#if USE_NVAPI
+            if(nvApiObjPtr && nvApiObjPtr->IsInitialized())
+                nvApiObjPtr->PrintData();
+#endif
+#if USE_AGS
+            if(agsObjPtr && agsObjPtr->IsInitialized())
+                agsObjPtr->PrintData();
+#endif
+
+            EnableExperimentalFeatures();
         }
+
+        if(g_PrintEnums)
+            PrintEnums();
+
+        // Scope for COM objects.
+        {
+            ComPtr<IDXGIFactory4> dxgiFactory = nullptr;
+#if defined(AUTO_LINK_DX12)
+            CHECK_HR(::CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
+#else
+            CHECK_HR(g_CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)));
+#endif
+            assert(dxgiFactory != nullptr);
+
+            ReportScopeArrayConditional scopeArray(
+                g_PrintAdaptersAsArray, SelectString(L"Adapter", L"Adapters"), ReportFormatter::ARRAY_SUFFIX_NONE);
+            ReportScopeObjectConditional scopeObject(!g_PrintAdaptersAsArray, L"Adapter");
+
+            if(g_ListAdapters)
+                ListAdapters(
+                    dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(), vkObjPtr.get());
+            else
+            {
+                if(g_WARP)
+                    InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(),
+                        vkObjPtr.get(), UINT32_MAX);
+                else if(!g_ShowAllAdapters)
+                    InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(),
+                        vkObjPtr.get(), adapterIndex);
+                else
+                    InspectAllAdapters(
+                        dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(), vkObjPtr.get());
+            }
+        }
+
+        // Intentionally calling it at the end, so we have all the necessary modules loaded into the process.
+        PrintModules();
     }
 
 #if !defined(AUTO_LINK_DX12)

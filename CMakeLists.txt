@@ -103,6 +103,8 @@ else()
     message(STATUS "Intel GPU Detect library not used.")
 endif()
 
+option(ENABLE_PSAPI "Enables usage of PSAPI and related parts of WinAPI used to fetch the list of modules (.dll files) loaded into the process." ON)
+
 function(add_my_executable USE_PREVIEW_AGILITY_SDK)
     set(EXE_NAME "D3d12info")
     if(USE_PREVIEW_AGILITY_SDK)
@@ -119,7 +121,12 @@ function(add_my_executable USE_PREVIEW_AGILITY_SDK)
     target_compile_options(${EXE_NAME} PRIVATE /W4 /wd4100 /wd4189)
     target_compile_definitions(${EXE_NAME} PRIVATE UNICODE _UNICODE)
     target_precompile_headers(${EXE_NAME} PRIVATE "Src/pch.hpp")
-    
+
+    if(ENABLE_PSAPI)
+        target_compile_definitions(${EXE_NAME} PRIVATE USE_PSAPI PSAPI_VERSION=1)
+        target_link_libraries(${EXE_NAME} PRIVATE "psapi.lib" "Version.lib")
+    endif()
+
     if(USE_PREVIEW_AGILITY_SDK)
         target_compile_definitions(${EXE_NAME} PRIVATE USE_PREVIEW_AGILITY_SDK=1)
         set(AGILITY_SDK_DIRECTORY "${PROJECT_SOURCE_DIR}/Src/ThirdParty/microsoft.direct3d.d3d12.1.716.1-preview")
