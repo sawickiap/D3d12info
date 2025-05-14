@@ -96,6 +96,7 @@ static bool g_OutputFile = false;
 static bool g_PrintFormats = false;
 static bool g_PrintMetaCommands = false;
 static bool g_PrintEnums = false;
+static bool g_PrintModules = false;
 static bool g_PureD3D12 = false;
 #ifdef USE_PREVIEW_AGILITY_SDK
 static bool g_EnableExperimental = true;
@@ -1380,6 +1381,7 @@ void PrintCommandLineSyntax()
     PrinterClass::PrintString(L"  -f --Formats                     Include information about DXGI format capabilities.\n");
     PrinterClass::PrintString(L"  --MetaCommands                   Include information about meta commands.\n");
     PrinterClass::PrintString(L"  -e --Enums                       Include information about all known enums and their values.\n");
+    PrinterClass::PrintString(L"  --Modules                        Include information about modules (.dll files) loaded in the process.\n");
     PrinterClass::PrintString(L"  --PureD3D12                      Extract information only from D3D12 and no other sources.\n");
 #ifdef USE_PREVIEW_AGILITY_SDK
     PrinterClass::PrintString(L"  -x --EnableExperimental=<on/off> Whether to enable experimental features before querying device capabilities. Default is on (off for D3d12info and on for D3d12info_preview).\n");
@@ -1611,6 +1613,7 @@ int wmain3(int argc, wchar_t** argv)
         CMD_LINE_OPT_FORMATS,
         CMD_LINE_OPT_META_COMMANDS,
         CMD_LINE_OPT_ENUMS,
+        CMD_LINE_OPT_MODULES,
         CMD_LINE_OPT_PURE_D3D12,
         CMD_LINE_OPT_ENABLE_EXPERIMENTAL,
         CMD_LINE_OPT_FORCE_VENDOR_SPECIFIC,
@@ -1637,6 +1640,7 @@ int wmain3(int argc, wchar_t** argv)
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_META_COMMANDS,         L"MetaCommands",        false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,                 L"Enums",               false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENUMS,                 L'e',                   false);
+    cmdLineParser.RegisterOpt(CMD_LINE_OPT_MODULES,               L"Modules",             false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_PURE_D3D12,            L"PureD3D12",           false);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENABLE_EXPERIMENTAL,   L"EnableExperimental",  true);
     cmdLineParser.RegisterOpt(CMD_LINE_OPT_ENABLE_EXPERIMENTAL,   L'x',                   true);
@@ -1713,6 +1717,9 @@ int wmain3(int argc, wchar_t** argv)
                 break;
             case CMD_LINE_OPT_ENUMS:
                 g_PrintEnums = true;
+                break;
+            case CMD_LINE_OPT_MODULES:
+                g_PrintModules = true;
                 break;
             case CMD_LINE_OPT_PURE_D3D12:
                 if(cmdLineParser.IsOptEncountered(CMD_LINE_OPT_FORCE_VENDOR_SPECIFIC))
@@ -1900,7 +1907,8 @@ int wmain3(int argc, wchar_t** argv)
         }
 
         // Intentionally calling it at the end, so we have all the necessary modules loaded into the process.
-        PrintModules();
+        if(g_PrintModules)
+            PrintModules();
     }
 
 #if !defined(AUTO_LINK_DX12)
