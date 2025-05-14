@@ -83,6 +83,13 @@ PFN_D3D12_GET_INTERFACE g_D3D12GetInterface; // Optional, can be null.
 
 #endif // #if defined(AUTO_LINK_DX12)
 
+// # From vkd3d-proton project
+// See: https://github.com/HansKristian-Work/vkd3d-proton/issues/2459
+
+// Query using D3D12GetInterface.
+DEFINE_GUID(CLSID_IVKD3DCoreInterface,
+    0xed53efad, 0xda21, 0x4d96, 0xa1, 0xbc, 0xe7, 0x34, 0xe0, 0x78, 0x87, 0x9c);
+
 // Command line flags
 static bool g_ShowVersionAndQuit = false;
 static bool g_ShowCommandLineSyntaxAndQuit = false;
@@ -666,6 +673,18 @@ static void EnableExperimentalFeatures()
         }
 
         ReportFormatter::GetInstance().AddFieldStringArray(L"D3D12EnableExperimentalFeatures", enabledFeatures);
+    }
+}
+
+static void DetectVkd3d()
+{
+    ComPtr<IUnknown> ptr;
+    if(g_D3D12GetInterface &&
+        SUCCEEDED(g_D3D12GetInterface(CLSID_IVKD3DCoreInterface, CLSID_IVKD3DCoreInterface, &ptr)) &&
+        ptr)
+    {
+        ReportScopeObject scope(L"vkd3d-proton detection");
+        ReportFormatter::GetInstance().AddFieldBool(L"IVKD3DCoreInterface", true);
     }
 }
 
@@ -1859,6 +1878,8 @@ int wmain3(int argc, wchar_t** argv)
 #endif
 
         EnableExperimentalFeatures();
+
+        DetectVkd3d();
     }
 
     if(g_PrintEnums)
