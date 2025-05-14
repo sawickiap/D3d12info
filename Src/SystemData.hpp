@@ -11,3 +11,4 @@ For more information, see files README.md, LICENSE.txt.
 
 void PrintOsVersionInfo();
 void PrintSystemMemoryInfo();
+void PrintModules();
