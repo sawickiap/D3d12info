@@ -30,7 +30,7 @@ See the original library in directory: Src\ThirdParty\gpudetect
 #include <winreg.h>
 
 // Don't forget to update to the date of the last commit when grabbing a new version!
-static const wchar_t* INTEL_GPU_DETECT_COMPILED_VERSION = L"2023-07-18";
+static const wchar_t* INTEL_GPU_DETECT_COMPILED_VERSION = L"2025-04-28";
 
 struct CUSTOM_FILE
 {
