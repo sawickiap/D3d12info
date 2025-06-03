@@ -1050,13 +1050,13 @@ static void PrintDeviceOptions(ID3D12Device* device)
            device->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &tightAlignment, sizeof(tightAlignment))))
         Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(tightAlignment);
 
-    if(D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL optionsExperimental = {}; SUCCEEDED(
-        device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL, &optionsExperimental, sizeof(optionsExperimental))))
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(optionsExperimental);
-
     if (D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS groupings = {}; SUCCEEDED(
         device->CheckFeatureSupport(D3D12_FEATURE_HARDWARE_SCHEDULING_QUEUE_GROUPINGS, &groupings, sizeof(groupings))))
         Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(groupings);
+
+    if(D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL optionsExperimental = {}; SUCCEEDED(
+        device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL, &optionsExperimental, sizeof(optionsExperimental))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(optionsExperimental);
 
     if (D3D12_FEATURE_DATA_COOPERATIVE_VECTOR cooperativeVector = {}; SUCCEEDED(
         device->CheckFeatureSupport(D3D12_FEATURE_COOPERATIVE_VECTOR, &cooperativeVector, sizeof(cooperativeVector))))
