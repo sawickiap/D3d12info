@@ -509,7 +509,6 @@ static void Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE(const D3D12_COO
 static void Print_D3D12_FEATURE_DATA_COOPERATIVE_VECTOR(const D3D12_FEATURE_DATA_COOPERATIVE_VECTOR& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_COOPERATIVE_VECTOR");
-    ReportFormatter& formatter = ReportFormatter::GetInstance();
 
     {
         ReportScopeArray scopeArray(L"pMatrixVectorMulAddProperties");
