@@ -1,3 +1,16 @@
+# Version 3.11.0 (2025-06-04)
+
+Changes:
+
+- Updated Agility SDK to version 1.616.0 / 1.717.0-preview. (#32) Updated information printed:
+  - Added Cooperative Vector.
+  - Removed DirectSR, which disappeared from the SDK.
+  - Other minor updates, including new `D3D12_RAYTRACING_TIER_1_2`, `D3D_SHADER_MODEL_6_9`, `D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS`.
+- Fixed usage of `D3D12GetInterface` function to fix compatibility with Wine. (#29)
+- Updated 3rd party libraries from GPU vendors.
+
+Compiled with DirectX 12 Agility SDK 1.616.0 ("D3d12info.exe") / 1.717.0-preview ("D3d12info\_preview.exe"), AMD AGS 6.2.0, AMD device\_info from 2025-03-11 (commit hash `1e9040681766423e6b361c6fd541834c3864a00b`), NVAPI R575, Intel GPU Detect from 2025-04-28 (commit hash `649cf14acd63e1d7ad7e30d3c558fb447f9f8c5b`).
+
 # Version 3.10.1 (2025-04-23)
 
 Changes:
