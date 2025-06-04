@@ -6,6 +6,7 @@ Changes:
   - Added Cooperative Vector.
   - Removed DirectSR, which disappeared from the SDK.
   - Other minor updates, including new `D3D12_RAYTRACING_TIER_1_2`, `D3D_SHADER_MODEL_6_9`, `D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS`.
+- Added vkd3d-proton detection using `IVKD3DCoreInterface` interface. (#30)
 - Fixed usage of `D3D12GetInterface` function to fix compatibility with Wine. (#29)
 - Updated 3rd party libraries from GPU vendors.
 
