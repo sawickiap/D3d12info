@@ -540,7 +540,7 @@ static void Print_D3D12_FEATURE_DATA_COOPERATIVE_VECTOR(const D3D12_FEATURE_DATA
         for (UINT i = 0; i < o.VectorAccumulatePropCount; ++i)
         {
             ReportScopeArrayItem scopeItem;
-            Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE(o.pOuterProductAccumulateProperties[i]);
+            Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE(o.pVectorAccumulateProperties[i]);
         }
     }
 }
