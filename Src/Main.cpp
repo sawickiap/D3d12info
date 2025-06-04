@@ -274,14 +274,12 @@ static void Print_D3D12_FEATURE_HARDWARE_COPY(const D3D12_FEATURE_DATA_HARDWARE_
     ReportFormatter::GetInstance().AddFieldBool(L"Supported", o.Supported);
 }
 
-#ifdef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE(
     const D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE");
     ReportFormatter::GetInstance().AddFieldBool(L"Supported", o.Supported);
 }
-#endif // #ifdef USE_PREVIEW_AGILITY_SDK
 
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(const D3D12_FEATURE_DATA_D3D12_OPTIONS3& options3)
 {
@@ -482,6 +480,70 @@ static void Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(const D3D12_FEATURE_DATA_TI
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_TIGHT_ALIGNMENT");
     ReportFormatter::GetInstance().AddFieldEnum(L"SupportTier", o.SupportTier, Enum_D3D12_TIGHT_ALIGNMENT_TIER);
 }
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(const D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL& o)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldEnum(L"CooperativeVectorTier", o.CooperativeVectorTier, Enum_D3D12_COOPERATIVE_VECTOR_TIER);
+}
+
+static void Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(const D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS& o)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldUint32(L"ComputeQueuesPer3DQueue", o.ComputeQueuesPer3DQueue);
+}
+
+static void Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_MUL(const D3D12_COOPERATIVE_VECTOR_PROPERTIES_MUL& o)
+{
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldEnum(L"InputType", o.InputType, Enum_D3D12_LINEAR_ALGEBRA_DATATYPE);
+    formatter.AddFieldEnum(L"InputInterpretation", o.InputInterpretation, Enum_D3D12_LINEAR_ALGEBRA_DATATYPE);
+    formatter.AddFieldEnum(L"MatrixInterpretation", o.MatrixInterpretation, Enum_D3D12_LINEAR_ALGEBRA_DATATYPE);
+    formatter.AddFieldEnum(L"BiasInterpretation", o.BiasInterpretation, Enum_D3D12_LINEAR_ALGEBRA_DATATYPE);
+    formatter.AddFieldEnum(L"OutputType", o.OutputType, Enum_D3D12_LINEAR_ALGEBRA_DATATYPE);
+    formatter.AddFieldBool(L"TransposeSupported", o.TransposeSupported);
+}
+
+static void Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE(const D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE& o)
+{
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldEnum(L"InputType", o.InputType, Enum_D3D12_LINEAR_ALGEBRA_DATATYPE);
+    formatter.AddFieldEnum(L"AccumulationType", o.AccumulationType, Enum_D3D12_LINEAR_ALGEBRA_DATATYPE);
+}
+
+static void Print_D3D12_FEATURE_DATA_COOPERATIVE_VECTOR(const D3D12_FEATURE_DATA_COOPERATIVE_VECTOR& o)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_COOPERATIVE_VECTOR");
+
+    {
+        ReportScopeArray scopeArray(L"pMatrixVectorMulAddProperties");
+        for (UINT i = 0; i < o.MatrixVectorMulAddPropCount; ++i)
+        {
+            ReportScopeArrayItem scopeItem;
+            Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_MUL(o.pMatrixVectorMulAddProperties[i]);
+        }
+    }
+
+    {
+        ReportScopeArray scopeArray(L"pOuterProductAccumulateProperties");
+        for (UINT i = 0; i < o.OuterProductAccumulatePropCount; ++i)
+        {
+            ReportScopeArrayItem scopeItem;
+            Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE(o.pOuterProductAccumulateProperties[i]);
+        }
+    }
+
+    {
+        ReportScopeArray scopeArray(L"pVectorAccumulateProperties");
+        for (UINT i = 0; i < o.VectorAccumulatePropCount; ++i)
+        {
+            ReportScopeArrayItem scopeItem;
+            Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE(o.pOuterProductAccumulateProperties[i]);
+        }
+    }
+}
 #endif // #ifdef USE_PREVIEW_AGILITY_SDK
 
 static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXISTING_HEAPS& existingHeaps)
@@ -633,7 +695,7 @@ static void EnableExperimentalFeatures()
     static const UUID FEATURE_UUIDS[] = { D3D12ExperimentalShaderModels, D3D12TiledResourceTier4,
         D3D12StateObjectsExperiment };
     static const wchar_t* FEATURE_NAMES[] = { L"D3D12ExperimentalShaderModels", L"D3D12TiledResourceTier4",
-        L"D3D12StateObjectsExperiment" };
+        L"D3D12StateObjectsExperiment", L"D3D12CooperativeVectorExperiment" };
 #else
     static const UUID FEATURE_UUIDS[] = { D3D12ExperimentalShaderModels, D3D12TiledResourceTier4 };
     static const wchar_t* FEATURE_NAMES[] = { L"D3D12ExperimentalShaderModels", L"D3D12TiledResourceTier4" };
@@ -1006,6 +1068,37 @@ static void PrintDeviceOptions(ID3D12Device* device)
     if(D3D12_FEATURE_DATA_TIGHT_ALIGNMENT tightAlignment = {}; SUCCEEDED(
            device->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &tightAlignment, sizeof(tightAlignment))))
         Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(tightAlignment);
+
+    if (D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS groupings = {}; SUCCEEDED(
+        device->CheckFeatureSupport(D3D12_FEATURE_HARDWARE_SCHEDULING_QUEUE_GROUPINGS, &groupings, sizeof(groupings))))
+        Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(groupings);
+
+    if(D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL optionsExperimental = {}; SUCCEEDED(
+        device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL, &optionsExperimental, sizeof(optionsExperimental))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(optionsExperimental);
+
+    if (D3D12_FEATURE_DATA_COOPERATIVE_VECTOR cooperativeVector = {}; SUCCEEDED(
+        device->CheckFeatureSupport(D3D12_FEATURE_COOPERATIVE_VECTOR, &cooperativeVector, sizeof(cooperativeVector))))
+    {
+        if(cooperativeVector.MatrixVectorMulAddPropCount > 0 ||
+            cooperativeVector.OuterProductAccumulatePropCount > 0 ||
+            cooperativeVector.VectorAccumulatePropCount > 0)
+        {
+            std::vector<D3D12_COOPERATIVE_VECTOR_PROPERTIES_MUL> matrixVectorMulAddProps(cooperativeVector.MatrixVectorMulAddPropCount);
+            std::vector<D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE> outerProductAccumulateProps(cooperativeVector.OuterProductAccumulatePropCount);
+            std::vector<D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE> vectorAccumulateProps(cooperativeVector.VectorAccumulatePropCount);
+        
+            if(cooperativeVector.MatrixVectorMulAddPropCount > 0)
+                cooperativeVector.pMatrixVectorMulAddProperties = matrixVectorMulAddProps.data();
+            if (cooperativeVector.OuterProductAccumulatePropCount > 0)
+                cooperativeVector.pOuterProductAccumulateProperties = outerProductAccumulateProps.data();
+            if (cooperativeVector.VectorAccumulatePropCount > 0)
+                cooperativeVector.pVectorAccumulateProperties = vectorAccumulateProps.data();
+
+            if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_COOPERATIVE_VECTOR, &cooperativeVector, sizeof(cooperativeVector))))
+                Print_D3D12_FEATURE_DATA_COOPERATIVE_VECTOR(cooperativeVector);
+        }
+    }
 #endif
 }
 
@@ -1117,55 +1210,6 @@ static void PrintCommandQueuePriorities(ID3D12Device* device)
     Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(queuePrioritySupport);
 }
 
-#ifdef USE_PREVIEW_AGILITY_SDK
-static void PrintDirectSROptimizationRankings(const DSR_OPTIMIZATION_TYPE* optimizationRankings)
-{
-    constexpr size_t count = _countof(DSR_SUPERRES_VARIANT_DESC::OptimizationRankings);
-
-    uint32_t rankingsCopy[count];
-    for(size_t i = 0; i < count; ++i)
-    {
-        rankingsCopy[i] = (uint32_t)optimizationRankings[i];
-    }
-
-    ReportFormatter::GetInstance().AddEnumArray(
-        L"OptimizationRankings", rankingsCopy, count, Enum_DSR_OPTIMIZATION_TYPE);
-}
-
-static void PrintDirectSR(ID3D12Device* device)
-{
-    if(g_D3D12GetInterface == nullptr)
-        return;
-    ComPtr<ID3D12DSRDeviceFactory> dsrDeviceFactory;
-    if(FAILED(g_D3D12GetInterface(CLSID_D3D12DSRDeviceFactory, IID_PPV_ARGS(&dsrDeviceFactory))))
-        return;
-    ComPtr<IDSRDevice> dsrDevice;
-    if(FAILED(dsrDeviceFactory->CreateDSRDevice(device, 0, IID_PPV_ARGS(&dsrDevice))))
-        return;
-    UINT numVariants = dsrDevice->GetNumSuperResVariants();
-    if(numVariants == 0)
-        return;
-
-    ReportScopeArray scope(L"DirectSR");
-    ReportFormatter& formatter = ReportFormatter::GetInstance();
-
-    for(UINT variantIndex = 0; variantIndex < numVariants; ++variantIndex)
-    {
-        DSR_SUPERRES_VARIANT_DESC desc = {};
-        if(SUCCEEDED(dsrDevice->GetSuperResVariantDesc(variantIndex, &desc)))
-        {
-            ReportScopeArrayItem scope2;
-
-            formatter.AddFieldString(L"VariantId", GuidToStr(desc.VariantId).c_str());
-            formatter.AddFieldString(L"VariantName", StrToWstr(desc.VariantName, CP_UTF8).c_str());
-            formatter.AddFieldFlags(L"Flags", desc.Flags, Enum_DSR_SUPERRES_VARIANT_FLAGS);
-            PrintDirectSROptimizationRankings(desc.OptimizationRankings);
-            formatter.AddFieldEnum(L"OptimalTargetFormat", desc.OptimalTargetFormat, Enum_DXGI_FORMAT);
-        }
-    }
-}
-#endif // #ifdef USE_PREVIEW_AGILITY_SDK
-
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI, AGS_Initialize_RAII* ags)
 {
     ComPtr<ID3D12Device> device;
@@ -1275,7 +1319,6 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_HARDWARE_COPY, &hardwareCopy, sizeof(hardwareCopy))))
         Print_D3D12_FEATURE_HARDWARE_COPY(hardwareCopy);
 
-#ifdef USE_PREVIEW_AGILITY_SDK
     if(D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE appSpecificDriverState = {};
         SUCCEEDED(device->CheckFeatureSupport(
             D3D12_FEATURE_APPLICATION_SPECIFIC_DRIVER_STATE, &appSpecificDriverState, sizeof(appSpecificDriverState))))
@@ -1283,7 +1326,6 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
 
     // TODO: In Agility SDK 1.715.0-preview how to query for D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL1?
     // What is the corresponding structure?
-#endif
 
     // TODO: D3D12_FEATURE_PLACED_RESOURCE_SUPPORT_INFO - What is this? How to query it? What structure to use?
 
@@ -1297,13 +1339,6 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         if(SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&device5))))
             PrintMetaCommands(device5.Get());
     }
-
-#ifdef USE_PREVIEW_AGILITY_SDK
-    if(!g_PureD3D12)
-    {
-        PrintDirectSR(device.Get());
-    }
-#endif
 
 #if USE_NVAPI
     bool useNVAPI = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_NVIDIA;
