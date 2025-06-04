@@ -21,19 +21,20 @@ For more information, see files README.md, LICENSE.txt.
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE
 
-ENUM_BEGIN(AGSDeviceInfo_AsicFamily)
-    ENUM_ITEM(AGSDeviceInfo::AsicFamily_Unknown)
-    ENUM_ITEM(AGSDeviceInfo::AsicFamily_PreGCN)
-    ENUM_ITEM(AGSDeviceInfo::AsicFamily_GCN1)
-    ENUM_ITEM(AGSDeviceInfo::AsicFamily_GCN2)
-    ENUM_ITEM(AGSDeviceInfo::AsicFamily_GCN3)
-    ENUM_ITEM(AGSDeviceInfo::AsicFamily_GCN4)
-    ENUM_ITEM(AGSDeviceInfo::AsicFamily_Vega)
-    ENUM_ITEM(AGSDeviceInfo::AsicFamily_RDNA)
-    ENUM_ITEM(AGSDeviceInfo::AsicFamily_RDNA2)
-    ENUM_ITEM(AGSDeviceInfo::AsicFamily_RDNA3)
-    ENUM_ITEM(AGSDeviceInfo::AsicFamily_Count)
-ENUM_END(AGSDeviceInfo_AsicFamily)
+ENUM_BEGIN(AGSAsicFamily)
+    ENUM_ITEM(AGSAsicFamily_Unknown)
+    ENUM_ITEM(AGSAsicFamily_PreGCN)
+    ENUM_ITEM(AGSAsicFamily_GCN1)
+    ENUM_ITEM(AGSAsicFamily_GCN2)
+    ENUM_ITEM(AGSAsicFamily_GCN3)
+    ENUM_ITEM(AGSAsicFamily_GCN4)
+    ENUM_ITEM(AGSAsicFamily_Vega)
+    ENUM_ITEM(AGSAsicFamily_RDNA)
+    ENUM_ITEM(AGSAsicFamily_RDNA2)
+    ENUM_ITEM(AGSAsicFamily_RDNA3)
+    ENUM_ITEM(AGSAsicFamily_RDNA4)
+    ENUM_ITEM(AGSAsicFamily_Count)
+ENUM_END(AGSAsicFamily)
 
 static AGSContext* g_AgsContext;
 static AGSGPUInfo g_GpuInfo;
@@ -114,7 +115,7 @@ void AGS_Initialize_RAII::PrintAgsDeviceData(const DeviceId& id)
     ReportScopeObject region(L"AGSDeviceInfo");
     ReportFormatter& formatter = ReportFormatter::GetInstance();
     formatter.AddFieldString(L"adapterString", StrToWstr(device.adapterString, CP_ACP).c_str());
-    formatter.AddFieldEnum(L"asicFamily", device.asicFamily, Enum_AGSDeviceInfo_AsicFamily);
+    formatter.AddFieldEnum(L"asicFamily", device.asicFamily, Enum_AGSAsicFamily);
     formatter.AddFieldBool(L"isAPU", device.isAPU);
     formatter.AddFieldBool(L"isExternal", device.isExternal);
     formatter.AddFieldVendorId(L"vendorId", (uint32_t)device.vendorId);
@@ -151,7 +152,7 @@ ComPtr<ID3D12Device> AGS_Initialize_RAII::CreateDeviceAndPrintData(
         ComPtr<ID3D12Device> device{ returnedParams.pDevice };
         g_DeviceCreatedWithAgs = true;
 
-        ReportScopeObject region(L"AGSDX12ReturnedParams::ExtensionsSupported");
+        ReportScopeObject region(L"AGSDX12ExtensionsSupported");
         ReportFormatter& formatter = ReportFormatter::GetInstance();
         formatter.AddFieldBool(L"intrinsics16", returnedParams.extensionsSupported.intrinsics16);
         formatter.AddFieldBool(L"intrinsics17", returnedParams.extensionsSupported.intrinsics17);
