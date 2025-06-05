@@ -33,7 +33,6 @@ Following types of information are printed by the program:
 - Direct3D 12 capabilities of the GPU, like `D3D12_FEATURE_DATA_D3D12_OPTIONS`, `D3D12_FEATURE_DATA_D3D12_OPTIONS2`, etc.
   - Latest DirectX Agility SDK is used for access to the latest features.
   - Preview version of the Agility SDK is supported by a separate executable "D3d12info_preview.exe".
-- DirectSR variants and their description.
 - Capabilities of all the formats (off by default), e.g. whether `DXGI_FORMAT_R9G9B9E5_SHAREDEXP` can be used as a render target.
 - Available meta commands and their parameters (off by default).
 - Graphics driver version, fetched in a multitude of ways.
