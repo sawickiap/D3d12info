@@ -693,13 +693,14 @@ static void EnableExperimentalFeatures()
 
 #ifdef USE_PREVIEW_AGILITY_SDK
     static const UUID FEATURE_UUIDS[] = { D3D12ExperimentalShaderModels, D3D12TiledResourceTier4,
-        D3D12StateObjectsExperiment };
+        D3D12StateObjectsExperiment, D3D12CooperativeVectorExperiment };
     static const wchar_t* FEATURE_NAMES[] = { L"D3D12ExperimentalShaderModels", L"D3D12TiledResourceTier4",
         L"D3D12StateObjectsExperiment", L"D3D12CooperativeVectorExperiment" };
 #else
     static const UUID FEATURE_UUIDS[] = { D3D12ExperimentalShaderModels, D3D12TiledResourceTier4 };
     static const wchar_t* FEATURE_NAMES[] = { L"D3D12ExperimentalShaderModels", L"D3D12TiledResourceTier4" };
 #endif // #ifdef USE_PREVIEW_AGILITY_SDK
+    static_assert(std::size(FEATURE_UUIDS) == std::size(FEATURE_NAMES));
     constexpr size_t FEATURE_COUNT = _countof(FEATURE_UUIDS);
     uint32_t featureBitMask = (1 << FEATURE_COUNT) - 1;
 

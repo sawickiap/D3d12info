@@ -1,3 +1,11 @@
+# Version 3.12.1 (2025-06-07)
+
+Changes:
+
+- Preview version: Fixed enabling of `D3D12CooperativeVectorExperiment`. (Reported by @didito as #34)
+
+Compiled with DirectX 12 Agility SDK 1.616.0 ("D3d12info.exe") / 1.717.0-preview ("D3d12info\_preview.exe"), AMD AGS 6.3.0, AMD device\_info from 2025-03-11 (commit hash `1e9040681766423e6b361c6fd541834c3864a00b`), NVAPI R575, Intel GPU Detect from 2025-04-28 (commit hash `649cf14acd63e1d7ad7e30d3c558fb447f9f8c5b`) - all same as previous version.
+
 # Version 3.12.0 (2025-06-07)
 
 Changes:
