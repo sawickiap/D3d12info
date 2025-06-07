@@ -73,11 +73,11 @@ char* custom_fgets(char* _Buffer, int _MaxCount, CUSTOM_FILE* _Stream)
     return i ? _Buffer : nullptr;
 }
 
-#include "ThirdParty/gpudetect/DeviceId.h"
 #include "ThirdParty/gpudetect/DeviceId.cpp"
-#include "ThirdParty/gpudetect/ID3D10Extensions.h"
-#include "ThirdParty/gpudetect/GPUDetect.h"
+#include "ThirdParty/gpudetect/DeviceId.h"
 #include "ThirdParty/gpudetect/GPUDetect.cpp"
+#include "ThirdParty/gpudetect/GPUDetect.h"
+#include "ThirdParty/gpudetect/ID3D10Extensions.h"
 
 namespace GPUDetect
 {

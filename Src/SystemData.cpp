@@ -8,6 +8,7 @@ License: MIT
 For more information, see files README.md, LICENSE.txt.
 */
 #include "SystemData.hpp"
+
 #include "Enums.hpp"
 #include "ReportFormatter/ReportFormatter.hpp"
 #include "Utils.hpp"
@@ -23,15 +24,15 @@ void PrintOsVersionInfo()
     ReportScopeObject scope(L"OS Info");
     ReportFormatter& formatter = ReportFormatter::GetInstance();
     HMODULE m = GetModuleHandle(L"ntdll.dll");
-    if (!m)
+    if(!m)
     {
         formatter.AddFieldString(L"Windows version", L"Unknown");
         return;
     }
 
-    typedef int32_t(WINAPI* RtlGetVersionFunc)(OSVERSIONINFOEX*);
+    typedef int32_t(WINAPI * RtlGetVersionFunc)(OSVERSIONINFOEX*);
     RtlGetVersionFunc RtlGetVersion = (RtlGetVersionFunc)GetProcAddress(m, "RtlGetVersion");
-    if (!RtlGetVersion)
+    if(!RtlGetVersion)
     {
         formatter.AddFieldString(L"Windows version", L"Unknown");
         return;
@@ -42,19 +43,19 @@ void PrintOsVersionInfo()
     RtlGetVersion(&osVersionInfo);
 
     formatter.AddFieldString(L"Windows version", std::format(L"{}.{}.{}", osVersionInfo.dwMajorVersion,
-        osVersionInfo.dwMinorVersion, osVersionInfo.dwBuildNumber));
+                                                     osVersionInfo.dwMinorVersion, osVersionInfo.dwBuildNumber));
 }
 
 void PrintSystemMemoryInfo()
 {
     ReportScopeObject scope(L"System memory");
 
-    if (uint64_t physicallyInstalledSystemMemory = 0;
+    if(uint64_t physicallyInstalledSystemMemory = 0;
         GetPhysicallyInstalledSystemMemory(&physicallyInstalledSystemMemory))
         ReportFormatter::GetInstance().AddFieldSizeKilobytes(
             L"GetPhysicallyInstalledSystemMemory", physicallyInstalledSystemMemory);
 
-    if (MEMORYSTATUSEX memStatEx = { sizeof(MEMORYSTATUSEX) }; GlobalMemoryStatusEx(&memStatEx))
+    if(MEMORYSTATUSEX memStatEx = { sizeof(MEMORYSTATUSEX) }; GlobalMemoryStatusEx(&memStatEx))
     {
         ReportFormatter& formatter = ReportFormatter::GetInstance();
         formatter.AddFieldSize(L"MEMORYSTATUSEX::ullTotalPhys", memStatEx.ullTotalPhys);
