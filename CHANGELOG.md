@@ -1,5 +1,7 @@
 # Version 3.12.0 (2025-06-07)
 
+Changes:
+
 - Refactored vkd3d-detection (previous variant didn't work). (Developed by @Devaniti as #36)
 - Added Wine detection. (Developed by @Devaniti as #36)
 
