@@ -83,11 +83,10 @@ PFN_D3D12_GET_INTERFACE g_D3D12GetInterface;                              // Opt
 
 #endif // #if defined(AUTO_LINK_DX12)
 
-// # From vkd3d-proton project
-// See: https://github.com/HansKristian-Work/vkd3d-proton/issues/2459
-
-// Query using D3D12GetInterface.
-DEFINE_GUID(CLSID_IVKD3DCoreInterface, 0xed53efad, 0xda21, 0x4d96, 0xa1, 0xbc, 0xe7, 0x34, 0xe0, 0x78, 0x87, 0x9c);
+// # From vkd3d-proton project, see:
+// https://github.com/HansKristian-Work/vkd3d-proton/issues/2459
+// https://github.com/HansKristian-Work/vkd3d-proton/blob/master/include/vkd3d_device_vkd3d_ext.idl
+DEFINE_GUID(IID_ID3D12DXVKInteropDevice, 0x39da4e09, 0xbd1c, 0x4198, 0x9f, 0xae, 0x86, 0xbb, 0xe3, 0xbe, 0x41, 0xfd);
 
 // Command line flags
 static bool g_ShowVersionAndQuit = false;
@@ -739,14 +738,27 @@ static void EnableExperimentalFeatures()
     }
 }
 
-static void DetectTranslationLayers()
+static void DetectTranslationLayersGlobal()
 {
-    ComPtr<IUnknown> ptr;
-    if(g_D3D12GetInterface &&
-        SUCCEEDED(g_D3D12GetInterface(CLSID_IVKD3DCoreInterface, CLSID_IVKD3DCoreInterface, &ptr)) && ptr)
+    ReportScopeObjectConditional scope(L"TranslationLayerDetection");
+
+    HMODULE ntdll = GetModuleHandleA("ntdll.dll");
+
+    if(ntdll == NULL)
     {
-        ReportScopeObject scope(L"TranslationLayerDetection");
-        ReportFormatter::GetInstance().AddFieldBool(L"IVKD3DCoreInterface", true);
+        // This should never happen, but in Release we may as well try and continue running
+        assert(0);
+        return;
+    }
+
+    const char*(CDECL * wine_get_version)(void);
+    wine_get_version = reinterpret_cast<decltype(wine_get_version)>(::GetProcAddress(ntdll, "wine_get_version"));
+    if(wine_get_version != nullptr)
+    {
+        scope.Enable();
+        const char* version = wine_get_version();
+        std::wstring versionW = StrToWstr(version, CP_ACP);
+        ReportFormatter::GetInstance().AddFieldString(L"wine_get_version", versionW);
     }
 }
 
@@ -966,6 +978,27 @@ static void PrintFormatInformation(ID3D12Device* device)
             scope2.Enable();
             formatter.AddFieldUint32(L"PlaneCount", formatInfo.PlaneCount);
         }
+    }
+}
+
+void DetectTranslationLayersDevice(ID3D12Device* device)
+{
+    ReportScopeObjectConditional scope(L"TranslationLayerDetection");
+
+    // WARNING for Game Developers!
+    // If you are looking at this code as a reference to implement something in a game engine
+    // You likely should NOT try to detect vkd3d-proton
+    // You really shouldn't make any assumptions based on whether you are running under vkd3d-proton
+    // If there's some features that are not available under vkd3d-proton, you should just query support for those
+    // features from normal d3d12 interfaces (or vendor extension interfaces if you use those)
+    // No engine logic should depend on such detection
+    ComPtr<IUnknown> vkd3dInteropDevice;
+    HRESULT hr = device->QueryInterface(IID_ID3D12DXVKInteropDevice, &vkd3dInteropDevice);
+
+    if(SUCCEEDED(hr) && vkd3dInteropDevice)
+    {
+        scope.Enable();
+        ReportFormatter::GetInstance().AddFieldBool(L"ID3D12DXVKInteropDevice", true);
     }
 }
 
@@ -1348,6 +1381,8 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     if(nvAPI && nvAPI->IsInitialized())
         nvAPI->PrintD3d12DeviceData(device.Get());
 #endif
+
+    DetectTranslationLayersDevice(device.Get());
 
     if(g_PrintFormats)
         PrintFormatInformation(device.Get());
@@ -1917,7 +1952,7 @@ int wmain3(int argc, wchar_t** argv)
 
         EnableExperimentalFeatures();
 
-        DetectVkd3d();
+        DetectTranslationLayersGlobal();
     }
 
     if(g_PrintEnums)
