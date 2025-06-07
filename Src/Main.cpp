@@ -14,9 +14,9 @@ For more information, see files README.md, LICENSE.txt.
 #include "NvApiData.hpp"
 #include "Printer.hpp"
 #include "ReportFormatter/ReportFormatter.hpp"
+#include "SystemData.hpp"
 #include "Utils.hpp"
 #include "VulkanData.hpp"
-#include "SystemData.hpp"
 
 #define WIDE_CHAR_STRING_HELPER(x) L ## x
 #define WIDE_CHAR_STRING(x) WIDE_CHAR_STRING_HELPER(x)
@@ -79,7 +79,7 @@ typedef HRESULT(WINAPI* PFN_D3D12_ENABLE_EXPERIMENTAL_FEATURES)(UINT NumFeatures
 PFN_DXGI_CREATE_FACTORY1 g_CreateDXGIFactory1;
 PFN_D3D12_CREATE_DEVICE g_D3D12CreateDevice;
 PFN_D3D12_ENABLE_EXPERIMENTAL_FEATURES g_D3D12EnableExperimentalFeatures; // Optional, can be null.
-PFN_D3D12_GET_INTERFACE g_D3D12GetInterface; // Optional, can be null.
+PFN_D3D12_GET_INTERFACE g_D3D12GetInterface;                              // Optional, can be null.
 
 #endif // #if defined(AUTO_LINK_DX12)
 
@@ -87,8 +87,7 @@ PFN_D3D12_GET_INTERFACE g_D3D12GetInterface; // Optional, can be null.
 // See: https://github.com/HansKristian-Work/vkd3d-proton/issues/2459
 
 // Query using D3D12GetInterface.
-DEFINE_GUID(CLSID_IVKD3DCoreInterface,
-    0xed53efad, 0xda21, 0x4d96, 0xa1, 0xbc, 0xe7, 0x34, 0xe0, 0x78, 0x87, 0x9c);
+DEFINE_GUID(CLSID_IVKD3DCoreInterface, 0xed53efad, 0xda21, 0x4d96, 0xa1, 0xbc, 0xe7, 0x34, 0xe0, 0x78, 0x87, 0x9c);
 
 // Command line flags
 static bool g_ShowVersionAndQuit = false;
@@ -488,7 +487,8 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(const D3D12_FEAT
     formatter.AddFieldEnum(L"CooperativeVectorTier", o.CooperativeVectorTier, Enum_D3D12_COOPERATIVE_VECTOR_TIER);
 }
 
-static void Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(const D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS& o)
+static void Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(
+    const D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS");
     ReportFormatter& formatter = ReportFormatter::GetInstance();
@@ -506,7 +506,8 @@ static void Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_MUL(const D3D12_COOPERATIV
     formatter.AddFieldBool(L"TransposeSupported", o.TransposeSupported);
 }
 
-static void Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE(const D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE& o)
+static void Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE(
+    const D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE& o)
 {
     ReportFormatter& formatter = ReportFormatter::GetInstance();
     formatter.AddFieldEnum(L"InputType", o.InputType, Enum_D3D12_LINEAR_ALGEBRA_DATATYPE);
@@ -519,7 +520,7 @@ static void Print_D3D12_FEATURE_DATA_COOPERATIVE_VECTOR(const D3D12_FEATURE_DATA
 
     {
         ReportScopeArray scopeArray(L"pMatrixVectorMulAddProperties");
-        for (UINT i = 0; i < o.MatrixVectorMulAddPropCount; ++i)
+        for(UINT i = 0; i < o.MatrixVectorMulAddPropCount; ++i)
         {
             ReportScopeArrayItem scopeItem;
             Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_MUL(o.pMatrixVectorMulAddProperties[i]);
@@ -528,7 +529,7 @@ static void Print_D3D12_FEATURE_DATA_COOPERATIVE_VECTOR(const D3D12_FEATURE_DATA
 
     {
         ReportScopeArray scopeArray(L"pOuterProductAccumulateProperties");
-        for (UINT i = 0; i < o.OuterProductAccumulatePropCount; ++i)
+        for(UINT i = 0; i < o.OuterProductAccumulatePropCount; ++i)
         {
             ReportScopeArrayItem scopeItem;
             Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE(o.pOuterProductAccumulateProperties[i]);
@@ -537,7 +538,7 @@ static void Print_D3D12_FEATURE_DATA_COOPERATIVE_VECTOR(const D3D12_FEATURE_DATA
 
     {
         ReportScopeArray scopeArray(L"pVectorAccumulateProperties");
-        for (UINT i = 0; i < o.VectorAccumulatePropCount; ++i)
+        for(UINT i = 0; i < o.VectorAccumulatePropCount; ++i)
         {
             ReportScopeArrayItem scopeItem;
             Print_D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE(o.pVectorAccumulateProperties[i]);
@@ -738,14 +739,13 @@ static void EnableExperimentalFeatures()
     }
 }
 
-static void DetectVkd3d()
+static void DetectTranslationLayers()
 {
     ComPtr<IUnknown> ptr;
     if(g_D3D12GetInterface &&
-        SUCCEEDED(g_D3D12GetInterface(CLSID_IVKD3DCoreInterface, CLSID_IVKD3DCoreInterface, &ptr)) &&
-        ptr)
+        SUCCEEDED(g_D3D12GetInterface(CLSID_IVKD3DCoreInterface, CLSID_IVKD3DCoreInterface, &ptr)) && ptr)
     {
-        ReportScopeObject scope(L"vkd3d-proton detection");
+        ReportScopeObject scope(L"TranslationLayerDetection");
         ReportFormatter::GetInstance().AddFieldBool(L"IVKD3DCoreInterface", true);
     }
 }
@@ -1069,33 +1069,36 @@ static void PrintDeviceOptions(ID3D12Device* device)
            device->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &tightAlignment, sizeof(tightAlignment))))
         Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(tightAlignment);
 
-    if (D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS groupings = {}; SUCCEEDED(
-        device->CheckFeatureSupport(D3D12_FEATURE_HARDWARE_SCHEDULING_QUEUE_GROUPINGS, &groupings, sizeof(groupings))))
+    if(D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS groupings = {}; SUCCEEDED(device->CheckFeatureSupport(
+           D3D12_FEATURE_HARDWARE_SCHEDULING_QUEUE_GROUPINGS, &groupings, sizeof(groupings))))
         Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(groupings);
 
-    if(D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL optionsExperimental = {}; SUCCEEDED(
-        device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL, &optionsExperimental, sizeof(optionsExperimental))))
+    if(D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL optionsExperimental = {}; SUCCEEDED(device->CheckFeatureSupport(
+           D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL, &optionsExperimental, sizeof(optionsExperimental))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(optionsExperimental);
 
-    if (D3D12_FEATURE_DATA_COOPERATIVE_VECTOR cooperativeVector = {}; SUCCEEDED(
-        device->CheckFeatureSupport(D3D12_FEATURE_COOPERATIVE_VECTOR, &cooperativeVector, sizeof(cooperativeVector))))
+    if(D3D12_FEATURE_DATA_COOPERATIVE_VECTOR cooperativeVector = {}; SUCCEEDED(device->CheckFeatureSupport(
+           D3D12_FEATURE_COOPERATIVE_VECTOR, &cooperativeVector, sizeof(cooperativeVector))))
     {
-        if(cooperativeVector.MatrixVectorMulAddPropCount > 0 ||
-            cooperativeVector.OuterProductAccumulatePropCount > 0 ||
+        if(cooperativeVector.MatrixVectorMulAddPropCount > 0 || cooperativeVector.OuterProductAccumulatePropCount > 0 ||
             cooperativeVector.VectorAccumulatePropCount > 0)
         {
-            std::vector<D3D12_COOPERATIVE_VECTOR_PROPERTIES_MUL> matrixVectorMulAddProps(cooperativeVector.MatrixVectorMulAddPropCount);
-            std::vector<D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE> outerProductAccumulateProps(cooperativeVector.OuterProductAccumulatePropCount);
-            std::vector<D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE> vectorAccumulateProps(cooperativeVector.VectorAccumulatePropCount);
-        
+            std::vector<D3D12_COOPERATIVE_VECTOR_PROPERTIES_MUL> matrixVectorMulAddProps(
+                cooperativeVector.MatrixVectorMulAddPropCount);
+            std::vector<D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE> outerProductAccumulateProps(
+                cooperativeVector.OuterProductAccumulatePropCount);
+            std::vector<D3D12_COOPERATIVE_VECTOR_PROPERTIES_ACCUMULATE> vectorAccumulateProps(
+                cooperativeVector.VectorAccumulatePropCount);
+
             if(cooperativeVector.MatrixVectorMulAddPropCount > 0)
                 cooperativeVector.pMatrixVectorMulAddProperties = matrixVectorMulAddProps.data();
-            if (cooperativeVector.OuterProductAccumulatePropCount > 0)
+            if(cooperativeVector.OuterProductAccumulatePropCount > 0)
                 cooperativeVector.pOuterProductAccumulateProperties = outerProductAccumulateProps.data();
-            if (cooperativeVector.VectorAccumulatePropCount > 0)
+            if(cooperativeVector.VectorAccumulatePropCount > 0)
                 cooperativeVector.pVectorAccumulateProperties = vectorAccumulateProps.data();
 
-            if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_COOPERATIVE_VECTOR, &cooperativeVector, sizeof(cooperativeVector))))
+            if(SUCCEEDED(device->CheckFeatureSupport(
+                   D3D12_FEATURE_COOPERATIVE_VECTOR, &cooperativeVector, sizeof(cooperativeVector))))
                 Print_D3D12_FEATURE_DATA_COOPERATIVE_VECTOR(cooperativeVector);
         }
     }
