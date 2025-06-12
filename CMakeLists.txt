@@ -122,13 +122,13 @@ function(add_my_executable USE_PREVIEW_AGILITY_SDK)
     
     if(USE_PREVIEW_AGILITY_SDK)
         target_compile_definitions(${EXE_NAME} PRIVATE USE_PREVIEW_AGILITY_SDK=1)
-        set(AGILITY_SDK_DIRECTORY "${PROJECT_SOURCE_DIR}/Src/ThirdParty/microsoft.direct3d.d3d12.1.717.0-preview")
+        set(AGILITY_SDK_DIRECTORY "${PROJECT_SOURCE_DIR}/Src/ThirdParty/microsoft.direct3d.d3d12.1.717.1-preview")
         add_custom_command(TARGET ${EXE_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${EXE_NAME}>/D3D12_preview"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${AGILITY_SDK_DIRECTORY}/build/native/bin/x64/D3D12Core.dll"
                 "$<TARGET_FILE_DIR:${EXE_NAME}>/D3D12_preview/")
     else()
-        set(AGILITY_SDK_DIRECTORY "${PROJECT_SOURCE_DIR}/Src/ThirdParty/microsoft.direct3d.d3d12.1.616.0")
+        set(AGILITY_SDK_DIRECTORY "${PROJECT_SOURCE_DIR}/Src/ThirdParty/microsoft.direct3d.d3d12.1.616.1")
         add_custom_command(TARGET ${EXE_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${EXE_NAME}>/D3D12"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${AGILITY_SDK_DIRECTORY}/build/native/bin/x64/D3D12Core.dll"
