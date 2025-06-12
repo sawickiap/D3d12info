@@ -11,8 +11,8 @@ For more information, see files README.md, LICENSE.txt.
 
 const wchar_t* const PROGRAM_NAME = L"D3d12info";
 const char* const PROGRAM_NAME_ANSI = "D3d12info";
-const wchar_t* const PROGRAM_VERSION = L"3.12.1";
-const uint32_t PROGRAM_VERSION_NUMBER = (3u << 20) | (12u << 10) | (1u);
+const wchar_t* const PROGRAM_VERSION = L"3.12.2";
+const uint32_t PROGRAM_VERSION_NUMBER = (3u << 20) | (12u << 10) | (2u);
 
 wstring SizeToStr(uint64_t size)
 {
