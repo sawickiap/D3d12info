@@ -85,7 +85,7 @@ The source code depends on:
 - C++ standard library, including some of the latest C++20 features
 - WinAPI from Windows 10 with some reasonably new Windows SDK
 
-It uses following thirt-party libraries:
+It uses following third-party libraries:
 
 - **[DirectX 12 Agility SDK](https://devblogs.microsoft.com/directx/directx12agility/)** - latest API to Direct3D, by Microsoft.
   - Embedded in directory: Src\ThirdParty\microsoft.direct3d.d3d12.*
