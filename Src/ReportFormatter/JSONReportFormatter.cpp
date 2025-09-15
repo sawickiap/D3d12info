@@ -133,11 +133,7 @@ void JSONReportFormatter::AddFieldUint32(std::wstring_view name, uint32_t value,
 
 void JSONReportFormatter::AddFieldUint64(std::wstring_view name, uint64_t value, std::wstring_view unit /* = {}*/)
 {
-    assert(!name.empty());
-    PushNewElement();
-
-    std::wstring escapedName = EscapeString(name);
-    Printer::PrintFormat(m_PrettyPrint ? L"\"{}\": {}" : L"\"{}\":{}", std::make_wformat_args(escapedName, value));
+    AddFieldString(name, std::to_wstring(value));
 }
 
 void JSONReportFormatter::AddFieldSize(std::wstring_view name, uint64_t value)
