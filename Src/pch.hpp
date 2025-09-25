@@ -18,7 +18,7 @@ For more information, see files README.md, LICENSE.txt.
 #ifdef USE_PREVIEW_AGILITY_SDK
 #include "ThirdParty/microsoft.direct3d.d3d12.1.717.1-preview/build/native/include/d3d12.h"
 #else
-#include "ThirdParty/microsoft.direct3d.d3d12.1.616.1/build/native/include/d3d12.h"
+#include "ThirdParty/microsoft.direct3d.d3d12.1.618.1/build/native/include/d3d12.h"
 #endif
 
 #include <Objbase.h> // for StringFromGUID2

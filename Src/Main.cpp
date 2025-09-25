@@ -472,13 +472,13 @@ static void Print_D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED(
     ReportFormatter::GetInstance().AddFieldBool(L"Supported", o.Supported);
 }
 
-#ifdef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(const D3D12_FEATURE_DATA_TIGHT_ALIGNMENT& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_TIGHT_ALIGNMENT");
     ReportFormatter::GetInstance().AddFieldEnum(L"SupportTier", o.SupportTier, Enum_D3D12_TIGHT_ALIGNMENT_TIER);
 }
 
+#ifdef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(const D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL");
@@ -1098,11 +1098,11 @@ static void PrintDeviceOptions(ID3D12Device* device)
             &bytecodeBypassHashSupported, sizeof(bytecodeBypassHashSupported))))
         Print_D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED(bytecodeBypassHashSupported);
 
-#ifdef USE_PREVIEW_AGILITY_SDK
-    if(D3D12_FEATURE_DATA_TIGHT_ALIGNMENT tightAlignment = {}; SUCCEEDED(
-           device->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &tightAlignment, sizeof(tightAlignment))))
+    if (D3D12_FEATURE_DATA_TIGHT_ALIGNMENT tightAlignment = {}; SUCCEEDED(
+        device->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &tightAlignment, sizeof(tightAlignment))))
         Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(tightAlignment);
 
+#ifdef USE_PREVIEW_AGILITY_SDK
     if(D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS groupings = {}; SUCCEEDED(device->CheckFeatureSupport(
            D3D12_FEATURE_HARDWARE_SCHEDULING_QUEUE_GROUPINGS, &groupings, sizeof(groupings))))
         Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(groupings);
