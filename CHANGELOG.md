@@ -1,3 +1,14 @@
+# Version 3.14.0 (2025-09-29)
+
+Changes:
+
+- Updated DirectX 12 Agility SDK retail to version 1.618.1 (there was no update to the preview version).
+  - Added `D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT`.
+  - Added `D3D12_FEATURE_DATA_TIGHT_ALIGNMENT` also to the retail version. Previously it was present only in the preview version.
+  - Added `D3D12_FORMAT_SUPPORT2_DISPLAYABLE`.
+
+Compiled with DirectX 12 Agility SDK 1.618.1 ("D3d12info.exe") / 1.717.1-preview ("D3d12info\_preview.exe"), AMD AGS 6.3.0, AMD device\_info from 2025-03-11 (commit hash `1e9040681766423e6b361c6fd541834c3864a00b`), NVAPI R575, Intel GPU Detect from 2025-04-28 (commit hash `649cf14acd63e1d7ad7e30d3c558fb447f9f8c5b`).
+
 # Version 3.13.0 (2025-09-15)
 
 Changes:
