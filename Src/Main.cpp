@@ -478,6 +478,23 @@ static void Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(const D3D12_FEATURE_DATA_TI
     ReportFormatter::GetInstance().AddFieldEnum(L"SupportTier", o.SupportTier, Enum_D3D12_TIGHT_ALIGNMENT_TIER);
 }
 
+#ifndef USE_PREVIEW_AGILITY_SDK
+static void Print_D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT(
+    const D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT & shaderCacheABISupport)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT");
+    ReportFormatter::GetInstance().AddFieldString(L"szAdapterFamily", shaderCacheABISupport.szAdapterFamily);
+    ReportFormatter::GetInstance().AddFieldMicrosoftVersion(
+        L"MinimumABISupportVersion", shaderCacheABISupport.MinimumABISupportVersion);
+    ReportFormatter::GetInstance().AddFieldMicrosoftVersion(
+        L"MaximumABISupportVersion", shaderCacheABISupport.MaximumABISupportVersion);
+    ReportFormatter::GetInstance().AddFieldMicrosoftVersion(
+        L"CompilerVersion", shaderCacheABISupport.CompilerVersion.Version);
+    ReportFormatter::GetInstance().AddFieldMicrosoftVersion(
+        L"ApplicationProfileVersion", shaderCacheABISupport.ApplicationProfileVersion.Version);
+}
+#endif
+
 #ifdef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(const D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL& o)
 {
@@ -1101,6 +1118,12 @@ static void PrintDeviceOptions(ID3D12Device* device)
     if (D3D12_FEATURE_DATA_TIGHT_ALIGNMENT tightAlignment = {}; SUCCEEDED(
         device->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &tightAlignment, sizeof(tightAlignment))))
         Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(tightAlignment);
+
+#ifndef USE_PREVIEW_AGILITY_SDK
+    if (D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT shaderCacheABISupport = {}; SUCCEEDED(device->CheckFeatureSupport(
+        D3D12_FEATURE_SHADER_CACHE_ABI_SUPPORT, &shaderCacheABISupport, sizeof(shaderCacheABISupport))))
+        Print_D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT(shaderCacheABISupport);
+#endif
 
 #ifdef USE_PREVIEW_AGILITY_SDK
     if(D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS groupings = {}; SUCCEEDED(device->CheckFeatureSupport(
