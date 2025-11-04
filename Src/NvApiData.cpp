@@ -19,7 +19,7 @@ For more information, see files README.md, LICENSE.txt.
 #include <nvapi.h>
 
 // Don't forget to update when linking with a new version!
-static const wchar_t* NVAPI_COMPILED_VERSION = L"R575";
+static const wchar_t* NVAPI_COMPILED_VERSION = L"R580";
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE

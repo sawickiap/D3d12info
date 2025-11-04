@@ -19,7 +19,7 @@ For more information, see files README.md, LICENSE.txt.
 #define VK_NO_PROTOTYPES 1
 #include <vulkan/vulkan.h>
 
-static const wchar_t* const VULKAN_SDK_VERSION = L"1.4.315.0";
+static const wchar_t* const VULKAN_SDK_VERSION = L"1.4.331.0";
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE

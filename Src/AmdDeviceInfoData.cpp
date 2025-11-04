@@ -22,7 +22,7 @@ For more information, see files README.md, LICENSE.txt.
 #include "ThirdParty/AMD_device_info/DeviceInfo.h"
 
 // Don't forget to update to the date of the last commit when grabbing a new version!
-static const wchar_t* AMD_DEVICE_INFO_COMPILED_VERSION = L"2025-03-11";
+static const wchar_t* AMD_DEVICE_INFO_COMPILED_VERSION = L"2025-10-30";
 
 ENUM_BEGIN(GDT_HW_ASIC_TYPE)
     ENUM_ITEM(GDT_ASIC_TYPE_NONE)
@@ -63,22 +63,40 @@ ENUM_BEGIN(GDT_HW_ASIC_TYPE)
     ENUM_ITEM(GDT_GFX10_1_0)
     ENUM_ITEM(GDT_GFX10_1_0_XL)
     ENUM_ITEM(GDT_GFX10_1_2)
+    ENUM_ITEM(GDT_GFX10_1_2_X)
+    ENUM_ITEM(GDT_GFX10_1_2_XT)
     ENUM_ITEM(GDT_GFX10_1_1)
     ENUM_ITEM(GDT_GFX10_3_0)
+    ENUM_ITEM(GDT_GFX10_3_0_XT)
+    ENUM_ITEM(GDT_GFX10_3_0_XTX)
     ENUM_ITEM(GDT_GFX10_3_1)
     ENUM_ITEM(GDT_GFX10_3_2)
+    ENUM_ITEM(GDT_GFX10_3_2_XT)
     ENUM_ITEM(GDT_GFX10_3_3)
     ENUM_ITEM(GDT_GFX10_3_4)
     ENUM_ITEM(GDT_GFX10_3_5)
+    ENUM_ITEM(GDT_GFX10_3_6)
     ENUM_ITEM(GDT_GFX11_0_0)
+    ENUM_ITEM(GDT_GFX11_0_0_XT)
+    ENUM_ITEM(GDT_GFX11_0_0_GRE)
+    ENUM_ITEM(GDT_GFX11_0_0_M)
     ENUM_ITEM(GDT_GFX11_0_1)
+    ENUM_ITEM(GDT_GFX11_0_1_XT)
     ENUM_ITEM(GDT_GFX11_0_2)
+    ENUM_ITEM(GDT_GFX11_0_2_XT)
     ENUM_ITEM(GDT_GFX11_0_3)
+    ENUM_ITEM(GDT_GFX11_0_3A)
     ENUM_ITEM(GDT_GFX11_0_3B)
     ENUM_ITEM(GDT_GFX11_5_0)
     ENUM_ITEM(GDT_GFX11_5_1)
     ENUM_ITEM(GDT_GFX11_5_2)
+    ENUM_ITEM(GDT_GFX11_5_3)
+    ENUM_ITEM(GDT_GFX11_5_3A)
+    ENUM_ITEM(GDT_GFX12_0_0)
+    ENUM_ITEM(GDT_GFX12_0_0_XT)
+    ENUM_ITEM(GDT_GFX12_0_1_GRE)
     ENUM_ITEM(GDT_GFX12_0_1)
+    ENUM_ITEM(GDT_GFX12_0_1_XT)
     ENUM_ITEM(GDT_LAST)
 ENUM_END(GDT_HW_ASIC_TYPE)
 
@@ -143,7 +161,7 @@ void AmdDeviceInfo_Initialize_RAII::PrintDeviceData(const DeviceId& id)
     if(cardInfo->m_asicType >= 0 && cardInfo->m_asicType < gs_deviceInfoSize)
     {
         const GDT_DeviceInfo& devInfo = gs_deviceInfo[cardInfo->m_asicType];
-        if(devInfo.m_deviceInfoValid)
+        //if(devInfo.m_deviceInfoValid)
         {
             ReportScopeObject region(L"AMD GDT_DeviceInfo");
             formatter.AddFieldUint64(L"NumShaderEngines", devInfo.m_nNumShaderEngines); // Number of shader engines.
@@ -154,8 +172,9 @@ void AmdDeviceInfo_Initialize_RAII::PrintDeviceData(const DeviceId& id)
             formatter.AddFieldUint64(L"NumPrimPipes", devInfo.m_nNumPrimPipes);         // Number of primitive pipes.
             formatter.AddFieldUint64(L"WaveSize", devInfo.m_nWaveSize);                 // Wavefront size.
             formatter.AddFieldUint64(L"NumSHPerSE", devInfo.m_nNumSHPerSE); // Number of shader array per Shader Engine.
-            formatter.AddFieldUint64(L"NumCUPerSH", devInfo.m_nNumCUPerSH); // Number of compute unit per Shader Array.
+            formatter.AddFieldUint64(L"NumCUs", devInfo.m_nNumCUs); // Number of Compute Units
             formatter.AddFieldUint64(L"NumSIMDPerCU", devInfo.m_nNumSIMDPerCU); // Number of SIMDs per Compute unit.
+            formatter.AddFieldUint64(L"NumVGPRPerSIMD", devInfo.m_nNumVGPRPerSIMD); // Number of VGPRs per SIMD.
         }
     }
 }
