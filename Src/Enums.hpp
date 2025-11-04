@@ -62,25 +62,25 @@ inline const wchar_t* FindEnumItemName(uint32_t value, const EnumItem* items)
 
 static const EnumItem Enum_VendorId[] = {
     // PCI IDs
-    { L"AMD/ATI",          0x1002     },
-    { L"AMD",              0x1022     },
-    { L"NVIDIA",           0x10de     },
-    { L"Microsoft",        0x1414     },
-    { L"Parallels",        0x1ab8     },
-    { L"Qualcomm",         0x5143     },
-    { L"Intel",            0x8086     },
+    { L"AMD/ATI",   0x1002     },
+    { L"AMD",       0x1022     },
+    { L"NVIDIA",    0x10de     },
+    { L"Microsoft", 0x1414     },
+    { L"Parallels", 0x1ab8     },
+    { L"Qualcomm",  0x5143     },
+    { L"Intel",     0x8086     },
     // ACPI IDs
-    { L"Parallels (PRL4)", 0x344C5250 },
-    { L"NVIDIA (NVDA)",    0x4144564E },
-    { L"Intel (INTC)",     0x43544E49 },
-    { L"Intel (INTL)",     0x4C544E49 },
-    { L"AMD (AMDI)",       0x49444D41 },
-    { L"Intel (ACPI)",     0x49504341 },
-    { L"Qualcomm (QCOM)",  0x4D4F4351 },
-    { L"Microsoft (MSFT)", 0x5446534D },
-    { L"Microsoft (MSHW)", 0x5748534D },
-    { L"Microsoft (MSAY)", 0x5941534D },
-    { NULL,                UINT32_MAX }
+    { L"Parallels", 0x344C5250 },
+    { L"NVIDIA",    0x4144564E },
+    { L"Intel",     0x43544E49 },
+    { L"Intel",     0x4C544E49 },
+    { L"AMD",       0x49444D41 },
+    { L"Intel",     0x49504341 },
+    { L"Qualcomm",  0x4D4F4351 },
+    { L"Microsoft", 0x5446534D },
+    { L"Microsoft", 0x5748534D },
+    { L"Microsoft", 0x5941534D },
+    { NULL,         UINT32_MAX }
 };
 static EnumRegistration g_Enum_VendorId_Registration(L"VendorId", Enum_VendorId);
 
