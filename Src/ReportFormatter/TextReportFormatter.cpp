@@ -334,23 +334,47 @@ void TextReportFormatter::AddFieldVendorId(std::wstring_view name, uint32_t valu
 {
     assert(!name.empty());
 
-    auto ACPIIDOpt = DecodeACPIID(value);
-
-    if(ACPIIDOpt.has_value())
+    if(value < 0xFFFF)
     {
-        PushElement();
-        auto& ACPIID = ACPIIDOpt.value();
-        const wchar_t* enumItemName = FindEnumItemName(value, Enum_VendorId);
-        if(enumItemName == nullptr)
-        {
-            enumItemName = L"Unknown";
-        }
-
-        Printer::PrintFormat(L"{} = {} \"{}\" (0x{:X})", std::make_wformat_args(name, enumItemName, ACPIID, value));
+        // PCI ID codepath
+        AddFieldEnum(name, value, Enum_VendorId);
     }
     else
     {
-        AddFieldEnum(name, value, Enum_VendorId);
+        // Either ACPI ID or invalid codepath
+
+        // ACPIID is NOT null terminated
+        char ACPIID[4] = { value & 0xFF, (value >> 8) & 0xFF, (value >> 16) & 0xFF, (value >> 24) & 0xFF };
+        bool valid = true;
+        for(const char& charByte : ACPIID)
+        {
+            bool isDigit = charByte >= '0' && charByte <= '9';
+            bool isUppercaseLetter = charByte >= 'A' && charByte <= 'Z';
+            if(!isDigit && !isUppercaseLetter)
+            {
+                valid = false;
+                break;
+            }
+        }
+
+        PushElement();
+        if(valid)
+        {
+            // ACPIIDString is null terminated
+            std::wstring ACPIIDString(ACPIID, ACPIID + 4);
+            const wchar_t* enumItemName = FindEnumItemName(value, Enum_VendorId);
+            if(enumItemName == nullptr)
+            {
+                enumItemName = L"Unknown";
+            }
+
+            Printer::PrintFormat(
+                L"{} = {} \"{}\" (0x{:X})", std::make_wformat_args(name, enumItemName, ACPIIDString, value));
+        }
+        else
+        {
+            Printer::PrintFormat(L"{} = Invalid (0x{:X})", std::make_wformat_args(name, value));
+        }
     }
 }
 
@@ -440,24 +464,4 @@ void TextReportFormatter::PrintDivider(size_t size)
     }
 
     Printer::PrintString(std::wstring(size, dividerChar));
-}
-
-std::optional<std::wstring> TextReportFormatter::DecodeACPIID(uint32_t value)
-{
-    if(value <= 0xFFFF)
-    {
-        return std::nullopt;
-    }
-
-    std::wstring result;
-    result.resize(4);
-
-    for(uint32_t i = 0; i < 4; ++i)
-    {
-        const uint8_t charValue = (uint8_t)(value >> (i * 8));
-        if(charValue < 32 || charValue > 126)
-            return std::nullopt;
-        result[i] = (wchar_t)charValue;
-    }
-    return result;
 }

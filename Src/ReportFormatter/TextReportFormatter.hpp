@@ -68,6 +68,4 @@ private:
     void PrintIndent() const;
     void PushElement();
     void PrintDivider(size_t size);
-
-    static std::optional<std::wstring> DecodeACPIID(uint32_t value);
 };
