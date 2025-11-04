@@ -344,7 +344,11 @@ void TextReportFormatter::AddFieldVendorId(std::wstring_view name, uint32_t valu
         // Either ACPI ID or invalid codepath
 
         // ACPIID is NOT null terminated
-        char ACPIID[4] = { value & 0xFF, (value >> 8) & 0xFF, (value >> 16) & 0xFF, (value >> 24) & 0xFF };
+        char ACPIID[4] = {
+            char(value & 0xFF),
+            char((value >> 8) & 0xFF),
+            char((value >> 16) & 0xFF),
+            char((value >> 24) & 0xFF) };
         bool valid = true;
         for(const char& charByte : ACPIID)
         {
