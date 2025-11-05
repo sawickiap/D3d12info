@@ -1,3 +1,12 @@
+# Version 3.15.0 (2025-11-05)
+
+Changes:
+
+- Updated third-party libraries to the latest versions: AMD device\_info, NVAPI, Vulkan-Headers. There are some changes in the reporting of `AMD GDT_DeviceInfo`.
+- Improved display of ACPI IDs. (Developed by @Devaniti as #40)
+
+Compiled with DirectX 12 Agility SDK 1.618.2 ("D3d12info.exe") / 1.717.1-preview ("D3d12info\_preview.exe"), AMD AGS 6.3.0, AMD device\_info from 2025-10-30 (commit hash `0f9cb0d126a1345331e71116733553602b7585d7`), NVAPI R580, Intel GPU Detect from 2025-04-28 (commit hash `649cf14acd63e1d7ad7e30d3c558fb447f9f8c5b`).
+
 # Version 3.14.1 (2025-10-15)
 
 Changes:
