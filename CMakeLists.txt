@@ -23,7 +23,6 @@ set(CPP_FILES
     Src/Printer.cpp
     Src/Resources.rc
     Src/Utils.cpp
-    Src/GUID.cpp
     Src/VulkanData.cpp
     Src/ReportFormatter/TextReportFormatter.cpp
     Src/ReportFormatter/JSONReportFormatter.cpp
@@ -40,7 +39,6 @@ set(HPP_FILES
     Src/pch.hpp
     Src/Printer.hpp
     Src/Utils.hpp
-    Src/GUID.hpp
     Src/VulkanData.hpp
     Src/ReportFormatter/TextReportFormatter.hpp
     Src/ReportFormatter/JSONReportFormatter.hpp

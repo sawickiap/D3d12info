@@ -10,7 +10,6 @@ For more information, see files README.md, LICENSE.txt.
 #include "AgsData.hpp"
 #include "AmdDeviceInfoData.hpp"
 #include "Enums.hpp"
-#include "GUID.hpp"
 #include "IntelData.hpp"
 #include "NvApiData.hpp"
 #include "Printer.hpp"
@@ -53,11 +52,11 @@ constexpr D3D12_COMMAND_LIST_TYPE COMMAND_LIST_TYPES[] = {
     D3D12_COMMAND_LIST_TYPE_VIDEO_PROCESS,
     D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE,
 };
-constexpr size_t COMMAND_LIST_TYPES_SIZE = _countof(COMMAND_LIST_TYPES);
+constexpr size_t COMMAND_LIST_TYPES_COUNT = _countof(COMMAND_LIST_TYPES);
 
 constexpr D3D12_COMMAND_QUEUE_PRIORITY COMMAND_QUEUE_PRIORITIES[] = { D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
     D3D12_COMMAND_QUEUE_PRIORITY_HIGH, D3D12_COMMAND_QUEUE_PRIORITY_GLOBAL_REALTIME };
-constexpr size_t COMMAND_QUEUE_PRIORITIES_SIZE = _countof(COMMAND_QUEUE_PRIORITIES);
+constexpr size_t COMMAND_QUEUE_PRIORITIES_COUNT = _countof(COMMAND_QUEUE_PRIORITIES);
 
 constexpr D3D12_BARRIER_LAYOUT BARRIER_LAYOUTS[] = { D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_GENERIC_READ,
     D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE,
@@ -74,7 +73,7 @@ constexpr D3D12_BARRIER_LAYOUT BARRIER_LAYOUTS[] = { D3D12_BARRIER_LAYOUT_COMMON
     D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_SHADER_RESOURCE, D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_COPY_SOURCE,
     D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_COPY_DEST,
     D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_GENERIC_READ_COMPUTE_QUEUE_ACCESSIBLE };
-constexpr size_t BARRIER_LAYOUTS_SIZE = _countof(BARRIER_LAYOUTS);
+constexpr size_t BARRIER_LAYOUTS_COUNT = _countof(BARRIER_LAYOUTS);
 
 // #define AUTO_LINK_DX12    // use this on everything before Win10
 #if defined(AUTO_LINK_DX12)
@@ -114,6 +113,14 @@ PFN_D3D12_ENABLE_EXPERIMENTAL_FEATURES g_D3D12EnableExperimentalFeatures; // Opt
 PFN_D3D12_GET_INTERFACE g_D3D12GetInterface;                              // Optional, can be null.
 
 #endif // #if defined(AUTO_LINK_DX12)
+
+// # From vkd3d-proton project, see:
+// https://github.com/HansKristian-Work/vkd3d-proton/issues/2459
+// https://github.com/HansKristian-Work/vkd3d-proton/blob/master/include/vkd3d_device_vkd3d_ext.idl
+DEFINE_GUID(IID_ID3D12DXVKInteropDevice, 0x39da4e09, 0xbd1c, 0x4198, 0x9f, 0xae, 0x86, 0xbb, 0xe3, 0xbe, 0x41, 0xfd);
+
+// D3d12info GUID for use with ID3D12ApplicationIdentity
+DEFINE_GUID(APPID_D3D12INFO, 0x86671909, 0x7f0b, 0x44d6, 0xb0, 0xf9, 0xbe, 0xca, 0x2f, 0xc7, 0x4e, 0x2e);
 
 // Command line flags
 static bool g_ShowVersionAndQuit = false;
@@ -257,7 +264,7 @@ static void Print_D3D12_FEATURE_DATA_SHADER_CACHE(const D3D12_FEATURE_DATA_SHADE
 }
 
 static void Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(
-    const std::array<std::array<bool, COMMAND_QUEUE_PRIORITIES_SIZE>, COMMAND_LIST_TYPES_SIZE>& commandQueuePriority)
+    const std::array<std::array<bool, COMMAND_QUEUE_PRIORITIES_COUNT>, COMMAND_LIST_TYPES_COUNT>& commandQueuePriority)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY");
     ReportFormatter& formatter = ReportFormatter::GetInstance();
@@ -267,9 +274,9 @@ static void Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(
 
     const wchar_t* commandQueuePriorityNames[] = { L"PRIORITY_NORMAL", L"PRIORITY_HIGH", L"PRIORITY_GLOBAL_REALTIME" };
 
-    for(size_t i = 0; i < COMMAND_LIST_TYPES_SIZE; ++i)
+    for(size_t i = 0; i < COMMAND_LIST_TYPES_COUNT; ++i)
     {
-        for(size_t j = 0; j < COMMAND_QUEUE_PRIORITIES_SIZE; ++j)
+        for(size_t j = 0; j < COMMAND_QUEUE_PRIORITIES_COUNT; ++j)
         {
             std::wstring fieldName = std::wstring(commandListTypeNames[i]) + L"." + commandQueuePriorityNames[j] +
                                      L".PriorityForTypeIsSupported";
@@ -279,7 +286,7 @@ static void Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(
 }
 
 static void Print_D3D12_FEATURE_DATA_BARRIER_LAYOUT(
-    const std::array<std::array<bool, BARRIER_LAYOUTS_SIZE>, COMMAND_LIST_TYPES_SIZE>& barrierLayout)
+    const std::array<std::array<bool, BARRIER_LAYOUTS_COUNT>, COMMAND_LIST_TYPES_COUNT>& barrierLayout)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_BARRIER_LAYOUT");
 
@@ -304,7 +311,7 @@ static void Print_D3D12_FEATURE_DATA_BARRIER_LAYOUT(
 
 #ifdef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_FENCE_BARRIERS(
-    const std::array<D3D12_FENCE_BARRIERS_TIER, COMMAND_LIST_TYPES_SIZE>& fenceBarriers)
+    const std::array<D3D12_FENCE_BARRIERS_TIER, COMMAND_LIST_TYPES_COUNT>& fenceBarriers)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_FENCE_BARRIERS");
 
@@ -1379,11 +1386,11 @@ static void PrintCommandQueuePriorities(ID3D12Device* device)
     D3D12_COMMAND_QUEUE_PRIORITY cmdQueuePriorities[] = { D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
         D3D12_COMMAND_QUEUE_PRIORITY_HIGH, D3D12_COMMAND_QUEUE_PRIORITY_GLOBAL_REALTIME };
 
-    std::array<std::array<bool, COMMAND_QUEUE_PRIORITIES_SIZE>, COMMAND_LIST_TYPES_SIZE> queuePrioritySupport = {};
+    std::array<std::array<bool, COMMAND_QUEUE_PRIORITIES_COUNT>, COMMAND_LIST_TYPES_COUNT> queuePrioritySupport = {};
 
-    for(size_t i = 0; i < COMMAND_LIST_TYPES_SIZE; ++i)
+    for(size_t i = 0; i < COMMAND_LIST_TYPES_COUNT; ++i)
     {
-        for(size_t j = 0; j < COMMAND_QUEUE_PRIORITIES_SIZE; ++j)
+        for(size_t j = 0; j < COMMAND_QUEUE_PRIORITIES_COUNT; ++j)
         {
             D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY commandQueuePriority = {};
             commandQueuePriority.CommandListType = COMMAND_LIST_TYPES[i];
@@ -1401,11 +1408,11 @@ static void PrintCommandQueuePriorities(ID3D12Device* device)
 
 static void PrintBarrierLayouts(ID3D12Device* device)
 {
-    std::array<std::array<bool, BARRIER_LAYOUTS_SIZE>, COMMAND_LIST_TYPES_SIZE> barrierLayoutSupport = {};
+    std::array<std::array<bool, BARRIER_LAYOUTS_COUNT>, COMMAND_LIST_TYPES_COUNT> barrierLayoutSupport = {};
 
-    for(size_t i = 0; i < COMMAND_LIST_TYPES_SIZE; ++i)
+    for(size_t i = 0; i < COMMAND_LIST_TYPES_COUNT; ++i)
     {
-        for(size_t j = 0; j < BARRIER_LAYOUTS_SIZE; ++j)
+        for(size_t j = 0; j < BARRIER_LAYOUTS_COUNT; ++j)
         {
             D3D12_FEATURE_DATA_BARRIER_LAYOUT barrierLayout = {};
             barrierLayout.CommandListType = COMMAND_LIST_TYPES[i];
@@ -1422,9 +1429,9 @@ static void PrintBarrierLayouts(ID3D12Device* device)
 #ifdef USE_PREVIEW_AGILITY_SDK
 static void PrintFenceBarriers(ID3D12Device* device)
 {
-    std::array<D3D12_FENCE_BARRIERS_TIER, COMMAND_LIST_TYPES_SIZE> fenceBarriersSupport = {};
+    std::array<D3D12_FENCE_BARRIERS_TIER, COMMAND_LIST_TYPES_COUNT> fenceBarriersSupport = {};
 
-    for(size_t i = 0; i < COMMAND_LIST_TYPES_SIZE; ++i)
+    for(size_t i = 0; i < COMMAND_LIST_TYPES_COUNT; ++i)
     {
         D3D12_FEATURE_DATA_FENCE_BARRIERS fenceBarriers = {};
         fenceBarriers.CommandListType = COMMAND_LIST_TYPES[i];
