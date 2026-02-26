@@ -1,3 +1,18 @@
+# Version 3.16.0 (2026-02-26)
+
+Changes:
+
+- Updated DirectX 12 Agility SDK.
+  - Added `D3D12_FEATURE_DATA_D3D12_OPTIONS22`.
+  - Added `D3D12_FEATURE_DATA_BARRIER_LAYOUT`.
+  - Added `D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW` (preview version only).
+  - Added `D3D12_FEATURE_DATA_FENCE_BARRIERS` (preview version only).
+  - Added usage of the new `ID3D12ApplicationIdentity::SetApplicationIdentity`.
+  - Removed experiments: `D3D12TiledResourceTier4, D3D12CooperativeVectorExperiment` (which was the cause of preview version of the app failing on Nvidia cards), added `D3D12GPUUploadHeapsOnUnsupportedOS, D3D12FenceBarriersExperiment, D3D12FenceBarriersTier2Experiment`.
+  - Other minor changes and additions.
+
+Compiled with DirectX 12 Agility SDK 1.619.0 ("D3d12info.exe") / 1.719.0-preview ("D3d12info\_preview.exe"), AMD AGS 6.3.0, AMD device\_info from 2025-10-30 (commit hash `0f9cb0d126a1345331e71116733553602b7585d7`), NVAPI R580, Intel GPU Detect from 2025-04-28 (commit hash `649cf14acd63e1d7ad7e30d3c558fb447f9f8c5b`).
+
 # Version 3.15.1 (2025-11-13)
 
 Changes:

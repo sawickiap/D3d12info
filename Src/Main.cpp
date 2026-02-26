@@ -789,7 +789,7 @@ static void SetApplicationIdentity()
     if(FAILED(hr))
         return;
 
-    ReportScopeObject scope(L"UsedApplicationIdentity");
+    ReportScopeObject scope(L"SetApplicationIdentity");
     ReportFormatter& formatter = ReportFormatter::GetInstance();
     formatter.AddFieldString(L"pExeFilename", appDesc.pExeFilename);
     formatter.AddFieldString(L"pName", appDesc.pName);
