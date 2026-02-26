@@ -14,18 +14,20 @@ For more information, see files README.md, LICENSE.txt.
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 
+// Enable defining GUIDs
+#include <initguid.h>
+
 // Agility SDK needs to be included before Windows 10 SDK - according to Microsoft.
 #ifdef USE_PREVIEW_AGILITY_SDK
-#include "ThirdParty/microsoft.direct3d.d3d12.1.717.1-preview/build/native/include/d3d12.h"
+#include "ThirdParty/microsoft.direct3d.d3d12.1.719.0-preview/build/native/include/d3d12.h"
 #else
-#include "ThirdParty/microsoft.direct3d.d3d12.1.618.3/build/native/include/d3d12.h"
+#include "ThirdParty/microsoft.direct3d.d3d12.1.619.0/build/native/include/d3d12.h"
 #endif
 
 #include <Objbase.h> // for StringFromGUID2
 #include <dxgi1_6.h>
 #include <windows.h>
 #include <wrl/client.h> // for ComPtr
-#include <initguid.h> // for DEFINE_GUID
 
 #include <algorithm>
 #include <array>

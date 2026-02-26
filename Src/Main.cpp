@@ -44,6 +44,37 @@ enum VENDOR_ID
     VENDOR_ID_INTEL = 0x8086
 };
 
+constexpr D3D12_COMMAND_LIST_TYPE COMMAND_LIST_TYPES[] = {
+    D3D12_COMMAND_LIST_TYPE_DIRECT,
+    D3D12_COMMAND_LIST_TYPE_COMPUTE,
+    D3D12_COMMAND_LIST_TYPE_COPY,
+    D3D12_COMMAND_LIST_TYPE_VIDEO_DECODE,
+    D3D12_COMMAND_LIST_TYPE_VIDEO_PROCESS,
+    D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE,
+};
+constexpr size_t COMMAND_LIST_TYPES_COUNT = _countof(COMMAND_LIST_TYPES);
+
+constexpr D3D12_COMMAND_QUEUE_PRIORITY COMMAND_QUEUE_PRIORITIES[] = { D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
+    D3D12_COMMAND_QUEUE_PRIORITY_HIGH, D3D12_COMMAND_QUEUE_PRIORITY_GLOBAL_REALTIME };
+constexpr size_t COMMAND_QUEUE_PRIORITIES_COUNT = _countof(COMMAND_QUEUE_PRIORITIES);
+
+constexpr D3D12_BARRIER_LAYOUT BARRIER_LAYOUTS[] = { D3D12_BARRIER_LAYOUT_COMMON, D3D12_BARRIER_LAYOUT_GENERIC_READ,
+    D3D12_BARRIER_LAYOUT_RENDER_TARGET, D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS, D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE,
+    D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ, D3D12_BARRIER_LAYOUT_SHADER_RESOURCE, D3D12_BARRIER_LAYOUT_COPY_SOURCE,
+    D3D12_BARRIER_LAYOUT_COPY_DEST, D3D12_BARRIER_LAYOUT_RESOLVE_SOURCE, D3D12_BARRIER_LAYOUT_RESOLVE_DEST,
+    D3D12_BARRIER_LAYOUT_SHADING_RATE_SOURCE, D3D12_BARRIER_LAYOUT_VIDEO_DECODE_READ,
+    D3D12_BARRIER_LAYOUT_VIDEO_DECODE_WRITE, D3D12_BARRIER_LAYOUT_VIDEO_PROCESS_READ,
+    D3D12_BARRIER_LAYOUT_VIDEO_PROCESS_WRITE, D3D12_BARRIER_LAYOUT_VIDEO_ENCODE_READ,
+    D3D12_BARRIER_LAYOUT_VIDEO_ENCODE_WRITE, D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_COMMON,
+    D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_GENERIC_READ, D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_UNORDERED_ACCESS,
+    D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_SHADER_RESOURCE, D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_COPY_SOURCE,
+    D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_COPY_DEST, D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_COMMON,
+    D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_GENERIC_READ, D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_UNORDERED_ACCESS,
+    D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_SHADER_RESOURCE, D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_COPY_SOURCE,
+    D3D12_BARRIER_LAYOUT_COMPUTE_QUEUE_COPY_DEST,
+    D3D12_BARRIER_LAYOUT_DIRECT_QUEUE_GENERIC_READ_COMPUTE_QUEUE_ACCESSIBLE };
+constexpr size_t BARRIER_LAYOUTS_COUNT = _countof(BARRIER_LAYOUTS);
+
 // #define AUTO_LINK_DX12    // use this on everything before Win10
 #if defined(AUTO_LINK_DX12)
 
@@ -87,6 +118,9 @@ PFN_D3D12_GET_INTERFACE g_D3D12GetInterface;                              // Opt
 // https://github.com/HansKristian-Work/vkd3d-proton/issues/2459
 // https://github.com/HansKristian-Work/vkd3d-proton/blob/master/include/vkd3d_device_vkd3d_ext.idl
 DEFINE_GUID(IID_ID3D12DXVKInteropDevice, 0x39da4e09, 0xbd1c, 0x4198, 0x9f, 0xae, 0x86, 0xbb, 0xe3, 0xbe, 0x41, 0xfd);
+
+// D3d12info GUID for use with ID3D12ApplicationIdentity
+DEFINE_GUID(APPID_D3D12INFO, 0x86671909, 0x7f0b, 0x44d6, 0xb0, 0xf9, 0xbe, 0xca, 0x2f, 0xc7, 0x4e, 0x2e);
 
 // Command line flags
 static bool g_ShowVersionAndQuit = false;
@@ -229,21 +263,67 @@ static void Print_D3D12_FEATURE_DATA_SHADER_CACHE(const D3D12_FEATURE_DATA_SHADE
         L"SupportFlags", shaderCache.SupportFlags, Enum_D3D12_SHADER_CACHE_SUPPORT_FLAGS);
 }
 
-static void Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(const std::array<bool, 9>& commandQueuePriority)
+static void Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(
+    const std::array<std::array<bool, COMMAND_QUEUE_PRIORITIES_COUNT>, COMMAND_LIST_TYPES_COUNT>& commandQueuePriority)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY");
     ReportFormatter& formatter = ReportFormatter::GetInstance();
-    formatter.AddFieldBool(L"TYPE_DIRECT.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[0]);
-    formatter.AddFieldBool(L"TYPE_DIRECT.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[1]);
-    formatter.AddFieldBool(L"TYPE_DIRECT.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[2]);
-    formatter.AddFieldBool(L"TYPE_COMPUTE.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[3]);
-    formatter.AddFieldBool(L"TYPE_COMPUTE.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[4]);
-    formatter.AddFieldBool(
-        L"TYPE_COMPUTE.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[5]);
-    formatter.AddFieldBool(L"TYPE_COPY.PRIORITY_NORMAL.PriorityForTypeIsSupported", commandQueuePriority[6]);
-    formatter.AddFieldBool(L"TYPE_COPY.PRIORITY_HIGH.PriorityForTypeIsSupported", commandQueuePriority[7]);
-    formatter.AddFieldBool(L"TYPE_COPY.PRIORITY_GLOBAL_REALTIME.PriorityForTypeIsSupported", commandQueuePriority[8]);
+
+    const wchar_t* commandListTypeNames[] = { L"TYPE_DIRECT", L"TYPE_COMPUTE", L"TYPE_COPY", L"TYPE_VIDEO_DECODE",
+        L"TYPE_VIDEO_PROCESS", L"TYPE_VIDEO_ENCODE" };
+
+    const wchar_t* commandQueuePriorityNames[] = { L"PRIORITY_NORMAL", L"PRIORITY_HIGH", L"PRIORITY_GLOBAL_REALTIME" };
+
+    for(size_t i = 0; i < COMMAND_LIST_TYPES_COUNT; ++i)
+    {
+        for(size_t j = 0; j < COMMAND_QUEUE_PRIORITIES_COUNT; ++j)
+        {
+            std::wstring fieldName = std::wstring(commandListTypeNames[i]) + L"." + commandQueuePriorityNames[j] +
+                                     L".PriorityForTypeIsSupported";
+            formatter.AddFieldBool(fieldName, commandQueuePriority[i][j]);
+        }
+    }
 }
+
+static void Print_D3D12_FEATURE_DATA_BARRIER_LAYOUT(
+    const std::array<std::array<bool, BARRIER_LAYOUTS_COUNT>, COMMAND_LIST_TYPES_COUNT>& barrierLayout)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_BARRIER_LAYOUT");
+
+    for(size_t i = 0; i < barrierLayout.size(); i++)
+    {
+        const wchar_t* commandListName = FindEnumItemName(COMMAND_LIST_TYPES[i], Enum_D3D12_COMMAND_LIST_TYPE);
+        assert(commandListName);
+
+        ReportScopeObject scopeCmdListType(commandListName);
+
+        for(size_t j = 0; j < barrierLayout[i].size(); j++)
+        {
+            const wchar_t* resourceStateName = FindEnumItemName(BARRIER_LAYOUTS[j], Enum_D3D12_BARRIER_LAYOUT);
+            assert(resourceStateName);
+            if(IsJsonOutput() || barrierLayout[i][j])
+            {
+                ReportFormatter::GetInstance().AddFieldBool(resourceStateName, barrierLayout[i][j]);
+            }
+        }
+    }
+}
+
+#ifdef USE_PREVIEW_AGILITY_SDK
+static void Print_D3D12_FEATURE_DATA_FENCE_BARRIERS(
+    const std::array<D3D12_FENCE_BARRIERS_TIER, COMMAND_LIST_TYPES_COUNT>& fenceBarriers)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_FENCE_BARRIERS");
+
+    for(size_t i = 0; i < fenceBarriers.size(); i++)
+    {
+        const wchar_t* commandListName = FindEnumItemName(COMMAND_LIST_TYPES[i], Enum_D3D12_COMMAND_LIST_TYPE);
+        assert(commandListName);
+
+        ReportFormatter::GetInstance().AddFieldEnum(commandListName, fenceBarriers[i], Enum_D3D12_FENCE_BARRIERS_TIER);
+    }
+}
+#endif
 
 static void Print_D3D12_FEATURE_DATA_SERIALIZATION(const D3D12_FEATURE_DATA_SERIALIZATION& serialization)
 {
@@ -465,6 +545,16 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(const D3D12_FEATURE_DATA_D3
     formatter.AddFieldBool(L"ExtendedCommandInfoSupported", o.ExtendedCommandInfoSupported);
 }
 
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS22(const D3D12_FEATURE_DATA_D3D12_OPTIONS22& o)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS22");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"ShaderExecutionReorderingActuallyReorders", o.ShaderExecutionReorderingActuallyReorders);
+    formatter.AddFieldBool(L"CreateByteOffsetViewsSupported", o.CreateByteOffsetViewsSupported);
+    formatter.AddFieldUint32(L"Max1DDispatchSize", o.Max1DDispatchSize);
+    formatter.AddFieldUint32(L"Max1DDispatchMeshSize", o.Max1DDispatchMeshSize);
+}
+
 static void Print_D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED(
     const D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED& o)
 {
@@ -480,7 +570,7 @@ static void Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(const D3D12_FEATURE_DATA_TI
 
 #ifndef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT(
-    const D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT & shaderCacheABISupport)
+    const D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT& shaderCacheABISupport)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT");
     ReportFormatter::GetInstance().AddFieldString(L"szAdapterFamily", shaderCacheABISupport.szAdapterFamily);
@@ -501,6 +591,15 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(const D3D12_FEAT
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL");
     ReportFormatter& formatter = ReportFormatter::GetInstance();
     formatter.AddFieldEnum(L"CooperativeVectorTier", o.CooperativeVectorTier, Enum_D3D12_COOPERATIVE_VECTOR_TIER);
+}
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW(const D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW& o)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+
+    formatter.AddFieldUint32(L"MaxGroupSharedMemoryPerGroupCS", o.MaxGroupSharedMemoryPerGroupCS);
+    formatter.AddFieldUint32(L"MaxGroupSharedMemoryPerGroupAS", o.MaxGroupSharedMemoryPerGroupAS);
+    formatter.AddFieldUint32(L"MaxGroupSharedMemoryPerGroupMS", o.MaxGroupSharedMemoryPerGroupMS);
 }
 
 static void Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(
@@ -667,6 +766,38 @@ static void PrintVersionData()
     }
 }
 
+static void SetApplicationIdentity()
+{
+    ComPtr<ID3D12ApplicationIdentity> applicationIdentity = nullptr;
+    HRESULT hr = g_D3D12GetInterface(CLSID_D3D12ApplicationIdentity, IID_PPV_ARGS(&applicationIdentity));
+    if(FAILED(hr))
+        return;
+
+    D3D12_APPLICATION_DESC appDesc = {};
+    appDesc.pExeFilename = L"" PROGRAM_NAME ".exe";
+    appDesc.pName = L"" PROGRAM_NAME;
+    appDesc.Version.VersionParts[0] = 0;
+    appDesc.Version.VersionParts[1] = PROGRAM_VERSION_PATCH;
+    appDesc.Version.VersionParts[2] = PROGRAM_VERSION_MINOR;
+    appDesc.Version.VersionParts[3] = PROGRAM_VERSION_MAJOR;
+    appDesc.pEngineName = L"" PROGRAM_NAME;
+    appDesc.EngineVersion.VersionParts[0] = 0;
+    appDesc.EngineVersion.VersionParts[1] = PROGRAM_VERSION_PATCH;
+    appDesc.EngineVersion.VersionParts[2] = PROGRAM_VERSION_MINOR;
+    appDesc.EngineVersion.VersionParts[3] = PROGRAM_VERSION_MAJOR;
+    hr = applicationIdentity->SetApplicationIdentity(&appDesc, APPID_D3D12INFO);
+    if(FAILED(hr))
+        return;
+
+    ReportScopeObject scope(L"UsedApplicationIdentity");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldString(L"pExeFilename", appDesc.pExeFilename);
+    formatter.AddFieldString(L"pName", appDesc.pName);
+    formatter.AddFieldMicrosoftVersion(L"Version", appDesc.Version.Version);
+    formatter.AddFieldString(L"pEngineName", appDesc.pEngineName);
+    formatter.AddFieldMicrosoftVersion(L"EngineVersion", appDesc.EngineVersion.Version);
+}
+
 static void PrintEnums()
 {
     ReportScopeObject scope(L"Enums");
@@ -709,13 +840,13 @@ static void EnableExperimentalFeatures()
         return;
 
 #ifdef USE_PREVIEW_AGILITY_SDK
-    static const UUID FEATURE_UUIDS[] = { D3D12ExperimentalShaderModels, D3D12TiledResourceTier4,
-        D3D12StateObjectsExperiment, D3D12CooperativeVectorExperiment };
-    static const wchar_t* FEATURE_NAMES[] = { L"D3D12ExperimentalShaderModels", L"D3D12TiledResourceTier4",
-        L"D3D12StateObjectsExperiment", L"D3D12CooperativeVectorExperiment" };
+    static const UUID FEATURE_UUIDS[] = { D3D12ExperimentalShaderModels, D3D12GPUUploadHeapsOnUnsupportedOS,
+        D3D12StateObjectsExperiment, D3D12FenceBarriersExperiment, D3D12FenceBarriersTier2Experiment };
+    static const wchar_t* FEATURE_NAMES[] = { L"D3D12ExperimentalShaderModels", L"D3D12GPUUploadHeapsOnUnsupportedOS",
+        L"D3D12StateObjectsExperiment", L"D3D12FenceBarriersExperiment", L"D3D12FenceBarriersTier2Experiment" };
 #else
-    static const UUID FEATURE_UUIDS[] = { D3D12ExperimentalShaderModels, D3D12TiledResourceTier4 };
-    static const wchar_t* FEATURE_NAMES[] = { L"D3D12ExperimentalShaderModels", L"D3D12TiledResourceTier4" };
+    static const UUID FEATURE_UUIDS[] = { D3D12ExperimentalShaderModels, D3D12GPUUploadHeapsOnUnsupportedOS };
+    static const wchar_t* FEATURE_NAMES[] = { L"D3D12ExperimentalShaderModels", L"D3D12GPUUploadHeapsOnUnsupportedOS" };
 #endif // #ifdef USE_PREVIEW_AGILITY_SDK
     static_assert(std::size(FEATURE_UUIDS) == std::size(FEATURE_NAMES));
     constexpr size_t FEATURE_COUNT = _countof(FEATURE_UUIDS);
@@ -1110,18 +1241,22 @@ static void PrintDeviceOptions(ID3D12Device* device)
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS21, &options21, sizeof(options21))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(options21);
 
+    if(D3D12_FEATURE_DATA_D3D12_OPTIONS22 options22 = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS22, &options22, sizeof(options22))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS22(options22);
+
     if(D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED bytecodeBypassHashSupported = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_BYTECODE_BYPASS_HASH_SUPPORTED,
             &bytecodeBypassHashSupported, sizeof(bytecodeBypassHashSupported))))
         Print_D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED(bytecodeBypassHashSupported);
 
-    if (D3D12_FEATURE_DATA_TIGHT_ALIGNMENT tightAlignment = {}; SUCCEEDED(
-        device->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &tightAlignment, sizeof(tightAlignment))))
+    if(D3D12_FEATURE_DATA_TIGHT_ALIGNMENT tightAlignment = {}; SUCCEEDED(
+           device->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &tightAlignment, sizeof(tightAlignment))))
         Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(tightAlignment);
 
 #ifndef USE_PREVIEW_AGILITY_SDK
-    if (D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT shaderCacheABISupport = {}; SUCCEEDED(device->CheckFeatureSupport(
-        D3D12_FEATURE_SHADER_CACHE_ABI_SUPPORT, &shaderCacheABISupport, sizeof(shaderCacheABISupport))))
+    if(D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT shaderCacheABISupport = {}; SUCCEEDED(device->CheckFeatureSupport(
+           D3D12_FEATURE_SHADER_CACHE_ABI_SUPPORT, &shaderCacheABISupport, sizeof(shaderCacheABISupport))))
         Print_D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT(shaderCacheABISupport);
 #endif
 
@@ -1133,6 +1268,10 @@ static void PrintDeviceOptions(ID3D12Device* device)
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL optionsExperimental = {}; SUCCEEDED(device->CheckFeatureSupport(
            D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL, &optionsExperimental, sizeof(optionsExperimental))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(optionsExperimental);
+
+    if(D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW optionsPreview = {}; SUCCEEDED(
+           device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_PREVIEW, &optionsPreview, sizeof(optionsPreview))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW(optionsPreview);
 
     if(D3D12_FEATURE_DATA_COOPERATIVE_VECTOR cooperativeVector = {}; SUCCEEDED(device->CheckFeatureSupport(
            D3D12_FEATURE_COOPERATIVE_VECTOR, &cooperativeVector, sizeof(cooperativeVector))))
@@ -1244,31 +1383,66 @@ static void PrintMetaCommands(ID3D12Device5* device5)
 
 static void PrintCommandQueuePriorities(ID3D12Device* device)
 {
-    D3D12_COMMAND_LIST_TYPE cmdListTypes[] = { D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_LIST_TYPE_COMPUTE,
-        D3D12_COMMAND_LIST_TYPE_COPY };
-
     D3D12_COMMAND_QUEUE_PRIORITY cmdQueuePriorities[] = { D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
         D3D12_COMMAND_QUEUE_PRIORITY_HIGH, D3D12_COMMAND_QUEUE_PRIORITY_GLOBAL_REALTIME };
 
-    std::array<bool, 9> queuePrioritySupport = {};
-    size_t queuePriorityIndex = 0;
-    for(auto cmdListType : cmdListTypes)
+    std::array<std::array<bool, COMMAND_QUEUE_PRIORITIES_COUNT>, COMMAND_LIST_TYPES_COUNT> queuePrioritySupport = {};
+
+    for(size_t i = 0; i < COMMAND_LIST_TYPES_COUNT; ++i)
     {
-        for(auto cmdQueuePriority : cmdQueuePriorities)
+        for(size_t j = 0; j < COMMAND_QUEUE_PRIORITIES_COUNT; ++j)
         {
             D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY commandQueuePriority = {};
-            commandQueuePriority.CommandListType = cmdListType;
-            commandQueuePriority.Priority = cmdQueuePriority;
+            commandQueuePriority.CommandListType = COMMAND_LIST_TYPES[i];
+            commandQueuePriority.Priority = COMMAND_QUEUE_PRIORITIES[j];
             if(FAILED(device->CheckFeatureSupport(
                    D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &commandQueuePriority, sizeof(commandQueuePriority))))
                 return;
 
-            queuePrioritySupport[queuePriorityIndex++] = commandQueuePriority.PriorityForTypeIsSupported;
+            queuePrioritySupport[i][j] = commandQueuePriority.PriorityForTypeIsSupported;
         }
     }
 
     Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(queuePrioritySupport);
 }
+
+static void PrintBarrierLayouts(ID3D12Device* device)
+{
+    std::array<std::array<bool, BARRIER_LAYOUTS_COUNT>, COMMAND_LIST_TYPES_COUNT> barrierLayoutSupport = {};
+
+    for(size_t i = 0; i < COMMAND_LIST_TYPES_COUNT; ++i)
+    {
+        for(size_t j = 0; j < BARRIER_LAYOUTS_COUNT; ++j)
+        {
+            D3D12_FEATURE_DATA_BARRIER_LAYOUT barrierLayout = {};
+            barrierLayout.CommandListType = COMMAND_LIST_TYPES[i];
+            barrierLayout.Layout = D3D12_BARRIER_LAYOUT(BARRIER_LAYOUTS[j]);
+            if(FAILED(device->CheckFeatureSupport(D3D12_FEATURE_BARRIER_LAYOUT, &barrierLayout, sizeof(barrierLayout))))
+                return;
+            barrierLayoutSupport[i][j] = barrierLayout.Supported;
+        }
+    }
+
+    Print_D3D12_FEATURE_DATA_BARRIER_LAYOUT(barrierLayoutSupport);
+}
+
+#ifdef USE_PREVIEW_AGILITY_SDK
+static void PrintFenceBarriers(ID3D12Device* device)
+{
+    std::array<D3D12_FENCE_BARRIERS_TIER, COMMAND_LIST_TYPES_COUNT> fenceBarriersSupport = {};
+
+    for(size_t i = 0; i < COMMAND_LIST_TYPES_COUNT; ++i)
+    {
+        D3D12_FEATURE_DATA_FENCE_BARRIERS fenceBarriers = {};
+        fenceBarriers.CommandListType = COMMAND_LIST_TYPES[i];
+        if(FAILED(device->CheckFeatureSupport(D3D12_FEATURE_FENCE_BARRIERS, &fenceBarriers, sizeof(fenceBarriers))))
+            return;
+        fenceBarriersSupport[i] = fenceBarriers.FenceBarriersTier;
+    }
+
+    Print_D3D12_FEATURE_DATA_FENCE_BARRIERS(fenceBarriersSupport);
+}
+#endif
 
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI, AGS_Initialize_RAII* ags)
 {
@@ -1383,6 +1557,12 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         SUCCEEDED(device->CheckFeatureSupport(
             D3D12_FEATURE_APPLICATION_SPECIFIC_DRIVER_STATE, &appSpecificDriverState, sizeof(appSpecificDriverState))))
         Print_D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE(appSpecificDriverState);
+
+    PrintBarrierLayouts(device.Get());
+
+#ifdef USE_PREVIEW_AGILITY_SDK
+    PrintFenceBarriers(device.Get());
+#endif
 
     // TODO: In Agility SDK 1.715.0-preview how to query for D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL1?
     // What is the corresponding structure?
@@ -1953,6 +2133,8 @@ int wmain3(int argc, wchar_t** argv)
     if(!g_PureD3D12)
         vkObjPtr = std::make_unique<Vulkan_Initialize_RAII>();
 #endif
+
+    SetApplicationIdentity();
 
     {
         ReportScopeObject scope(SelectString(L"System Info", L"SystemInfo"));

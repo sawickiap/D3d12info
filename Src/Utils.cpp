@@ -9,10 +9,13 @@ For more information, see files README.md, LICENSE.txt.
 */
 #include "Utils.hpp"
 
-const wchar_t* const PROGRAM_NAME = L"D3d12info";
-const char* const PROGRAM_NAME_ANSI = "D3d12info";
-const wchar_t* const PROGRAM_VERSION = L"3.15.1";
-const uint32_t PROGRAM_VERSION_NUMBER = (3u << 20) | (15u << 10) | (1u);
+#define STRINGIFY_HELPER(x) #x
+#define STRINGIFY(x) STRINGIFY_HELPER(x)
+
+const wchar_t* const PROGRAM_VERSION =
+    L"" STRINGIFY(PROGRAM_VERSION_MAJOR) "." STRINGIFY(PROGRAM_VERSION_MINOR) "." STRINGIFY(PROGRAM_VERSION_PATCH);
+const uint32_t PROGRAM_VERSION_NUMBER = (uint32_t(PROGRAM_VERSION_MAJOR) << 20) |
+                                        (uint32_t(PROGRAM_VERSION_MINOR) << 10) | (uint32_t(PROGRAM_VERSION_PATCH));
 
 wstring SizeToStr(uint64_t size)
 {

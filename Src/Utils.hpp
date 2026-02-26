@@ -9,8 +9,6 @@ For more information, see files README.md, LICENSE.txt.
 */
 #pragma once
 
-extern const wchar_t* const PROGRAM_NAME;
-extern const char* const PROGRAM_NAME_ANSI;
 extern const wchar_t* const PROGRAM_VERSION;
 extern const uint32_t PROGRAM_VERSION_NUMBER;
 
