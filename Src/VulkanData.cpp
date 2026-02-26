@@ -139,9 +139,9 @@ Vulkan_Initialize_RAII::Vulkan_Initialize_RAII()
         return;
 
     VkApplicationInfo appInfo = { .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-        .pApplicationName = PROGRAM_NAME_ANSI,
+        .pApplicationName = PROGRAM_NAME,
         .applicationVersion = PROGRAM_VERSION_NUMBER,
-        .pEngineName = PROGRAM_NAME_ANSI,
+        .pEngineName = PROGRAM_NAME,
         .engineVersion = PROGRAM_VERSION_NUMBER,
         .apiVersion = VK_API_VERSION_1_2 };
     const VkInstanceCreateInfo instanceCreateInfo = { .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,

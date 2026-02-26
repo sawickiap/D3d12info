@@ -140,8 +140,8 @@ ComPtr<ID3D12Device> AGS_Initialize_RAII::CreateDeviceAndPrintData(
     const AGSDX12DeviceCreationParams creationParams = {
         .pAdapter = adapter, .iid = __uuidof(ID3D12Device), .FeatureLevel = featureLevel
     };
-    const AGSDX12ExtensionParams extensionParams = { .pAppName = PROGRAM_NAME,
-        .pEngineName = PROGRAM_NAME,
+    const AGSDX12ExtensionParams extensionParams = { .pAppName = L"" PROGRAM_NAME,
+        .pEngineName = L"" PROGRAM_NAME,
         .appVersion = PROGRAM_VERSION_NUMBER,
         .engineVersion = PROGRAM_VERSION_NUMBER,
         .uavSlot = 0 };
