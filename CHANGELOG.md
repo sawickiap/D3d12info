@@ -1,3 +1,13 @@
+# Version 3.17.0 (2026-??-??)
+
+Changes:
+
+- Updated preview version of DirectX 12 Agility SDK to 1.620.0.
+  - TODO
+- Updated retail version of DirectX 12 Agility SDK to 1.619.2. No new data to fetch.
+
+Compiled with DirectX 12 Agility SDK 1.619.2 ("D3d12info.exe") / 1.720.0-preview ("D3d12info\_preview.exe"), AMD AGS 6.3.0, AMD device\_info from 2025-10-30 (commit hash `0f9cb0d126a1345331e71116733553602b7585d7`), NVAPI R580, Intel GPU Detect from 2025-04-28 (commit hash `649cf14acd63e1d7ad7e30d3c558fb447f9f8c5b`).
+
 # Version 3.16.0 (2026-02-26)
 
 Changes:
