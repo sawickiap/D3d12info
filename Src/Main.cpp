@@ -858,9 +858,11 @@ static void EnableExperimentalFeatures()
 
 #ifdef USE_PREVIEW_AGILITY_SDK
     static const UUID FEATURE_UUIDS[] = { D3D12ExperimentalShaderModels, D3D12GPUUploadHeapsOnUnsupportedOS,
-        D3D12StateObjectsExperiment, D3D12FenceBarriersTier2Experiment };
+        D3D12StateObjectsExperiment, D3D12FenceBarriersTier2Experiment, D3D12FenceBarriersPreviewCompat,
+        D3D12AsyncCommandsExperiment };
     static const wchar_t* FEATURE_NAMES[] = { L"D3D12ExperimentalShaderModels", L"D3D12GPUUploadHeapsOnUnsupportedOS",
-        L"D3D12StateObjectsExperiment", L"D3D12FenceBarriersTier2Experiment" };
+        L"D3D12StateObjectsExperiment", L"D3D12FenceBarriersTier2Experiment", L"D3D12FenceBarriersPreviewCompat",
+        L"D3D12AsyncCommandsExperiment" };
 #else
     static const UUID FEATURE_UUIDS[] = { D3D12ExperimentalShaderModels, D3D12GPUUploadHeapsOnUnsupportedOS };
     static const wchar_t* FEATURE_NAMES[] = { L"D3D12ExperimentalShaderModels", L"D3D12GPUUploadHeapsOnUnsupportedOS" };
