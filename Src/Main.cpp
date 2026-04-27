@@ -586,12 +586,6 @@ static void Print_D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT(
 #endif
 
 #ifdef USE_PREVIEW_AGILITY_SDK
-static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(const D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL& o)
-{
-    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL");
-    ReportFormatter& formatter = ReportFormatter::GetInstance();
-    formatter.AddFieldEnum(L"CooperativeVectorTier", o.CooperativeVectorTier, Enum_D3D12_COOPERATIVE_VECTOR_TIER);
-}
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW(const D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW");
@@ -1264,10 +1258,6 @@ static void PrintDeviceOptions(ID3D12Device* device)
     if(D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS groupings = {}; SUCCEEDED(device->CheckFeatureSupport(
            D3D12_FEATURE_HARDWARE_SCHEDULING_QUEUE_GROUPINGS, &groupings, sizeof(groupings))))
         Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(groupings);
-
-    if(D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL optionsExperimental = {}; SUCCEEDED(device->CheckFeatureSupport(
-           D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL, &optionsExperimental, sizeof(optionsExperimental))))
-        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL(optionsExperimental);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW optionsPreview = {}; SUCCEEDED(
            device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_PREVIEW, &optionsPreview, sizeof(optionsPreview))))
