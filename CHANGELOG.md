@@ -3,7 +3,7 @@
 Changes:
 
 - Updated preview version of DirectX 12 Agility SDK to 1.620.0.
-  - Added `D3D12_FEATURE_ASYNC_COMMANDS`, `D3D12_FEATURE_D3D12_OPTIONS_MLIR`.
+  - Added `D3D12_FEATURE_ASYNC_COMMANDS`, `D3D12_FEATURE_D3D12_OPTIONS_MLIR`, `D3D12_FEATURE_LINEAR_ALGEBRA_SUPPORT`.
   - Updated `D3D12_LINEAR_ALGEBRA_DATATYPE`.
   - Removed `D3D12_FEATURE_DATA_D3D12_OPTIONS_EXPERIMENTAL`.
 - Updated retail version of DirectX 12 Agility SDK to 1.619.2. No new data to fetch.

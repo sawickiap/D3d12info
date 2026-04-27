@@ -600,6 +600,13 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_MLIR(const D3D12_FEATURE_DATA
     ReportFormatter::GetInstance().AddFieldEnum(L"MlirProgramsTier", o.MlirProgramsTier, Enum_D3D12_MLIR_PROGRAMS_TIER);
 }
 
+static void Print_D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT(const D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT& o)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT");
+    ReportFormatter::GetInstance().AddFieldEnum(
+        L"LinearAlgebraTier", o.LinearAlgebraTier, Enum_D3D12_LINEAR_ALGEBRA_TIER);
+}
+
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW(const D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW");
@@ -1278,6 +1285,11 @@ static void PrintDeviceOptions(ID3D12Device* device)
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS_MLIR optionsMlir = {}; SUCCEEDED(
            device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_MLIR, &optionsMlir, sizeof(optionsMlir))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_MLIR(optionsMlir);
+
+    if(D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT linearAlgebraSupport = {}; SUCCEEDED(
+           device->CheckFeatureSupport(D3D12_FEATURE_LINEAR_ALGEBRA_SUPPORT, &linearAlgebraSupport,
+               sizeof(linearAlgebraSupport))))
+        Print_D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT(linearAlgebraSupport);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW optionsPreview = {}; SUCCEEDED(
            device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_PREVIEW, &optionsPreview, sizeof(optionsPreview))))
