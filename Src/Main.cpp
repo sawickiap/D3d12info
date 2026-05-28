@@ -594,6 +594,38 @@ static void Print_D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT(
 #endif
 
 #ifdef USE_PREVIEW_AGILITY_SDK
+static void Print_D3D12_FEATURE_DATA_PARTIAL_GRAPHICS_PROGRAMS(
+    const D3D12_FEATURE_DATA_PARTIAL_GRAPHICS_PROGRAMS& o)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_PARTIAL_GRAPHICS_PROGRAMS");
+    ReportFormatter::GetInstance().AddFieldEnum(
+        L"PartialGraphicsProgramsTier", o.PartialGraphicsProgramsTier, Enum_D3D12_PARTIAL_GRAPHICS_PROGRAMS_TIER);
+}
+
+static void Print_D3D12_FEATURE_DATA_DUMP_FILE(const D3D12_FEATURE_DATA_DUMP_FILE& o)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_DUMP_FILE");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"Supported", o.Supported);
+    formatter.AddFieldEnum(L"DumpFileDriverTier", o.DumpFileDriverTier, Enum_D3D12_DUMP_FILE_DRIVER_TIER);
+    formatter.AddFieldFlags(L"DumpFileDriverOptionsMask", o.DumpFileDriverOptionsMask, Enum_D3D12_DUMP_FILE_DRIVER_OPTIONS);
+}
+
+static void Print_D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION(const D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION& o)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION");
+    ReportFormatter::GetInstance().AddFieldBool(L"Supported", o.Supported);
+}
+
+static void Print_D3D12_FEATURE_DATA_DEBUG_BREAK(const D3D12_FEATURE_DATA_DEBUG_BREAK& o)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_DEBUG_BREAK");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"HaltSupported", o.HaltSupported);
+    formatter.AddFieldBool(L"LiveDebuggingSupported", o.LiveDebuggingSupported);
+    formatter.AddFieldBool(L"CpuSupported", o.CpuSupported);
+}
+
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_MLIR(const D3D12_FEATURE_DATA_D3D12_OPTIONS_MLIR& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_MLIR");
@@ -615,6 +647,8 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW(const D3D12_FEATURE_D
     formatter.AddFieldUint32(L"MaxGroupSharedMemoryPerGroupCS", o.MaxGroupSharedMemoryPerGroupCS);
     formatter.AddFieldUint32(L"MaxGroupSharedMemoryPerGroupAS", o.MaxGroupSharedMemoryPerGroupAS);
     formatter.AddFieldUint32(L"MaxGroupSharedMemoryPerGroupMS", o.MaxGroupSharedMemoryPerGroupMS);
+    formatter.AddFieldBool(L"UAVOfDepthStencilSupported", o.UAVOfDepthStencilSupported);
+    formatter.AddFieldBool(L"D32S8Interleaved", o.D32S8Interleaved);
 }
 
 static void Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(
@@ -1243,6 +1277,22 @@ static void PrintDeviceOptions(ID3D12Device* device)
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW optionsPreview = {}; SUCCEEDED(
            device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_PREVIEW, &optionsPreview, sizeof(optionsPreview))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW(optionsPreview);
+
+    if(D3D12_FEATURE_DATA_PARTIAL_GRAPHICS_PROGRAMS partialGraphicsPrograms = {}; SUCCEEDED(device->CheckFeatureSupport(
+           D3D12_FEATURE_PARTIAL_GRAPHICS_PROGRAMS, &partialGraphicsPrograms, sizeof(partialGraphicsPrograms))))
+        Print_D3D12_FEATURE_DATA_PARTIAL_GRAPHICS_PROGRAMS(partialGraphicsPrograms);
+
+    if(D3D12_FEATURE_DATA_DUMP_FILE dumpFile = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_DUMP_FILE, &dumpFile, sizeof(dumpFile))))
+        Print_D3D12_FEATURE_DATA_DUMP_FILE(dumpFile);
+
+    if(D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION userDefinedAnnotation = {}; SUCCEEDED(device->CheckFeatureSupport(
+           D3D12_FEATURE_USER_DEFINED_ANNOTATION, &userDefinedAnnotation, sizeof(userDefinedAnnotation))))
+        Print_D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION(userDefinedAnnotation);
+
+    if(D3D12_FEATURE_DATA_DEBUG_BREAK debugBreak = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_DEBUG_BREAK, &debugBreak, sizeof(debugBreak))))
+        Print_D3D12_FEATURE_DATA_DEBUG_BREAK(debugBreak);
 #endif
 }
 
