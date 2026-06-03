@@ -1,3 +1,9 @@
+# Version 3.19.0 (??)
+
+Changes:
+
+- Fixed a hang with an infinite loop when passing an incorrect command-line parameter like `-help`.
+
 # Version 3.18.0 (2026-05-28)
 
 Changes:
