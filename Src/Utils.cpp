@@ -260,6 +260,7 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
         SHORT_OPT* so = FindShortOpt(m_LastArg[m_LastArgIndex]);
         if(so == NULL)
         {
+            m_InsideMultioption = false;
             m_LastOptId = 0;
             m_LastParameter.clear();
             return CmdLineParser::RESULT_ERROR;
@@ -270,6 +271,7 @@ CmdLineParser::RESULT CmdLineParser::ReadNext()
             {
                 if(!ReadNextArg(&m_LastParameter))
                 {
+                    m_InsideMultioption = false;
                     m_LastOptId = 0;
                     m_LastParameter.clear();
                     return CmdLineParser::RESULT_ERROR;

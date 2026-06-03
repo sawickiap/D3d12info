@@ -1940,14 +1940,21 @@ int wmain3(int argc, wchar_t** argv)
     // clang-format on
 
     CmdLineParser::RESULT cmdLineResult;
-    while((cmdLineResult = cmdLineParser.ReadNextOpt()) != CmdLineParser::RESULT_END)
+    while(true)
     {
-        switch(cmdLineResult)
+        cmdLineResult = cmdLineParser.ReadNextOpt();
+        if(cmdLineResult == CmdLineParser::RESULT_END)
+            break;
+
+        if(cmdLineResult == CmdLineParser::RESULT_ERROR ||
+            cmdLineResult == CmdLineParser::RESULT_PARAMETER)
         {
-        case CmdLineParser::RESULT_ERROR:
-        case CmdLineParser::RESULT_PARAMETER:
             g_ShowCommandLineSyntaxAndFail = true;
             break;
+        }
+
+        switch(cmdLineResult)
+        {
         case CmdLineParser::RESULT_OPT:
             switch(cmdLineParser.GetOptId())
             {
