@@ -16,6 +16,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CPP_FILES
     Src/AgsData.cpp
     Src/AmdDeviceInfoData.cpp
+    Src/CudaData.cpp
     Src/IntelData.cpp
     Src/Main.cpp
     Src/NvApiData.cpp
@@ -32,6 +33,7 @@ set(CPP_FILES
 set(HPP_FILES
     Src/AgsData.hpp
     Src/AmdDeviceInfoData.hpp
+    Src/CudaData.hpp
     Src/Enums.hpp
     Src/IntelData.hpp
     Src/NvApiData.hpp
@@ -78,6 +80,15 @@ if(ENABLE_NVAPI)
     endif()
 else()
     message(STATUS "NVAPI library not used.")
+endif()
+
+option(ENABLE_CUDA "Enables usage of the CUDA Driver API." ON)
+if(ENABLE_CUDA)
+    # CUDA 10.0 added cuDeviceGetLuid, used to match CUDA devices with DXGI adapters.
+    find_package(CUDAToolkit 10.0 REQUIRED)
+    message(STATUS "CUDA Driver API used (${CUDAToolkit_VERSION}).")
+else()
+    message(STATUS "CUDA Driver API not used.")
 endif()
 
 option(ENABLE_VULKAN "Enables usage of Vulkan." ON)
@@ -163,6 +174,11 @@ function(add_my_executable USE_PREVIEW_AGILITY_SDK)
         target_compile_definitions(${EXE_NAME} PRIVATE USE_NVAPI=1)
         target_include_directories(${EXE_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/Src/ThirdParty/nvapi")
         target_link_libraries(${EXE_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/Src/ThirdParty/nvapi/amd64/nvapi64.lib")
+    endif()
+
+    if(ENABLE_CUDA)
+        target_compile_definitions(${EXE_NAME} PRIVATE USE_CUDA=1)
+        target_link_libraries(${EXE_NAME} PRIVATE CUDA::cuda_driver)
     endif()
 
     if (ENABLE_VULKAN)

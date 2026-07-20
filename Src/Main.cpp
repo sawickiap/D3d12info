@@ -9,6 +9,7 @@ For more information, see files README.md, LICENSE.txt.
 */
 #include "AgsData.hpp"
 #include "AmdDeviceInfoData.hpp"
+#include "CudaData.hpp"
 #include "Enums.hpp"
 #include "IntelData.hpp"
 #include "NvApiData.hpp"
@@ -742,6 +743,9 @@ static void PrintVersionData()
     {
 #if USE_NVAPI
         NvAPI_Inititalize_RAII::PrintStaticParams();
+#endif
+#if USE_CUDA
+        Cuda_Initialize_RAII::PrintStaticParams();
 #endif
 #if USE_AGS
         AGS_Initialize_RAII::PrintStaticParams();
@@ -1716,7 +1720,8 @@ void PrintCommandLineSyntax()
 }
 
 static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter, NvAPI_Inititalize_RAII* nvApi,
-    AGS_Initialize_RAII* ags, AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk)
+    Cuda_Initialize_RAII* cuda, AGS_Initialize_RAII* ags, AmdDeviceInfo_Initialize_RAII* amdDeviceInfo,
+    Vulkan_Initialize_RAII* vk)
 {
     ReportScopeArrayItem scope;
 
@@ -1738,6 +1743,11 @@ static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter, NvAPI_Init
         {
             nvApi->PrintPhysicalGpuData(desc.AdapterLuid);
         }
+#endif
+#if USE_CUDA
+        bool useCuda = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_NVIDIA;
+        if(useCuda && cuda)
+            cuda->PrintAdapterData(desc);
 #endif
 #if USE_AGS
         bool useAGS = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_AMD;
@@ -1764,8 +1774,8 @@ static void ListAdapter(uint32_t adapterIndex, IDXGIAdapter* adapter, NvAPI_Init
     }
 }
 
-static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
-    AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk)
+static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, Cuda_Initialize_RAII* cuda,
+    AGS_Initialize_RAII* ags, AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk)
 {
     ComPtr<IDXGIAdapter> adapter;
     if(!g_WARP)
@@ -1773,7 +1783,7 @@ static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvA
         UINT adapterIndex = 0;
         while(dxgiFactory->EnumAdapters(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND)
         {
-            ListAdapter(adapterIndex, adapter.Get(), nvApi, ags, amdDeviceInfo, vk);
+            ListAdapter(adapterIndex, adapter.Get(), nvApi, cuda, ags, amdDeviceInfo, vk);
             adapter.Reset();
             ++adapterIndex;
         }
@@ -1781,11 +1791,11 @@ static void ListAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvA
     else
     {
         CHECK_HR(dxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&adapter)));
-        ListAdapter(0, adapter.Get(), nvApi, ags, amdDeviceInfo, vk);
+        ListAdapter(0, adapter.Get(), nvApi, cuda, ags, amdDeviceInfo, vk);
     }
 }
 
-int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
+int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, Cuda_Initialize_RAII* cuda, AGS_Initialize_RAII* ags,
     AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk, uint32_t& adapterIndex,
     ComPtr<IDXGIAdapter1>& adapter1)
 {
@@ -1811,6 +1821,11 @@ int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
         {
             nvApi->PrintPhysicalGpuData(desc.AdapterLuid);
         }
+#endif
+#if USE_CUDA
+        bool useCuda = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_NVIDIA;
+        if(useCuda && cuda)
+            cuda->PrintAdapterData(desc);
 #endif
 #if USE_AGS
         bool useAGS = g_ForceVendorAPI || desc.VendorId == VENDOR_ID_AMD;
@@ -1850,8 +1865,9 @@ int InspectAdapter(NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
     return programResult;
 }
 
-static int InspectAllAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
-    AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk)
+static int InspectAllAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi,
+    Cuda_Initialize_RAII* cuda, AGS_Initialize_RAII* ags, AmdDeviceInfo_Initialize_RAII* amdDeviceInfo,
+    Vulkan_Initialize_RAII* vk)
 {
     uint32_t adapterIndex = 0;
     bool anyInspected = false;
@@ -1869,7 +1885,7 @@ static int InspectAllAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII
             }
         }
 
-        int result = InspectAdapter(nvApi, ags, amdDeviceInfo, vk, adapterIndex, adapter1);
+        int result = InspectAdapter(nvApi, cuda, ags, amdDeviceInfo, vk, adapterIndex, adapter1);
         anyInspected = true;
         if(result != PROGRAM_EXIT_SUCCESS)
             return result;
@@ -1883,8 +1899,9 @@ static int InspectAllAdapters(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII
 }
 
 // adapterIndex == UINT_MAX means first non-software and non-remote adapter.
-static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, AGS_Initialize_RAII* ags,
-    AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk, uint32_t adapterIndex)
+static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nvApi, Cuda_Initialize_RAII* cuda,
+    AGS_Initialize_RAII* ags, AmdDeviceInfo_Initialize_RAII* amdDeviceInfo, Vulkan_Initialize_RAII* vk,
+    uint32_t adapterIndex)
 {
     ComPtr<IDXGIAdapter1> adapter1;
     if(g_WARP)
@@ -1910,7 +1927,7 @@ static int InspectAdapter(IDXGIFactory4* dxgiFactory, NvAPI_Inititalize_RAII* nv
 
     if(adapter1)
     {
-        return InspectAdapter(nvApi, ags, amdDeviceInfo, vk, adapterIndex, adapter1);
+        return InspectAdapter(nvApi, cuda, ags, amdDeviceInfo, vk, adapterIndex, adapter1);
     }
 
     throw std::runtime_error("No valid adapter chosen to show D3D12 device details.");
@@ -2151,6 +2168,12 @@ int wmain3(int argc, wchar_t** argv)
         nvApiObjPtr = std::make_unique<NvAPI_Inititalize_RAII>();
 #endif
 
+    std::unique_ptr<Cuda_Initialize_RAII> cudaObjPtr;
+#if USE_CUDA
+    if(!g_PureD3D12)
+        cudaObjPtr = std::make_unique<Cuda_Initialize_RAII>();
+#endif
+
     std::unique_ptr<AGS_Initialize_RAII> agsObjPtr;
 #if USE_AGS
     if(!g_PureD3D12)
@@ -2186,6 +2209,10 @@ int wmain3(int argc, wchar_t** argv)
         if(nvApiObjPtr && nvApiObjPtr->IsInitialized())
             nvApiObjPtr->PrintData();
 #endif
+#if USE_CUDA
+        if(cudaObjPtr)
+            cudaObjPtr->PrintData();
+#endif
 #if USE_AGS
         if(agsObjPtr && agsObjPtr->IsInitialized())
             agsObjPtr->PrintData();
@@ -2216,19 +2243,19 @@ int wmain3(int argc, wchar_t** argv)
         ReportScopeObjectConditional scopeObject(!g_PrintAdaptersAsArray, L"Adapter");
 
         if(g_ListAdapters)
-            ListAdapters(
-                dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(), vkObjPtr.get());
+            ListAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), cudaObjPtr.get(), agsObjPtr.get(),
+                amdDeviceInfoObjPtr.get(), vkObjPtr.get());
         else
         {
             if(g_WARP)
-                InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(),
-                    vkObjPtr.get(), UINT32_MAX);
+                InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), cudaObjPtr.get(), agsObjPtr.get(),
+                    amdDeviceInfoObjPtr.get(), vkObjPtr.get(), UINT32_MAX);
             else if(!g_ShowAllAdapters)
-                InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(),
-                    vkObjPtr.get(), adapterIndex);
+                InspectAdapter(dxgiFactory.Get(), nvApiObjPtr.get(), cudaObjPtr.get(), agsObjPtr.get(),
+                    amdDeviceInfoObjPtr.get(), vkObjPtr.get(), adapterIndex);
             else
-                InspectAllAdapters(
-                    dxgiFactory.Get(), nvApiObjPtr.get(), agsObjPtr.get(), amdDeviceInfoObjPtr.get(), vkObjPtr.get());
+                InspectAllAdapters(dxgiFactory.Get(), nvApiObjPtr.get(), cudaObjPtr.get(), agsObjPtr.get(),
+                    amdDeviceInfoObjPtr.get(), vkObjPtr.get());
         }
     }
 

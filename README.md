@@ -1,6 +1,6 @@
 # D3d12info
 
-A Windows console program that outputs all the information about the GPU (graphics chip) installed in the system, through DXGI and Direct3D 12 (D3D12) + AMD AGS, NVAPI, WinAPI, and some other sources.
+A Windows console program that outputs all the information about the GPU (graphics chip) installed in the system, through DXGI and Direct3D 12 (D3D12) + AMD AGS, NVAPI, CUDA Driver API, WinAPI, and some other sources.
 
 ![Example output](Docs/Gfx/Example_output.png "Example output")
 
@@ -39,7 +39,7 @@ Following types of information are printed by the program:
 - Basic information about the operating system, e.g. Windows version, system memory size.
 - Basic information fetched from Vulkan, focused on general GPU description and driver version.
 - On AMD GPUs: Information fetched using their AGS library and device_info library, e.g. more detailed parameters of the hardware and the availability of custom extensions like `userMarkers`, `appRegistration`, `shaderClock`.
-- On Nvidia GPUs: Information fetched using their NVAPI library, e.g. more detailed parameters of the hardware and the availability of custom extensions like `NVAPI_D3D12_RAYTRACING_CAPS_TYPE_THREAD_REORDERING`, `*OPACITY_MICROMAP`, `*DISPLACEMENT_MICROMAP`.
+- On Nvidia GPUs: Information fetched using their NVAPI library and CUDA Driver API, e.g. more detailed parameters of the hardware and the availability of custom extensions like `NVAPI_D3D12_RAYTRACING_CAPS_TYPE_THREAD_REORDERING`, `*OPACITY_MICROMAP`, `*DISPLACEMENT_MICROMAP`.
 - On Intel GPUs: Information fetched from their GPU Detect library, e.g. more detailed parameters of the hardware.
 
 Output is printed in a human-readable text format by default, but it can be switched to **JSON** format suitable for automated processing.
@@ -98,6 +98,9 @@ It uses following third-party libraries:
 - **[NVAPI](https://developer.nvidia.com/nvapi)** - custom vendor extensions to graphics APIs by Nvidia.
   - Linked via submodule.
   - Optional, controlled by Cmake variable `ENABLE_NVAPI` - on by default.
+- **[CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)** 10.0 (mostly to get LUID query API) or newer.
+  - Installed separately; it is not a submodule.
+  - Optional, controlled by Cmake variable `ENABLE_CUDA` - on by default.
 - **[Intel GPU Detect](https://github.com/GameTechDev/gpudetect)** - custom vendor extensions to graphics APIs by Intel. License: Apache 2.0.
   - Linked via submodule.
   - Optional, controlled by Cmake variable `ENABLE_INTEL_GPUDETECT` - on by default.
