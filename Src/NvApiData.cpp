@@ -582,7 +582,6 @@ There are two ways to query the list of devices:
 */
 
 static NvU32 g_LogicalGpuCount = 0;
-static NvLogicalGpuHandle g_LogicalGpuHandles[NVAPI_MAX_LOGICAL_GPUS];
 static NV_LOGICAL_GPU_DATA g_LogicalGpuData[NVAPI_MAX_LOGICAL_GPUS];
 static LUID g_LogicalGpuLuids[NVAPI_MAX_LOGICAL_GPUS];
 static NV_PHYSICAL_GPUS g_PhysicalGpus;
@@ -596,13 +595,20 @@ static wstring NvShortStringToStr(NvAPI_ShortString str)
 
 static void LoadGpus()
 {
-    if(NvAPI_EnumLogicalGPUs(g_LogicalGpuHandles, &g_LogicalGpuCount) != NVAPI_OK)
-        g_LogicalGpuCount = 0;
-    for(NvU32 i = 0; i < g_LogicalGpuCount; ++i)
+    NvU32 enumeratedGPUCount = 0;
+    NvLogicalGpuHandle logicalGpuHandles[NVAPI_MAX_LOGICAL_GPUS];
+    if(NvAPI_EnumLogicalGPUs(logicalGpuHandles, &enumeratedGPUCount) != NVAPI_OK)
+        enumeratedGPUCount = 0;
+
+    g_LogicalGpuCount = 0;
+    for(NvU32 i = 0; i < enumeratedGPUCount; ++i)
     {
-        g_LogicalGpuData[i] = { .version = NV_LOGICAL_GPU_DATA_VER, .pOSAdapterId = &g_LogicalGpuLuids[i] };
-        NvAPI_Status status = NvAPI_GPU_GetLogicalGpuInfo(g_LogicalGpuHandles[i], &g_LogicalGpuData[i]);
-        assert(status == NVAPI_OK);
+        g_LogicalGpuData[g_LogicalGpuCount] = { .version = NV_LOGICAL_GPU_DATA_VER,
+            .pOSAdapterId = &g_LogicalGpuLuids[g_LogicalGpuCount] };
+        NvAPI_Status status =
+            NvAPI_GPU_GetLogicalGpuInfo(logicalGpuHandles[g_LogicalGpuCount], &g_LogicalGpuData[g_LogicalGpuCount]);
+        if(status == NVAPI_OK)
+            ++g_LogicalGpuCount;
     }
 
     // Success in fetching this structure is optional.

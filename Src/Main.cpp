@@ -155,6 +155,13 @@ static wstring LuidToStr(LUID value)
     return wstring{ s };
 }
 
+static void Print_D3D12CreateDevice_ReturnValue(HRESULT hr)
+{
+    ReportScopeObject scope(L"D3D12CreateDevice");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldEnum(L"ReturnValue", hr, Enum_DXGI_STATUS);
+}
+
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(const D3D12_FEATURE_DATA_D3D12_OPTIONS& options)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS");
@@ -1512,14 +1519,17 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
 #else
         hr = g_D3D12CreateDevice(adapter1, MIN_FEATURE_LEVEL, IID_PPV_ARGS(&device));
 #endif
-        if(hr == 0x887E0003)
+
+        if(hr == D3D12_ERROR_INVALID_REDIST)
             throw std::runtime_error(
                 "D3D12CreateDevice returned 0x887E0003. Make sure Developer Mode is enabled in Windows settings.");
-        CHECK_HR(hr);
-    }
 
-    if(!device)
-        return PROGRAM_EXIT_ERROR_D3D12;
+        if(FAILED(hr))
+        {
+            Print_D3D12CreateDevice_ReturnValue(hr);
+            return PROGRAM_EXIT_SUCCESS;
+        }
+    }
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options))))
