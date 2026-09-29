@@ -2,16 +2,13 @@
 
 Changes:
 
+- Updated DirectX 12 Agility SDK retail to 1.619.6. (Developed by @Dragon31337 as #48)
+  - Reported shader-cache ABI support in both stable and preview builds, including the adapter family used by the offline compiler.
+  - Reported shader-cache ABI bounds as both the integer values accepted by the offline compiler and formatted four-component versions. (TBD FIX THIS)
+- Removed `D3D12_FEATURE_DATA_D3D12_OPTIONS9::WaveMMATier` as this is an abandoned feature.
 - Improved handling of non-D3D12 capable GPUs - the app now prints the result of `D3D12CreateDevice` instead of failing. (Developed by @Devaniti as #47)
 - Fixed handling of NVAPI on Nvidia drivers before 421. (Developed by @Devaniti as #47)
-- Removed `D3D12_FEATURE_DATA_D3D12_OPTIONS9::WaveMMATier` as this is an abandoned feature.
-- Updated DirectX 12 Agility SDK from 1.619.5 to 1.619.6 (the preview SDK remains at 1.721.3-preview).
-  - Reported shader-cache ABI support in both stable and preview builds, including the adapter family used by the offline compiler.
-  - Reported shader-cache ABI bounds as both the integer values accepted by the offline compiler and formatted four-component versions.
-- Updated NVAPI from R610 to R615-Developer.
-  - Added reporting for connected monitor capabilities, including the new basic eDP classification.
-- Updated AMD AGS from 6.3.0 to 6.3.1.
-- Updated Vulkan-Headers from 1.4.358 to 1.4.364.
+- Updated NVAPI to R615-Developer, AMD AGS to 6.3.1, Vulkan-Headers to 1.4.364. (Developed by @Dragon31337 as #48)
 
 Compiled with DirectX 12 Agility SDK 1.619.6 ("D3d12info.exe") / 1.721.3-preview ("D3d12info\_preview.exe"), AMD AGS 6.3.1, AMD device\_info v1.0 from 2026-06-02, NVAPI R615, Intel GPU Detect from 2025-04-28 (commit hash `649cf14acd63e1d7ad7e30d3c558fb447f9f8c5b`).
 
