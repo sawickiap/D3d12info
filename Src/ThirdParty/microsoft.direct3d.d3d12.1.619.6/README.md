@@ -13,6 +13,11 @@ The included licenses apply to the following files:
 
 ## Changelog
 
+### Version 1.619.6:
+- D3D12StateObjectCompiler.exe `--processes` option for multi-process compile/replay rather than multi-threaded.
+- State Object DataBase (SODB) writing uses deterministic hash keys for PSOs/SOs, regardless of subobject ordering and/or default PSO subobject presence.
+- D3D12StateObjectCompiler.exe `merge-sodb` and SODB writer do not treat identical insertion as an error, unless an existing group key is being replaced to point to a different PSO/SO.
+
 ### Version 1.619.5:
 - Adds telemetry/ETW logging in the case D3D12 Video Encode support is not available due to exclusive engine access taken by another actor
 - Debug layer fixes:

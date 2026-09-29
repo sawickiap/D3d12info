@@ -19,7 +19,7 @@ For more information, see files README.md, LICENSE.txt.
 #include <nvapi.h>
 
 // Don't forget to update when linking with a new version!
-static const wchar_t* NVAPI_COMPILED_VERSION = L"R610";
+static const wchar_t* NVAPI_COMPILED_VERSION = L"R615";
 
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE
@@ -530,6 +530,19 @@ ENUM_BEGIN(NVAPI_NVLINK_STATUS_LOOP_PROPERTY)
     ENUM_ITEM(NVAPI_NVLINK_STATUS_LOOP_PROPERTY_LOOPOUT)
 ENUM_END(NVAPI_NVLINK_STATUS_LOOP_PROPERTY)
 
+ENUM_BEGIN(NV_MONITOR_CONN_TYPE)
+    ENUM_ITEM(NV_MONITOR_CONN_TYPE_UNINITIALIZED)
+    ENUM_ITEM(NV_MONITOR_CONN_TYPE_VGA)
+    ENUM_ITEM(NV_MONITOR_CONN_TYPE_COMPONENT)
+    ENUM_ITEM(NV_MONITOR_CONN_TYPE_SVIDEO)
+    ENUM_ITEM(NV_MONITOR_CONN_TYPE_HDMI)
+    ENUM_ITEM(NV_MONITOR_CONN_TYPE_DVI)
+    ENUM_ITEM(NV_MONITOR_CONN_TYPE_LVDS)
+    ENUM_ITEM(NV_MONITOR_CONN_TYPE_DP)
+    ENUM_ITEM(NV_MONITOR_CONN_TYPE_COMPOSITE)
+    ENUM_ITEM(NV_MONITOR_CONN_TYPE_UNKNOWN)
+ENUM_END(NV_MONITOR_CONN_TYPE)
+
 ENUM_BEGIN(NV_NGX_DRIVER_FEATURE_ID)
     ENUM_ITEM(NV_NGX_DRIVER_FEATURE_ID_SET_FLIP_CONFIG_V2)
     ENUM_ITEM(NV_NGX_DRIVER_FEATURE_ID_FRAME_PRESENT_NOTIFY_HYBRID)
@@ -655,6 +668,45 @@ static bool FindPhysicalGpuAdapterType(NvPhysicalGpuHandle physicalGpuHandle, NV
         }
     }
     return false;
+}
+
+static void PrintConnectedMonitorCapabilities(NvPhysicalGpuHandle gpu)
+{
+    NvU32 displayCount = 0;
+    if(NvAPI_GPU_GetConnectedDisplayIds(gpu, nullptr, &displayCount, 0) != NVAPI_OK || displayCount == 0)
+        return;
+
+    // NVAPI requires the version field to be initialized in every array element
+    // before the second call populates the connected display identifiers.
+    std::vector<NV_GPU_DISPLAYIDS> displayIds(displayCount);
+    for(NV_GPU_DISPLAYIDS& displayId : displayIds)
+        displayId.version = NV_GPU_DISPLAYIDS_VER;
+
+    if(NvAPI_GPU_GetConnectedDisplayIds(gpu, displayIds.data(), &displayCount, 0) != NVAPI_OK)
+        return;
+
+    ReportScopeArrayConditional scope(L"NvAPI_DISP_GetMonitorCapabilities");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    for(NvU32 displayIndex = 0; displayIndex < displayCount; ++displayIndex)
+    {
+        NV_MONITOR_CAPABILITIES caps = { NV_MONITOR_CAPABILITIES_VER };
+        caps.infoType = NV_MONITOR_CAPS_TYPE_GENERIC;
+        if(NvAPI_DISP_GetMonitorCapabilities(displayIds[displayIndex].displayId, &caps) != NVAPI_OK ||
+            !caps.bIsValidInfo)
+            continue;
+
+        scope.Enable();
+        ReportScopeArrayItem itemScope;
+        formatter.AddFieldHex32(L"displayId", displayIds[displayIndex].displayId);
+        formatter.AddFieldEnum(L"connectorType", caps.connectorType, Enum_NV_MONITOR_CONN_TYPE);
+        formatter.AddFieldBool(L"supportVRR", caps.data.caps.supportVRR != 0);
+        formatter.AddFieldBool(L"supportULMB", caps.data.caps.supportULMB != 0);
+        formatter.AddFieldBool(L"isTrueGsync", caps.data.caps.isTrueGsync != 0);
+        formatter.AddFieldBool(L"isRLACapable", caps.data.caps.isRLACapable != 0);
+        formatter.AddFieldBool(L"currentlyCapableOfVRR", caps.data.caps.currentlyCapableOfVRR != 0);
+        formatter.AddFieldBool(L"isBasicVRR", caps.data.caps.isBasicVRR != 0);
+        formatter.AddFieldBool(L"isBasicEdp", caps.data.caps.isBasicEdp != 0);
+    }
 }
 
 static void PrintCooperativeVectorProperty(size_t index, const NVAPI_COOPERATIVE_VECTOR_PROPERTIES& props)
@@ -1187,6 +1239,8 @@ void NvAPI_Inititalize_RAII::PrintPhysicalGpuData(const LUID& adapterLuid)
                 overclockStatus.bOverclockingDetected != 0);
         }
     }
+
+    PrintConnectedMonitorCapabilities(gpu);
 
     {
         NVLINK_GET_CAPS_EX caps = { NVLINK_GET_CAPS_EX_VER };
