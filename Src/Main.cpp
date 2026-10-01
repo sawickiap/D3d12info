@@ -567,32 +567,18 @@ static void Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(const D3D12_FEATURE_DATA_TI
     ReportFormatter::GetInstance().AddFieldEnum(L"SupportTier", o.SupportTier, Enum_D3D12_TIGHT_ALIGNMENT_TIER);
 }
 
-static std::wstring MicrosoftVersionToString(uint64_t value)
-{
-    const uint64_t major = value >> 48;
-    const uint64_t minor = (value >> 32) & 0xFFFF;
-    const uint64_t build = (value >> 16) & 0xFFFF;
-    const uint64_t revision = value & 0xFFFF;
-    return std::format(L"{}.{}.{}.{}", major, minor, build, revision);
-}
-
-// Shader cache ABI support is exposed by both stable and preview Agility SDK headers.
 static void Print_D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT(
     const D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT& shaderCacheABISupport)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT");
-    ReportFormatter& formatter = ReportFormatter::GetInstance();
-    formatter.AddFieldString(L"szAdapterFamily", shaderCacheABISupport.szAdapterFamily);
-
-    // ABI versions are UINT64 compiler inputs. Also provide the four-component interpretation for readability.
-    formatter.AddFieldUint64(L"MinimumABISupportVersion", shaderCacheABISupport.MinimumABISupportVersion);
-    formatter.AddFieldString(L"MinimumABISupportVersionFormatted",
-        MicrosoftVersionToString(shaderCacheABISupport.MinimumABISupportVersion));
-    formatter.AddFieldUint64(L"MaximumABISupportVersion", shaderCacheABISupport.MaximumABISupportVersion);
-    formatter.AddFieldString(L"MaximumABISupportVersionFormatted",
-        MicrosoftVersionToString(shaderCacheABISupport.MaximumABISupportVersion));
-    formatter.AddFieldMicrosoftVersion(L"CompilerVersion", shaderCacheABISupport.CompilerVersion.Version);
-    formatter.AddFieldMicrosoftVersion(
+    ReportFormatter::GetInstance().AddFieldString(L"szAdapterFamily", shaderCacheABISupport.szAdapterFamily);
+    ReportFormatter::GetInstance().AddFieldMicrosoftVersion(
+        L"MinimumABISupportVersion", shaderCacheABISupport.MinimumABISupportVersion);
+    ReportFormatter::GetInstance().AddFieldMicrosoftVersion(
+        L"MaximumABISupportVersion", shaderCacheABISupport.MaximumABISupportVersion);
+    ReportFormatter::GetInstance().AddFieldMicrosoftVersion(
+        L"CompilerVersion", shaderCacheABISupport.CompilerVersion.Version);
+    ReportFormatter::GetInstance().AddFieldMicrosoftVersion(
         L"ApplicationProfileVersion", shaderCacheABISupport.ApplicationProfileVersion.Version);
 }
 

@@ -1,10 +1,9 @@
-# Version 3.20.0 (TBD)
+# Version 3.20.0 (2026-10-01)
 
 Changes:
 
 - Updated DirectX 12 Agility SDK retail to 1.619.6. (Developed by @Dragon31337 as #48)
   - Reported shader-cache ABI support in both stable and preview builds, including the adapter family used by the offline compiler.
-  - Reported shader-cache ABI bounds as both the integer values accepted by the offline compiler and formatted four-component versions. (TBD FIX THIS)
 - Removed `D3D12_FEATURE_DATA_D3D12_OPTIONS9::WaveMMATier` as this is an abandoned feature.
 - Improved handling of non-D3D12 capable GPUs - the app now prints the result of `D3D12CreateDevice` instead of failing. (Developed by @Devaniti as #47)
 - Fixed handling of NVAPI on Nvidia drivers before 421. (Developed by @Devaniti as #47)
