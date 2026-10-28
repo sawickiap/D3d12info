@@ -1061,12 +1061,12 @@ enum class FormatSupportResult
     Crashed
 };
 
-static FormatSupportResult CheckFormatSupport(ID3D12Device* device, D3D12_FEATURE_DATA_FORMAT_SUPPORT& formatSupport)
+static FormatSupportResult CheckFormatSupport(ID3D12Device16* device, D3D12_FEATURE_DATA_FORMAT_SUPPORT& formatSupport)
 {
     __try
     {
         const HRESULT hr =
-            device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, UINT(sizeof formatSupport));
+            device->CheckFeatureSupport1(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, UINT(sizeof formatSupport), D3D12SDKVersion);
         return SUCCEEDED(hr) ? FormatSupportResult::Ok : FormatSupportResult::Failed;
     }
     // This is needed because latest (as of November 2023) AMD drivers crash when calling:
@@ -1077,7 +1077,7 @@ static FormatSupportResult CheckFormatSupport(ID3D12Device* device, D3D12_FEATUR
     }
 }
 
-static void PrintFormatInformation(ID3D12Device* device)
+static void PrintFormatInformation(ID3D12Device16* device)
 {
     ReportScopeObject scope(L"Formats");
     ReportFormatter& formatter = ReportFormatter::GetInstance();
@@ -1096,8 +1096,8 @@ static void PrintFormatInformation(ID3D12Device* device)
         if(formatSupportResult == FormatSupportResult::Crashed)
         {
             ErrorPrinter::PrintFormat(
-                L"ERROR: ID3D12Device::CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, {}) crashed.\n",
-                std::make_wformat_args(name));
+                L"ERROR: ID3D12Device16::CheckFeatureSupport1(D3D12_FEATURE_FORMAT_SUPPORT, {}, SDKVersion={}) crashed.\n",
+                std::make_wformat_args(name, D3D12SDKVersion));
             break;
         }
 
@@ -1113,8 +1113,8 @@ static void PrintFormatInformation(ID3D12Device* device)
             msQualityLevels.Format = format;
             for(msQualityLevels.SampleCount = 1;; msQualityLevels.SampleCount *= 2)
             {
-                if(SUCCEEDED(device->CheckFeatureSupport(
-                       D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &msQualityLevels, UINT(sizeof msQualityLevels))) &&
+                if(SUCCEEDED(device->CheckFeatureSupport1(
+                       D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &msQualityLevels, UINT(sizeof msQualityLevels), D3D12SDKVersion)) &&
                     msQualityLevels.NumQualityLevels > 0)
                 {
                     if(IsJsonOutput())
@@ -1139,7 +1139,7 @@ static void PrintFormatInformation(ID3D12Device* device)
         }
 
         formatInfo.Format = format;
-        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &formatInfo, UINT(sizeof formatInfo))))
+        if(SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_FORMAT_INFO, &formatInfo, UINT(sizeof formatInfo), D3D12SDKVersion)))
         {
             scope2.Enable();
             formatter.AddFieldUint32(L"PlaneCount", formatInfo.PlaneCount);
@@ -1168,179 +1168,179 @@ void DetectTranslationLayersDevice(ID3D12Device* device)
     }
 }
 
-static void PrintDeviceOptions(ID3D12Device* device)
+static void PrintDeviceOptions(ID3D12Device16* device)
 {
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS1 options1 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS1, &options1, sizeof(options1), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS1(options1);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS2 options2 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS2(options2);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS3(options3);
 
     if(D3D12_FEATURE_DATA_EXISTING_HEAPS existingHeaps = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeaps, sizeof(existingHeaps))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_EXISTING_HEAPS, &existingHeaps, sizeof(existingHeaps), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(existingHeaps);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS4 options4 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4, &options4, sizeof(options4))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS4, &options4, sizeof(options4), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS4(options4);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS5, &options5, sizeof(options5), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS5(options5);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS6 options6 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &options6, sizeof(options6))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS6, &options6, sizeof(options6), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS6(options6);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS7 options7 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS7(options7);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS8 options8 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS8, &options8, sizeof(options8))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS8, &options8, sizeof(options8), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS8(options8);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS9 options9 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS9, &options9, sizeof(options9))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS9, &options9, sizeof(options9), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS9(options9);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS10 options10 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS10, &options10, sizeof(options10))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS10, &options10, sizeof(options10), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS10(options10);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS11 options11 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS11, &options11, sizeof(options11))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS11, &options11, sizeof(options11), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS11(options11);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS12 options12 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS12, &options12, sizeof(options12))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS12, &options12, sizeof(options12), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS12(options12);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS13 options13 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS13, &options13, sizeof(options13))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS13, &options13, sizeof(options13), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS13(options13);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS14 options14 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS14, &options14, sizeof(options14))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS14, &options14, sizeof(options14), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS14(options14);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS15 options15 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS15, &options15, sizeof(options15))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS15, &options15, sizeof(options15), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS15(options15);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS16 options16 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS16, &options16, sizeof(options16), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS16(options16);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS17 options17 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS17, &options17, sizeof(options17))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS17, &options17, sizeof(options17), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS17(options17);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS18 options18 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS18, &options18, sizeof(options18))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS18, &options18, sizeof(options18), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS18(options18);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS19 options19 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS19, &options19, sizeof(options19))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS19, &options19, sizeof(options19), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS19(options19);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS20 options20 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS20, &options20, sizeof(options20))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS20, &options20, sizeof(options20), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS20(options20);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS21 options21 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS21, &options21, sizeof(options21))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS21, &options21, sizeof(options21), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS21(options21);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS22 options22 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS22, &options22, sizeof(options22))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS22, &options22, sizeof(options22), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS22(options22);
 
     if(D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED bytecodeBypassHashSupported = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_BYTECODE_BYPASS_HASH_SUPPORTED,
-            &bytecodeBypassHashSupported, sizeof(bytecodeBypassHashSupported))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_BYTECODE_BYPASS_HASH_SUPPORTED,
+            &bytecodeBypassHashSupported, sizeof(bytecodeBypassHashSupported), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_BYTECODE_BYPASS_HASH_SUPPORTED(bytecodeBypassHashSupported);
 
     if(D3D12_FEATURE_DATA_TIGHT_ALIGNMENT tightAlignment = {}; SUCCEEDED(
-           device->CheckFeatureSupport(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &tightAlignment, sizeof(tightAlignment))))
+           device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_TIGHT_ALIGNMENT, &tightAlignment, sizeof(tightAlignment), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_TIGHT_ALIGNMENT(tightAlignment);
 
-    if(D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT shaderCacheABISupport = {}; SUCCEEDED(device->CheckFeatureSupport(
-           D3D12_FEATURE_SHADER_CACHE_ABI_SUPPORT, &shaderCacheABISupport, sizeof(shaderCacheABISupport))))
+    if(D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT shaderCacheABISupport = {}; SUCCEEDED(device->CheckFeatureSupport1(
+           D3D12_FEATURE_SHADER_CACHE_ABI_SUPPORT, &shaderCacheABISupport, sizeof(shaderCacheABISupport), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT(shaderCacheABISupport);
 
 #ifdef USE_PREVIEW_AGILITY_SDK
-    if(D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS groupings = {}; SUCCEEDED(device->CheckFeatureSupport(
-           D3D12_FEATURE_HARDWARE_SCHEDULING_QUEUE_GROUPINGS, &groupings, sizeof(groupings))))
+    if(D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS groupings = {}; SUCCEEDED(device->CheckFeatureSupport1(
+           D3D12_FEATURE_HARDWARE_SCHEDULING_QUEUE_GROUPINGS, &groupings, sizeof(groupings), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(groupings);
 
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW optionsPreview = {}; SUCCEEDED(
-           device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_PREVIEW, &optionsPreview, sizeof(optionsPreview))))
+           device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS_PREVIEW, &optionsPreview, sizeof(optionsPreview), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW(optionsPreview);
 #endif
 
 #if DIRECT3D_RAYTRACING2
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2 optionsRaytracing2 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_RAYTRACING2,
-            &optionsRaytracing2, sizeof(optionsRaytracing2))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS_RAYTRACING2,
+            &optionsRaytracing2, sizeof(optionsRaytracing2), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2(optionsRaytracing2);
 #endif
 
-    if(D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION userDefinedAnnotation = {}; SUCCEEDED(device->CheckFeatureSupport(
-           D3D12_FEATURE_USER_DEFINED_ANNOTATION, &userDefinedAnnotation, sizeof(userDefinedAnnotation))))
+    if(D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION userDefinedAnnotation = {}; SUCCEEDED(device->CheckFeatureSupport1(
+           D3D12_FEATURE_USER_DEFINED_ANNOTATION, &userDefinedAnnotation, sizeof(userDefinedAnnotation), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION(userDefinedAnnotation);
 
 #if DIRECT3D_DEBUG_BREAK
     if(D3D12_FEATURE_DATA_DEBUG_BREAK debugBreak = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_DEBUG_BREAK, &debugBreak, sizeof(debugBreak))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_DEBUG_BREAK, &debugBreak, sizeof(debugBreak), D3D12SDKVersion)))
     {
         Print_D3D12_FEATURE_DATA_DEBUG_BREAK(debugBreak);
     }
 #endif
 
     if(D3D12_FEATURE_DATA_DUMP_FILE dumpFile = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_DUMP_FILE, &dumpFile, sizeof(dumpFile))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_DUMP_FILE, &dumpFile, sizeof(dumpFile), D3D12SDKVersion)))
     {
         Print_D3D12_FEATURE_DATA_DUMP_FILE(dumpFile);
     }
 
 #if DIRECT3D_LINEAR_ALGEBRA
     if(D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT linearAlgebraSupport = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_LINEAR_ALGEBRA_SUPPORT, &linearAlgebraSupport, sizeof(linearAlgebraSupport))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_LINEAR_ALGEBRA_SUPPORT, &linearAlgebraSupport, sizeof(linearAlgebraSupport), D3D12SDKVersion)))
     {
         Print_D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT(linearAlgebraSupport);
     }
 #endif
 
     if(D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_SUPPORT mlirComputeGraphSupport = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_MLIR_COMPUTE_GRAPH_SUPPORT,
-            &mlirComputeGraphSupport, sizeof(mlirComputeGraphSupport))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_MLIR_COMPUTE_GRAPH_SUPPORT,
+            &mlirComputeGraphSupport, sizeof(mlirComputeGraphSupport), D3D12SDKVersion)))
     {
         Print_D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_SUPPORT(mlirComputeGraphSupport);
     }
 
     D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_VERSION mlirComputeGraphVersion = {};
     mlirComputeGraphVersion.HighestVersion.Version = UINT64_MAX;
-    if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_MLIR_COMPUTE_GRAPH_VERSION,
-           &mlirComputeGraphVersion, sizeof(mlirComputeGraphVersion))))
+    if(SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_MLIR_COMPUTE_GRAPH_VERSION,
+           &mlirComputeGraphVersion, sizeof(mlirComputeGraphVersion), D3D12SDKVersion)))
     {
         Print_D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_VERSION(mlirComputeGraphVersion);
     }
 
     if(D3D12_FEATURE_DATA_PARTIAL_GRAPHICS_PROGRAMS partialGraphicsPrograms = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_PARTIAL_GRAPHICS_PROGRAMS, &partialGraphicsPrograms, sizeof(partialGraphicsPrograms))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_PARTIAL_GRAPHICS_PROGRAMS, &partialGraphicsPrograms, sizeof(partialGraphicsPrograms), D3D12SDKVersion)))
     {
         Print_D3D12_FEATURE_DATA_PARTIAL_GRAPHICS_PROGRAMS(partialGraphicsPrograms);
     }
 
     if(D3D12_FEATURE_DATA_EXPLICIT_PSDBS explicitPsdbs = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_EXPLICIT_PSDBS, &explicitPsdbs, sizeof(explicitPsdbs))))
+        SUCCEEDED(device->CheckFeatureSupport1(D3D12_FEATURE_EXPLICIT_PSDBS, &explicitPsdbs, sizeof(explicitPsdbs), D3D12SDKVersion)))
     {
         Print_D3D12_FEATURE_DATA_EXPLICIT_PSDBS(explicitPsdbs);
     }
@@ -1426,7 +1426,7 @@ static void PrintMetaCommands(ID3D12Device5* device5)
         PrintMetaCommand(device5, i, descs[i]);
 }
 
-static void PrintCommandQueuePriorities(ID3D12Device* device)
+static void PrintCommandQueuePriorities(ID3D12Device16* device)
 {
     D3D12_COMMAND_QUEUE_PRIORITY cmdQueuePriorities[] = { D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
         D3D12_COMMAND_QUEUE_PRIORITY_HIGH, D3D12_COMMAND_QUEUE_PRIORITY_GLOBAL_REALTIME };
@@ -1440,8 +1440,8 @@ static void PrintCommandQueuePriorities(ID3D12Device* device)
             D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY commandQueuePriority = {};
             commandQueuePriority.CommandListType = COMMAND_LIST_TYPES[i];
             commandQueuePriority.Priority = COMMAND_QUEUE_PRIORITIES[j];
-            if(FAILED(device->CheckFeatureSupport(
-                   D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &commandQueuePriority, sizeof(commandQueuePriority))))
+            if(FAILED(device->CheckFeatureSupport1(
+                   D3D12_FEATURE_COMMAND_QUEUE_PRIORITY, &commandQueuePriority, sizeof(commandQueuePriority), D3D12SDKVersion)))
                 return;
 
             queuePrioritySupport[i][j] = commandQueuePriority.PriorityForTypeIsSupported;
@@ -1451,7 +1451,7 @@ static void PrintCommandQueuePriorities(ID3D12Device* device)
     Print_D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY(queuePrioritySupport);
 }
 
-static void PrintBarrierLayouts(ID3D12Device* device)
+static void PrintBarrierLayouts(ID3D12Device16* device)
 {
     std::array<std::array<bool, BARRIER_LAYOUTS_COUNT>, COMMAND_LIST_TYPES_COUNT> barrierLayoutSupport = {};
 
@@ -1462,7 +1462,7 @@ static void PrintBarrierLayouts(ID3D12Device* device)
             D3D12_FEATURE_DATA_BARRIER_LAYOUT barrierLayout = {};
             barrierLayout.CommandListType = COMMAND_LIST_TYPES[i];
             barrierLayout.Layout = D3D12_BARRIER_LAYOUT(BARRIER_LAYOUTS[j]);
-            if(FAILED(device->CheckFeatureSupport(D3D12_FEATURE_BARRIER_LAYOUT, &barrierLayout, sizeof(barrierLayout))))
+            if(FAILED(device->CheckFeatureSupport1(D3D12_FEATURE_BARRIER_LAYOUT, &barrierLayout, sizeof(barrierLayout), D3D12SDKVersion)))
                 return;
             barrierLayoutSupport[i][j] = barrierLayout.Supported;
         }
@@ -1490,7 +1490,7 @@ static void Print_D3D12_FEATURE_DATA_FENCE_BARRIERS(
     }
 }
 
-static void PrintFenceBarriers(ID3D12Device* device)
+static void PrintFenceBarriers(ID3D12Device16* device)
 {
     std::array<D3D12_FEATURE_DATA_FENCE_BARRIERS, COMMAND_LIST_TYPES_COUNT> fenceBarriers = {};
 
@@ -1498,7 +1498,7 @@ static void PrintFenceBarriers(ID3D12Device* device)
     {
         fenceBarriers[i] = {};
         fenceBarriers[i].CommandListType = COMMAND_LIST_TYPES[i];
-        if(FAILED(device->CheckFeatureSupport(D3D12_FEATURE_FENCE_BARRIERS, &fenceBarriers[i], sizeof(fenceBarriers[i]))))
+        if(FAILED(device->CheckFeatureSupport1(D3D12_FEATURE_FENCE_BARRIERS, &fenceBarriers[i], sizeof(fenceBarriers[i]), D3D12SDKVersion)))
             return;
     }
 
@@ -1544,13 +1544,16 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         }
     }
 
+    ComPtr<ID3D12Device16> device16;
+    CHECK_HR(device->QueryInterface(IID_PPV_ARGS(&device16)));
+
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options))))
+        SUCCEEDED(device16->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS(options);
 
     if(D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT gpuVirtualAddressSupport = {};
-        SUCCEEDED(device->CheckFeatureSupport(
-            D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &gpuVirtualAddressSupport, sizeof(gpuVirtualAddressSupport))))
+        SUCCEEDED(device16->CheckFeatureSupport1(
+            D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &gpuVirtualAddressSupport, sizeof(gpuVirtualAddressSupport), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT(gpuVirtualAddressSupport);
 
     /*
@@ -1566,7 +1569,7 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
         for(size_t enumItemIndex = _countof(Enum_D3D_SHADER_MODEL) - 1; enumItemIndex--;)
         {
             shaderModel.HighestShaderModel = D3D_SHADER_MODEL(Enum_D3D_SHADER_MODEL[enumItemIndex].m_Value);
-            if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel))))
+            if(SUCCEEDED(device16->CheckFeatureSupport1(D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel), D3D12SDKVersion)))
             {
                 Print_D3D12_FEATURE_DATA_SHADER_MODEL(shaderModel);
                 break;
@@ -1575,64 +1578,64 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     }
 
     if(D3D12_FEATURE_DATA_ROOT_SIGNATURE rootSignature = { .HighestVersion = HIGHEST_ROOT_SIGNATURE_VERSION };
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &rootSignature, sizeof(rootSignature))))
+        SUCCEEDED(device16->CheckFeatureSupport1(D3D12_FEATURE_ROOT_SIGNATURE, &rootSignature, sizeof(rootSignature), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_ROOT_SIGNATURE(rootSignature);
 
     if(D3D12_FEATURE_DATA_ARCHITECTURE1 architecture1 = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE1, &architecture1, sizeof(architecture1))))
+        SUCCEEDED(device16->CheckFeatureSupport1(D3D12_FEATURE_ARCHITECTURE1, &architecture1, sizeof(architecture1), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_ARCHITECTURE1(architecture1);
     else
     {
         if(D3D12_FEATURE_DATA_ARCHITECTURE architecture = {};
-            SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &architecture, sizeof(architecture))))
+            SUCCEEDED(device16->CheckFeatureSupport1(D3D12_FEATURE_ARCHITECTURE, &architecture, sizeof(architecture), D3D12SDKVersion)))
             Print_D3D12_FEATURE_DATA_ARCHITECTURE(architecture);
     }
 
     {
         D3D12_FEATURE_DATA_FEATURE_LEVELS featureLevels = { _countof(FEATURE_LEVELS_ARRAY), FEATURE_LEVELS_ARRAY,
             MAX_FEATURE_LEVEL };
-        if(SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &featureLevels, sizeof(featureLevels))))
+        if(SUCCEEDED(device16->CheckFeatureSupport1(D3D12_FEATURE_FEATURE_LEVELS, &featureLevels, sizeof(featureLevels), D3D12SDKVersion)))
             Print_D3D12_FEATURE_DATA_FEATURE_LEVELS(featureLevels);
     }
 
     if(D3D12_FEATURE_DATA_SHADER_CACHE shaderCache = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_SHADER_CACHE, &shaderCache, sizeof(shaderCache))))
+        SUCCEEDED(device16->CheckFeatureSupport1(D3D12_FEATURE_SHADER_CACHE, &shaderCache, sizeof(shaderCache), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_SHADER_CACHE(shaderCache);
 
-    PrintCommandQueuePriorities(device.Get());
+    PrintCommandQueuePriorities(device16.Get());
 
     if(D3D12_FEATURE_DATA_SERIALIZATION serialization = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_SERIALIZATION, &serialization, sizeof(serialization))))
+        SUCCEEDED(device16->CheckFeatureSupport1(D3D12_FEATURE_SERIALIZATION, &serialization, sizeof(serialization), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_SERIALIZATION(serialization);
 
     if(D3D12_FEATURE_DATA_CROSS_NODE crossNode = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_CROSS_NODE, &crossNode, sizeof(crossNode))))
+        SUCCEEDED(device16->CheckFeatureSupport1(D3D12_FEATURE_CROSS_NODE, &crossNode, sizeof(crossNode), D3D12SDKVersion)))
         Print_D3D12_FEATURE_CROSS_NODE(crossNode);
 
     if(D3D12_FEATURE_DATA_PREDICATION predication = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_PREDICATION, &predication, sizeof(predication))))
+        SUCCEEDED(device16->CheckFeatureSupport1(D3D12_FEATURE_PREDICATION, &predication, sizeof(predication), D3D12SDKVersion)))
         Print_D3D12_FEATURE_PREDICATION(predication);
 
     if(D3D12_FEATURE_DATA_HARDWARE_COPY hardwareCopy = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_HARDWARE_COPY, &hardwareCopy, sizeof(hardwareCopy))))
+        SUCCEEDED(device16->CheckFeatureSupport1(D3D12_FEATURE_HARDWARE_COPY, &hardwareCopy, sizeof(hardwareCopy), D3D12SDKVersion)))
         Print_D3D12_FEATURE_HARDWARE_COPY(hardwareCopy);
 
     if(D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE appSpecificDriverState = {};
-        SUCCEEDED(device->CheckFeatureSupport(
-            D3D12_FEATURE_APPLICATION_SPECIFIC_DRIVER_STATE, &appSpecificDriverState, sizeof(appSpecificDriverState))))
+        SUCCEEDED(device16->CheckFeatureSupport1(
+            D3D12_FEATURE_APPLICATION_SPECIFIC_DRIVER_STATE, &appSpecificDriverState, sizeof(appSpecificDriverState), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE(appSpecificDriverState);
 
-    PrintBarrierLayouts(device.Get());
+    PrintBarrierLayouts(device16.Get());
 
     if(D3D12_FEATURE_DATA_ASYNC_COMMANDS asyncCommands = {};
-        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_ASYNC_COMMANDS, &asyncCommands, sizeof(asyncCommands))))
+        SUCCEEDED(device16->CheckFeatureSupport1(D3D12_FEATURE_ASYNC_COMMANDS, &asyncCommands, sizeof(asyncCommands), D3D12SDKVersion)))
         Print_D3D12_FEATURE_DATA_ASYNC_COMMANDS(asyncCommands);
 
-    PrintFenceBarriers(device.Get());
+    PrintFenceBarriers(device16.Get());
 
     // TODO: D3D12_FEATURE_PLACED_RESOURCE_SUPPORT_INFO - What is this? How to query it? What structure to use?
 
-    PrintDeviceOptions(device.Get());
+    PrintDeviceOptions(device16.Get());
 
     PrintDescriptorSizes(device.Get());
 
@@ -1652,7 +1655,10 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
     DetectTranslationLayersDevice(device.Get());
 
     if(g_PrintFormats)
-        PrintFormatInformation(device.Get());
+        PrintFormatInformation(device16.Get());
+
+    // Release the additional interface before AGS destroys the device.
+    device16.Reset();
 
 #if USE_AGS
     if(useAGS && ags && ags->IsInitialized())
