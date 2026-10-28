@@ -598,7 +598,9 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW(const D3D12_FEATURE_D
     formatter.AddFieldBool(L"UAVOfDepthStencilSupported", o.UAVOfDepthStencilSupported);
     formatter.AddFieldBool(L"D32S8Interleaved", o.D32S8Interleaved);
 }
+#endif
 
+#if DIRECT3D_RAYTRACING2
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2(const D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2");
@@ -606,7 +608,9 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2(const D3D12_FEATU
     formatter.AddFieldBool(L"ClustersAndPTLASSupported", o.ClustersAndPTLASSupported);
     formatter.AddFieldBool(L"TemplateInstancePrefersCOMPRESSED1", o.TemplateInstancePrefersCOMPRESSED1);
 }
+#endif
 
+#ifdef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(
     const D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS& o)
 {
@@ -1279,7 +1283,9 @@ static void PrintDeviceOptions(ID3D12Device* device)
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW optionsPreview = {}; SUCCEEDED(
            device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_PREVIEW, &optionsPreview, sizeof(optionsPreview))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW(optionsPreview);
+#endif
 
+#if DIRECT3D_RAYTRACING2
     if(D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2 optionsRaytracing2 = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_RAYTRACING2,
             &optionsRaytracing2, sizeof(optionsRaytracing2))))
