@@ -1,3 +1,18 @@
+# Version 3.21.0 (2026-10-28)
+
+Changes:
+
+- Updated DirectX 12 Agility SDK to 1.620.1 / 1.722.0-preview.
+  - Added reporting of `D3D12_FEATURE_EXPLICIT_PSDBS` in both retail and preview versions.
+  - Added retail reporting of `D3D12_FEATURE_ASYNC_COMMANDS`, `D3D12_FEATURE_FENCE_BARRIERS`, `D3D12_FEATURE_PARTIAL_GRAPHICS_PROGRAMS`, `D3D12_FEATURE_MLIR_COMPUTE_GRAPH_SUPPORT`, `D3D12_FEATURE_MLIR_COMPUTE_GRAPH_VERSION`, `D3D12_FEATURE_DUMP_FILE`, and `D3D12_FEATURE_USER_DEFINED_ANNOTATION`. Previously these were reported only in the preview version.
+  - Updated `D3D12_FEATURE_DATA_ASYNC_COMMANDS` to report `Impl` member.
+  - Updated `D3D12_FEATURE_DATA_FENCE_BARRIERS` to report both `FenceBarriersTier` and `SupportFlags` for each command list type.
+  - Added names for the new `D3D12_SHADER_CACHE_SUPPORT_FLAGS` values.
+  - Preview version: Added `D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2`, `D3D12_TILED_RESOURCES_TIER_5`, `D3D12_RESOURCE_BINDING_TIER_4`, and `D3D12_RAYTRACING_TIER_2_0`.
+  - Preview version: Added the `D3D12RaytracingPreview` experiment and removed the obsolete `D3D12FenceBarriersTier2Experiment`, `D3D12FenceBarriersPreviewCompat`, and `D3D12AsyncCommandsExperiment` experiments.
+
+Compiled with DirectX 12 Agility SDK 1.620.1 ("D3d12info.exe") / 1.722.0-preview ("D3d12info\_preview.exe"), AMD AGS 6.3.1, AMD device\_info v1.0 from 2026-06-02, NVAPI R615, Intel GPU Detect from 2025-04-28 (commit hash `649cf14acd63e1d7ad7e30d3c558fb447f9f8c5b`).
+
 # Version 3.20.0 (2026-10-01)
 
 Changes:
