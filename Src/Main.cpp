@@ -343,13 +343,11 @@ static void Print_D3D12_FEATURE_HARDWARE_COPY(const D3D12_FEATURE_DATA_HARDWARE_
     ReportFormatter::GetInstance().AddFieldBool(L"Supported", o.Supported);
 }
 
-#if DIRECT3D_ASYNC_COMMANDS
 static void Print_D3D12_FEATURE_DATA_ASYNC_COMMANDS(const D3D12_FEATURE_DATA_ASYNC_COMMANDS& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_ASYNC_COMMANDS");
-    ReportFormatter::GetInstance().AddFieldBool(L"Supported", o.Supported);
+    ReportFormatter::GetInstance().AddFieldEnum(L"Impl", o.Impl, Enum_D3D12_ASYNC_COMMANDS_IMPL);
 }
-#endif
 
 static void Print_D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE(
     const D3D12_FEATURE_DATA_APPLICATION_SPECIFIC_DRIVER_STATE& o)
@@ -582,13 +580,13 @@ static void Print_D3D12_FEATURE_DATA_SHADERCACHE_ABI_SUPPORT(
         L"ApplicationProfileVersion", shaderCacheABISupport.ApplicationProfileVersion.Version);
 }
 
-#ifdef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION(const D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION");
     ReportFormatter::GetInstance().AddFieldBool(L"Supported", o.Supported);
 }
 
+#ifdef USE_PREVIEW_AGILITY_SDK
 static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW(const D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW");
@@ -599,6 +597,14 @@ static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW(const D3D12_FEATURE_D
     formatter.AddFieldUint32(L"MaxGroupSharedMemoryPerGroupMS", o.MaxGroupSharedMemoryPerGroupMS);
     formatter.AddFieldBool(L"UAVOfDepthStencilSupported", o.UAVOfDepthStencilSupported);
     formatter.AddFieldBool(L"D32S8Interleaved", o.D32S8Interleaved);
+}
+
+static void Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2(const D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2& o)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
+    formatter.AddFieldBool(L"ClustersAndPTLASSupported", o.ClustersAndPTLASSupported);
+    formatter.AddFieldBool(L"TemplateInstancePrefersCOMPRESSED1", o.TemplateInstancePrefersCOMPRESSED1);
 }
 
 static void Print_D3D12_FEATURE_DATA_HARDWARE_SCHEDULING_QUEUE_GROUPINGS(
@@ -621,7 +627,6 @@ static void Print_D3D12_FEATURE_DATA_DEBUG_BREAK(const D3D12_FEATURE_DATA_DEBUG_
 }
 #endif // #if DIRECT3D_DEBUG_BREAK
 
-#if DIRECT3D_DUMP_FILES
 static void Print_D3D12_FEATURE_DATA_DUMP_FILE(const D3D12_FEATURE_DATA_DUMP_FILE& o)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_DUMP_FILE");
@@ -630,7 +635,6 @@ static void Print_D3D12_FEATURE_DATA_DUMP_FILE(const D3D12_FEATURE_DATA_DUMP_FIL
     formatter.AddFieldEnum(L"DumpFileDriverTier", o.DumpFileDriverTier, Enum_D3D12_DUMP_FILE_DRIVER_TIER);
     formatter.AddFieldFlags(L"DumpFileDriverOptionsMask", o.DumpFileDriverOptionsMask, Enum_D3D12_DUMP_FILE_DRIVER_OPTIONS);
 }
-#endif // #if DIRECT3D_DUMP_FILES
 
 #if DIRECT3D_LINEAR_ALGEBRA
 static void Print_D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT(const D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT& o)
@@ -641,7 +645,6 @@ static void Print_D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT(const D3D12_FEATURE_
 }
 #endif // #if DIRECT3D_LINEAR_ALGEBRA
 
-#if DIRECT3D_MLIR_PROGRAMS
 static void Print_D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_SUPPORT(
     const D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_SUPPORT& o)
 {
@@ -657,9 +660,7 @@ static void Print_D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_VERSION(
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_VERSION");
     ReportFormatter::GetInstance().AddFieldMicrosoftVersion(L"HighestVersion", o.HighestVersion.Version);
 }
-#endif // #if DIRECT3D_MLIR_PROGRAMS
 
-#if DIRECT3D_PARTIAL_PROGRAMS
 static void Print_D3D12_FEATURE_DATA_PARTIAL_GRAPHICS_PROGRAMS(
     const D3D12_FEATURE_DATA_PARTIAL_GRAPHICS_PROGRAMS& o)
 {
@@ -667,7 +668,12 @@ static void Print_D3D12_FEATURE_DATA_PARTIAL_GRAPHICS_PROGRAMS(
     ReportFormatter::GetInstance().AddFieldEnum(
         L"PartialGraphicsProgramsTier", o.PartialGraphicsProgramsTier, Enum_D3D12_PARTIAL_GRAPHICS_PROGRAMS_TIER);
 }
-#endif // #if DIRECT3D_PARTIAL_PROGRAMS
+
+static void Print_D3D12_FEATURE_DATA_EXPLICIT_PSDBS(const D3D12_FEATURE_DATA_EXPLICIT_PSDBS& o)
+{
+    ReportScopeObject scope(L"D3D12_FEATURE_DATA_EXPLICIT_PSDBS");
+    ReportFormatter::GetInstance().AddFieldBool(L"ExplicitPsdbsSupported", o.ExplicitPsdbsSupported);
+}
 
 static void Print_D3D12_FEATURE_DATA_EXISTING_HEAPS(const D3D12_FEATURE_DATA_EXISTING_HEAPS& existingHeaps)
 {
@@ -848,11 +854,9 @@ static void EnableExperimentalFeatures()
 
 #ifdef USE_PREVIEW_AGILITY_SDK
     static const UUID FEATURE_UUIDS[] = { D3D12ExperimentalShaderModels, D3D12GPUUploadHeapsOnUnsupportedOS,
-        D3D12StateObjectsExperiment, D3D12FenceBarriersTier2Experiment, D3D12FenceBarriersPreviewCompat,
-        D3D12AsyncCommandsExperiment };
+        D3D12StateObjectsExperiment, D3D12RaytracingPreview };
     static const wchar_t* FEATURE_NAMES[] = { L"D3D12ExperimentalShaderModels", L"D3D12GPUUploadHeapsOnUnsupportedOS",
-        L"D3D12StateObjectsExperiment", L"D3D12FenceBarriersTier2Experiment", L"D3D12FenceBarriersPreviewCompat",
-        L"D3D12AsyncCommandsExperiment" };
+        L"D3D12StateObjectsExperiment", L"D3D12RaytracingPreview" };
 #else
     static const UUID FEATURE_UUIDS[] = { D3D12ExperimentalShaderModels, D3D12GPUUploadHeapsOnUnsupportedOS };
     static const wchar_t* FEATURE_NAMES[] = { L"D3D12ExperimentalShaderModels", L"D3D12GPUUploadHeapsOnUnsupportedOS" };
@@ -1276,10 +1280,15 @@ static void PrintDeviceOptions(ID3D12Device* device)
            device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_PREVIEW, &optionsPreview, sizeof(optionsPreview))))
         Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_PREVIEW(optionsPreview);
 
+    if(D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2 optionsRaytracing2 = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS_RAYTRACING2,
+            &optionsRaytracing2, sizeof(optionsRaytracing2))))
+        Print_D3D12_FEATURE_DATA_D3D12_OPTIONS_RAYTRACING2(optionsRaytracing2);
+#endif
+
     if(D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION userDefinedAnnotation = {}; SUCCEEDED(device->CheckFeatureSupport(
            D3D12_FEATURE_USER_DEFINED_ANNOTATION, &userDefinedAnnotation, sizeof(userDefinedAnnotation))))
         Print_D3D12_FEATURE_DATA_USER_DEFINED_ANNOTATION(userDefinedAnnotation);
-#endif
 
 #if DIRECT3D_DEBUG_BREAK
     if(D3D12_FEATURE_DATA_DEBUG_BREAK debugBreak = {};
@@ -1289,13 +1298,11 @@ static void PrintDeviceOptions(ID3D12Device* device)
     }
 #endif
 
-#if DIRECT3D_DUMP_FILES
     if(D3D12_FEATURE_DATA_DUMP_FILE dumpFile = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_DUMP_FILE, &dumpFile, sizeof(dumpFile))))
     {
         Print_D3D12_FEATURE_DATA_DUMP_FILE(dumpFile);
     }
-#endif
 
 #if DIRECT3D_LINEAR_ALGEBRA
     if(D3D12_FEATURE_DATA_LINEAR_ALGEBRA_SUPPORT linearAlgebraSupport = {};
@@ -1305,7 +1312,6 @@ static void PrintDeviceOptions(ID3D12Device* device)
     }
 #endif
 
-#if DIRECT3D_MLIR_PROGRAMS
     if(D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_SUPPORT mlirComputeGraphSupport = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_MLIR_COMPUTE_GRAPH_SUPPORT,
             &mlirComputeGraphSupport, sizeof(mlirComputeGraphSupport))))
@@ -1320,15 +1326,18 @@ static void PrintDeviceOptions(ID3D12Device* device)
     {
         Print_D3D12_FEATURE_DATA_MLIR_COMPUTE_GRAPH_VERSION(mlirComputeGraphVersion);
     }
-#endif
 
-#if DIRECT3D_PARTIAL_PROGRAMS
     if(D3D12_FEATURE_DATA_PARTIAL_GRAPHICS_PROGRAMS partialGraphicsPrograms = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_PARTIAL_GRAPHICS_PROGRAMS, &partialGraphicsPrograms, sizeof(partialGraphicsPrograms))))
     {
         Print_D3D12_FEATURE_DATA_PARTIAL_GRAPHICS_PROGRAMS(partialGraphicsPrograms);
     }
-#endif
+
+    if(D3D12_FEATURE_DATA_EXPLICIT_PSDBS explicitPsdbs = {};
+        SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_EXPLICIT_PSDBS, &explicitPsdbs, sizeof(explicitPsdbs))))
+    {
+        Print_D3D12_FEATURE_DATA_EXPLICIT_PSDBS(explicitPsdbs);
+    }
 }
 
 static void PrintDescriptorSizes(ID3D12Device* device)
@@ -1456,9 +1465,8 @@ static void PrintBarrierLayouts(ID3D12Device* device)
     Print_D3D12_FEATURE_DATA_BARRIER_LAYOUT(barrierLayoutSupport);
 }
 
-#if DIRECT3D_FENCE_BARRIERS_PREVIEW_COMPAT
 static void Print_D3D12_FEATURE_DATA_FENCE_BARRIERS(
-    const std::array<D3D12_FENCE_BARRIERS_TIER, COMMAND_LIST_TYPES_COUNT>& fenceBarriers)
+    const std::array<D3D12_FEATURE_DATA_FENCE_BARRIERS, COMMAND_LIST_TYPES_COUNT>& fenceBarriers)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_FENCE_BARRIERS");
 
@@ -1467,26 +1475,26 @@ static void Print_D3D12_FEATURE_DATA_FENCE_BARRIERS(
         const wchar_t* commandListName = FindEnumItemName(COMMAND_LIST_TYPES[i], Enum_D3D12_COMMAND_LIST_TYPE);
         assert(commandListName);
 
-        ReportFormatter::GetInstance().AddFieldEnum(commandListName, fenceBarriers[i], Enum_D3D12_FENCE_BARRIERS_TIER);
+        ReportFormatter::GetInstance().AddFieldEnum(
+            commandListName, fenceBarriers[i].FenceBarriersTier, Enum_D3D12_FENCE_BARRIERS_TIER);
+        // TODO how to change the formatting here to also print fenceBarriers[i].SupportFlags?
     }
 }
 
 static void PrintFenceBarriers(ID3D12Device* device)
 {
-    std::array<D3D12_FENCE_BARRIERS_TIER, COMMAND_LIST_TYPES_COUNT> fenceBarriersSupport = {};
+    std::array<D3D12_FEATURE_DATA_FENCE_BARRIERS, COMMAND_LIST_TYPES_COUNT> fenceBarriers = {};
 
     for(size_t i = 0; i < COMMAND_LIST_TYPES_COUNT; ++i)
     {
-        D3D12_FEATURE_DATA_FENCE_BARRIERS fenceBarriers = {};
-        fenceBarriers.CommandListType = COMMAND_LIST_TYPES[i];
-        if(FAILED(device->CheckFeatureSupport(D3D12_FEATURE_FENCE_BARRIERS, &fenceBarriers, sizeof(fenceBarriers))))
+        fenceBarriers[i] = {};
+        fenceBarriers[i].CommandListType = COMMAND_LIST_TYPES[i];
+        if(FAILED(device->CheckFeatureSupport(D3D12_FEATURE_FENCE_BARRIERS, &fenceBarriers[i], sizeof(fenceBarriers[i]))))
             return;
-        fenceBarriersSupport[i] = fenceBarriers.FenceBarriersTier;
     }
 
-    Print_D3D12_FEATURE_DATA_FENCE_BARRIERS(fenceBarriersSupport);
+    Print_D3D12_FEATURE_DATA_FENCE_BARRIERS(fenceBarriers);
 }
-#endif // #if DIRECT3D_FENCE_BARRIERS_PREVIEW_COMPAT
 
 static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* nvAPI, AGS_Initialize_RAII* ags)
 {
@@ -1607,18 +1615,11 @@ static int PrintDeviceDetails(IDXGIAdapter1* adapter1, NvAPI_Inititalize_RAII* n
 
     PrintBarrierLayouts(device.Get());
 
-#if DIRECT3D_ASYNC_COMMANDS
     if(D3D12_FEATURE_DATA_ASYNC_COMMANDS asyncCommands = {};
         SUCCEEDED(device->CheckFeatureSupport(D3D12_FEATURE_ASYNC_COMMANDS, &asyncCommands, sizeof(asyncCommands))))
         Print_D3D12_FEATURE_DATA_ASYNC_COMMANDS(asyncCommands);
-#endif
 
-#ifdef DIRECT3D_FENCE_BARRIERS_PREVIEW_COMPAT
     PrintFenceBarriers(device.Get());
-#endif
-
-    // TODO: In Agility SDK 1.715.0-preview how to query for D3D12_FEATURE_D3D12_OPTIONS_EXPERIMENTAL1?
-    // What is the corresponding structure?
 
     // TODO: D3D12_FEATURE_PLACED_RESOURCE_SUPPORT_INFO - What is this? How to query it? What structure to use?
 
