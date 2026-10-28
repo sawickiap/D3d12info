@@ -1475,15 +1475,18 @@ static void Print_D3D12_FEATURE_DATA_FENCE_BARRIERS(
     const std::array<D3D12_FEATURE_DATA_FENCE_BARRIERS, COMMAND_LIST_TYPES_COUNT>& fenceBarriers)
 {
     ReportScopeObject scope(L"D3D12_FEATURE_DATA_FENCE_BARRIERS");
+    ReportFormatter& formatter = ReportFormatter::GetInstance();
 
     for(size_t i = 0; i < fenceBarriers.size(); i++)
     {
         const wchar_t* commandListName = FindEnumItemName(COMMAND_LIST_TYPES[i], Enum_D3D12_COMMAND_LIST_TYPE);
         assert(commandListName);
 
-        ReportFormatter::GetInstance().AddFieldEnum(
-            commandListName, fenceBarriers[i].FenceBarriersTier, Enum_D3D12_FENCE_BARRIERS_TIER);
-        // TODO how to change the formatting here to also print fenceBarriers[i].SupportFlags?
+        ReportScopeObject scopeCmdListType(commandListName);
+        formatter.AddFieldEnum(
+            L"FenceBarriersTier", fenceBarriers[i].FenceBarriersTier, Enum_D3D12_FENCE_BARRIERS_TIER);
+        formatter.AddFieldFlags(
+            L"SupportFlags", fenceBarriers[i].SupportFlags, Enum_D3D12_FENCE_BARRIERS_SUPPORT_FLAGS);
     }
 }
 
